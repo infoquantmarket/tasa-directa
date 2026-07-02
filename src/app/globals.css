@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  /* Fondo claro institucional */
+  --background: #f8fafc;
+  --surface:    #ffffff;
+  --border:     #e2e8f0;
+
+  /* Tipografía */
+  --foreground:  #0f172a;
+  --muted:       #64748b;
+
+  /* Acentos verdes — confianza, dinero, crecimiento */
+  --green-50:  #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
+
+  /* Semáforo */
+  --warning: #f59e0b;
+  --danger:  #ef4444;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface:    var(--surface);
+  --color-border:     var(--border);
+  --color-muted:      var(--muted);
+  --color-brand:      var(--green-600);
+  --color-brand-dark: var(--green-700);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Sin modo oscuro: producto institucional, siempre claro */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
