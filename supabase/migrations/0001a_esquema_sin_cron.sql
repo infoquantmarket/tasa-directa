@@ -317,6 +317,11 @@ alter table public.ofertas           enable row level security;
 alter table public.intenciones       enable row level security;
 
 -- perfiles_usuarios
+drop policy if exists "perfil: leer propio"      on public.perfiles_usuarios;
+drop policy if exists "perfil: admin lee todo"   on public.perfiles_usuarios;
+drop policy if exists "perfil: crear propio"     on public.perfiles_usuarios;
+drop policy if exists "perfil: editar propio"    on public.perfiles_usuarios;
+drop policy if exists "perfil: admin edita todo" on public.perfiles_usuarios;
 create policy "perfil: leer propio"      on public.perfiles_usuarios for select to authenticated using (id = auth.uid());
 create policy "perfil: admin lee todo"   on public.perfiles_usuarios for select to authenticated using (public.es_admin());
 create policy "perfil: crear propio"     on public.perfiles_usuarios for insert to authenticated with check (id = auth.uid());
@@ -324,6 +329,11 @@ create policy "perfil: editar propio"    on public.perfiles_usuarios for update 
 create policy "perfil: admin edita todo" on public.perfiles_usuarios for update to authenticated using (public.es_admin()) with check (public.es_admin());
 
 -- documentos_kyc
+drop policy if exists "kyc: leer"              on public.documentos_kyc;
+drop policy if exists "kyc: subir"             on public.documentos_kyc;
+drop policy if exists "kyc: editar pendientes" on public.documentos_kyc;
+drop policy if exists "kyc: admin revisa"      on public.documentos_kyc;
+drop policy if exists "kyc: borrar pendientes" on public.documentos_kyc;
 create policy "kyc: leer"              on public.documentos_kyc for select to authenticated using (usuario_id = auth.uid() or public.es_admin());
 create policy "kyc: subir"             on public.documentos_kyc for insert to authenticated with check (usuario_id = auth.uid());
 create policy "kyc: editar pendientes" on public.documentos_kyc for update to authenticated using (usuario_id = auth.uid() and estado = 'pendiente') with check (usuario_id = auth.uid());
@@ -331,16 +341,25 @@ create policy "kyc: admin revisa"      on public.documentos_kyc for update to au
 create policy "kyc: borrar pendientes" on public.documentos_kyc for delete to authenticated using (usuario_id = auth.uid() and estado = 'pendiente');
 
 -- membresias
-create policy "membresia: leer propia"   on public.membresias for select to authenticated using (usuario_id = auth.uid() or public.es_admin());
+drop policy if exists "membresia: leer propia"    on public.membresias;
+drop policy if exists "membresia: admin gestiona" on public.membresias;
+create policy "membresia: leer propia"    on public.membresias for select to authenticated using (usuario_id = auth.uid() or public.es_admin());
 create policy "membresia: admin gestiona" on public.membresias for all    to authenticated using (public.es_admin()) with check (public.es_admin());
 
 -- ofertas
+drop policy if exists "oferta: mercado activo" on public.ofertas;
+drop policy if exists "oferta: crear propia"   on public.ofertas;
+drop policy if exists "oferta: editar propia"  on public.ofertas;
+drop policy if exists "oferta: admin modera"   on public.ofertas;
 create policy "oferta: mercado activo" on public.ofertas for select to authenticated using (estado = 'activa' or usuario_id = auth.uid() or public.es_admin());
 create policy "oferta: crear propia"   on public.ofertas for insert to authenticated with check (usuario_id = auth.uid());
 create policy "oferta: editar propia"  on public.ofertas for update to authenticated using (usuario_id = auth.uid()) with check (usuario_id = auth.uid());
 create policy "oferta: admin modera"   on public.ofertas for all    to authenticated using (public.es_admin()) with check (public.es_admin());
 
 -- intenciones
+drop policy if exists "intencion: partes involucradas" on public.intenciones;
+drop policy if exists "intencion: crear propia"        on public.intenciones;
+drop policy if exists "intencion: gestionar"           on public.intenciones;
 create policy "intencion: partes involucradas" on public.intenciones for select to authenticated
   using (usuario_id = auth.uid()
          or exists (select 1 from public.ofertas o where o.id = oferta_id and o.usuario_id = auth.uid())
@@ -357,6 +376,10 @@ insert into storage.buckets (id, name, public)
 values ('kyc-documentos', 'kyc-documentos', false)
 on conflict (id) do nothing;
 
+drop policy if exists "storage kyc: subir propios"      on storage.objects;
+drop policy if exists "storage kyc: leer propios"       on storage.objects;
+drop policy if exists "storage kyc: actualizar propios" on storage.objects;
+drop policy if exists "storage kyc: borrar propios"     on storage.objects;
 create policy "storage kyc: subir propios"      on storage.objects for insert to authenticated
   with check (bucket_id = 'kyc-documentos' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy "storage kyc: leer propios"       on storage.objects for select to authenticated
