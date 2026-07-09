@@ -39,6 +39,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['perfiles_usuarios']['Row'], 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['perfiles_usuarios']['Insert']>
+        Relationships: []
       }
       documentos_kyc: {
         Row: {
@@ -56,6 +57,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['documentos_kyc']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['documentos_kyc']['Insert']>
+        Relationships: []
       }
       membresias: {
         Row: {
@@ -70,6 +72,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['membresias']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['membresias']['Insert']>
+        Relationships: []
       }
       ofertas: {
         Row: {
@@ -89,6 +92,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['ofertas']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Pick<Database['public']['Tables']['ofertas']['Row'], 'cantidad' | 'precio_cop' | 'estado'>>
+        Relationships: []
       }
       intenciones: {
         Row: {
@@ -104,6 +108,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['intenciones']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Pick<Database['public']['Tables']['intenciones']['Row'], 'estado'>>
+        Relationships: []
       }
     }
     Views: {
@@ -118,6 +123,7 @@ export interface Database {
           whatsapp:         string | null
           correo:           string
         }
+        Relationships: []
       }
     }
     Functions: {
