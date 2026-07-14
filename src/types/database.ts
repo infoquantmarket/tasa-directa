@@ -7,8 +7,9 @@ export type EstadoPerfil = 'pendiente' | 'aprobado' | 'rechazado' | 'suspendido'
 export type RolPerfil    = 'usuario' | 'admin'
 export type TipoDoc      = 'rut' | 'camara_comercio' | 'resolucion_dian'
 export type EstadoDoc    = 'pendiente' | 'aprobado' | 'rechazado'
-export type TipoMembresia = 'plus' | 'premium'
+export type TipoMembresia = 'estandar'
 export type EstadoMembresia = 'activa' | 'vencida' | 'cancelada'
+export type TokenConcepto = 'compra' | 'ajuste_admin' | 'destacar_oferta' | 'alerta_premium' | 'oferta_urgente' | 'republicacion' | 'reembolso'
 export type Moneda       = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'MXN' | 'CHF' | 'AUD' | 'JPY'
 export type Operacion    = 'compra' | 'venta'
 export type Condicion    = 'efectivo' | 'transferencia' | 'para_recoger' | 'en_oficina'
@@ -110,6 +111,31 @@ export interface Database {
         Update: Partial<Pick<Database['public']['Tables']['intenciones']['Row'], 'estado'>>
         Relationships: []
       }
+      token_saldos: {
+        Row: {
+          usuario_id: string
+          saldo:      number
+          updated_at: string
+        }
+        Insert: never   // solo escriben las funciones definer
+        Update: never
+        Relationships: []
+      }
+      token_movimientos: {
+        Row: {
+          id:         string
+          usuario_id: string
+          delta:      number
+          concepto:   TokenConcepto
+          referencia: string | null
+          nota:       string | null
+          creado_por: string | null
+          created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
     }
     Views: {
       perfiles_publicos: {
@@ -129,8 +155,16 @@ export interface Database {
     Functions: {
       es_admin:      { Args: { uid?: string }; Returns: boolean }
       es_aprobado:   { Args: { uid?: string }; Returns: boolean }
-      limite_diario: { Args: { uid: string  }; Returns: number  }
       fecha_colombia:{ Args: Record<never,never>; Returns: string }
+      tiene_membresia_activa: { Args: { uid?: string }; Returns: boolean }
+      otorgar_tokens: {
+        Args: { p_usuario: string; p_cantidad: number; p_nota?: string; p_concepto?: string; p_referencia?: string }
+        Returns: number
+      }
+      consumir_tokens: {
+        Args: { p_cantidad: number; p_concepto: string; p_referencia?: string; p_nota?: string }
+        Returns: number
+      }
     }
   }
 }
