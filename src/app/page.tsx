@@ -63,7 +63,8 @@ export default function Home() {
         </section>
 
         <footer className="mt-auto border-t border-border py-8 text-center text-sm text-muted-foreground">
-          Tasa Directa conecta profesionales; no ejecuta ni intermedia transacciones cambiarias.
+          <p>Tasa Directa conecta profesionales; no ejecuta ni intermedia transacciones cambiarias.</p>
+          <p className="mt-1 text-xs">Tasa Directa es una empresa de BitWave S.A.S. · NIT 901.920.120-1</p>
         </footer>
       </main>
     </>

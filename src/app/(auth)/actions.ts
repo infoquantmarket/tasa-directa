@@ -4,8 +4,21 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { registroSchema } from '@/lib/validation/registro'
+import { notificarTelegram } from '@/lib/telegram/notificar'
 
-export type AuthState = { error: string | null }
+export type AuthState = { error: string | null; valores?: Record<string, string> }
+
+function valoresDesdeFormData(formData: FormData): Record<string, string> {
+  return {
+    razonSocial: String(formData.get('razonSocial') ?? ''),
+    nit: String(formData.get('nit') ?? ''),
+    sede: String(formData.get('sede') ?? ''),
+    ciudad: String(formData.get('ciudad') ?? ''),
+    telefono: String(formData.get('telefono') ?? ''),
+    whatsapp: String(formData.get('whatsapp') ?? ''),
+    correo: String(formData.get('correo') ?? ''),
+  }
+}
 
 export async function registrarse(
   _prev: AuthState,
@@ -23,7 +36,7 @@ export async function registrarse(
   })
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0].message }
+    return { error: parsed.error.issues[0].message, valores: valoresDesdeFormData(formData) }
   }
 
   const { correo, password, razonSocial, nit, sede, ciudad, telefono, whatsapp } = parsed.data
@@ -45,8 +58,15 @@ export async function registrarse(
   })
 
   if (error) {
-    return { error: 'No se pudo completar el registro. Verifique el correo o intente más tarde.' }
+    return {
+      error: 'No se pudo completar el registro. Verifique el correo o intente más tarde.',
+      valores: valoresDesdeFormData(formData),
+    }
   }
+
+  await notificarTelegram(
+    `🆕 <b>Nueva empresa registrada</b>\n${razonSocial}\nNIT: ${nit}\nCiudad: ${ciudad}\nCorreo: ${correo}`
+  )
 
   redirect('/registro/confirmar')
 }
