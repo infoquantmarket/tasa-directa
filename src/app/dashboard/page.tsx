@@ -35,6 +35,9 @@ export default async function DashboardPage() {
     doc: docs?.find((d) => d.tipo_documento === tipo) ?? null,
   }))
 
+  const membresiaVigente = esMembresiaVigente(membresia, fechaColombiaHoy())
+  const saldoTokens = saldoRow?.saldo ?? 0
+
   return (
     <div className="grid gap-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -72,52 +75,48 @@ export default async function DashboardPage() {
         </Alert>
       )}
 
-      {perfil.estado === 'aprobado' && (() => {
-        const vigente = esMembresiaVigente(membresia, fechaColombiaHoy())
-        const saldo = saldoRow?.saldo ?? 0
-        return (
-          <section className="grid gap-4 sm:grid-cols-2">
-            <Card>
-              <CardHeader className="flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-base">Membresía</CardTitle>
-                <BadgeCheck className={vigente ? 'size-5 text-primary' : 'size-5 text-muted-foreground'} />
-              </CardHeader>
-              <CardContent className="grid gap-1 text-sm">
-                {vigente ? (
-                  <>
-                    <p className="font-medium text-primary">Activa</p>
-                    <p className="text-muted-foreground">
-                      Acceso total al mercado: publicaciones e intenciones sin límite.
-                      {membresia?.fecha_fin ? ` Vigente hasta ${membresia.fecha_fin}.` : ''}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="font-medium">Inactiva</p>
-                    <p className="text-muted-foreground">
-                      Su empresa está verificada. Para activar el acceso al mercado,
-                      nuestro equipo le enviará el enlace de pago de la suscripción.
-                    </p>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-base">Tokens</CardTitle>
-                <Coins className="size-5 text-primary" />
-              </CardHeader>
-              <CardContent className="grid gap-1 text-sm">
-                <p className="text-2xl font-bold tracking-tight">{saldo}</p>
-                <p className="text-muted-foreground">
-                  Los tokens le permitirán acceder a servicios como destacar sus
-                  ofertas o recibir alertas premium (próximamente).
-                </p>
-              </CardContent>
-            </Card>
-          </section>
-        )
-      })()}
+      {perfil.estado === 'aprobado' && (
+        <section className="grid gap-4 sm:grid-cols-2">
+          <Card>
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Membresía</CardTitle>
+              <BadgeCheck className={membresiaVigente ? 'size-5 text-primary' : 'size-5 text-muted-foreground'} />
+            </CardHeader>
+            <CardContent className="grid gap-1 text-sm">
+              {membresiaVigente ? (
+                <>
+                  <p className="font-medium text-primary">Activa</p>
+                  <p className="text-muted-foreground">
+                    Acceso total al mercado: publicaciones e intenciones sin límite.
+                    {membresia?.fecha_fin ? ` Vigente hasta ${membresia.fecha_fin}.` : ''}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium">Inactiva</p>
+                  <p className="text-muted-foreground">
+                    Su empresa está verificada. Para activar el acceso al mercado,
+                    nuestro equipo le enviará el enlace de pago de la suscripción.
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Tokens</CardTitle>
+              <Coins className="size-5 text-primary" />
+            </CardHeader>
+            <CardContent className="grid gap-1 text-sm">
+              <p className="text-2xl font-bold tracking-tight">{saldoTokens}</p>
+              <p className="text-muted-foreground">
+                Los tokens le permitirán acceder a servicios como destacar sus
+                ofertas o recibir alertas premium (próximamente).
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       <section className="grid gap-4">
         <h2 className="text-lg font-semibold">Documentos de vinculación</h2>
