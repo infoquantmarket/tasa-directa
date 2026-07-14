@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { EstadoBadge } from '@/components/estado-badge'
 import { ETIQUETAS_DOCUMENTO, TIPOS_DOCUMENTO, puedeAprobarUsuario } from '@/lib/validation/kyc'
 import { revisarDocumento, aprobarUsuario, rechazarUsuario } from '../../actions'
+import { GestionComercial } from './gestion-comercial'
 
 export const metadata: Metadata = { title: 'Expediente PCD' }
 
@@ -19,9 +20,15 @@ export default async function ExpedientePage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: perfil }, { data: docs }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', id).single(),
     supabase.from('documentos_kyc').select('*').eq('usuario_id', id),
+    supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
+      .eq('usuario_id', id).eq('estado', 'activa').maybeSingle(),
+    supabase.from('token_saldos').select('saldo').eq('usuario_id', id).maybeSingle(),
+    supabase.from('token_movimientos')
+      .select('id, delta, concepto, nota, created_at')
+      .eq('usuario_id', id).order('created_at', { ascending: false }).limit(5),
   ])
 
   if (!perfil) notFound()
@@ -127,6 +134,15 @@ export default async function ExpedientePage({
           )
         })}
       </section>
+
+      {perfil.estado === 'aprobado' && (
+        <GestionComercial
+          usuarioId={perfil.id}
+          membresia={membresia}
+          saldo={saldoRow?.saldo ?? 0}
+          movimientos={movimientos ?? []}
+        />
+      )}
 
       {perfil.estado === 'pendiente' && (
         <section className="grid gap-4 rounded-lg border border-border bg-white p-6">

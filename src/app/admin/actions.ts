@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { puedeAprobarUsuario } from '@/lib/validation/kyc'
+import { notificarTelegram } from '@/lib/telegram/notificar'
 
 export type AdminState = { error: string | null }
 
@@ -78,6 +79,16 @@ export async function aprobarUsuario(
 
   if (error) return { error: 'No se pudo aprobar el usuario.' }
 
+  const { data: perfilAprobado } = await supabase
+    .from('perfiles_usuarios')
+    .select('razon_social, nit, correo')
+    .eq('id', usuarioId)
+    .single()
+
+  await notificarTelegram(
+    `✅ <b>PCD aprobado</b>\n${perfilAprobado?.razon_social ?? usuarioId}\nNIT: ${perfilAprobado?.nit ?? '—'}\nCorreo: ${perfilAprobado?.correo ?? '—'}\n➡️ Enviar enlace de pago Bold para activar la membresía.`
+  )
+
   revalidatePath('/admin', 'layout')
   return { error: null }
 }
@@ -103,6 +114,79 @@ export async function rechazarUsuario(
 
   if (error) return { error: 'No se pudo rechazar el usuario.' }
 
+  revalidatePath('/admin', 'layout')
+  return { error: null }
+}
+
+export async function activarMembresia(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const { supabase, admin } = await exigirAdmin()
+  if (!admin) return { error: 'No autorizado.' }
+
+  const usuarioId = String(formData.get('usuarioId') ?? '')
+  if (!usuarioId) return { error: 'Solicitud inválida.' }
+
+  // El índice único uniq_membresia_activa garantiza una sola activa por usuario.
+  const { error } = await supabase.from('membresias').insert({
+    usuario_id: usuarioId,
+    tipo: 'estandar',
+    estado: 'activa',
+    fecha_inicio: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' }),
+    fecha_fin: null,
+  })
+
+  if (error) {
+    return { error: 'No se pudo activar (¿ya tiene una membresía activa?).' }
+  }
+  revalidatePath('/admin', 'layout')
+  return { error: null }
+}
+
+export async function cancelarMembresia(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const { supabase, admin } = await exigirAdmin()
+  if (!admin) return { error: 'No autorizado.' }
+
+  const usuarioId = String(formData.get('usuarioId') ?? '')
+  if (!usuarioId) return { error: 'Solicitud inválida.' }
+
+  const { error } = await supabase
+    .from('membresias')
+    .update({ estado: 'cancelada' })
+    .eq('usuario_id', usuarioId)
+    .eq('estado', 'activa')
+
+  if (error) return { error: 'No se pudo cancelar la membresía.' }
+  revalidatePath('/admin', 'layout')
+  return { error: null }
+}
+
+export async function otorgarTokens(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const { supabase, admin } = await exigirAdmin()
+  if (!admin) return { error: 'No autorizado.' }
+
+  const usuarioId = String(formData.get('usuarioId') ?? '')
+  const cantidad = Number(formData.get('cantidad'))
+  const nota = String(formData.get('nota') ?? '').trim()
+
+  if (!usuarioId || !Number.isInteger(cantidad) || cantidad <= 0 || cantidad > 100000) {
+    return { error: 'Cantidad inválida: debe ser un entero entre 1 y 100.000.' }
+  }
+
+  const { error } = await supabase.rpc('otorgar_tokens', {
+    p_usuario: usuarioId,
+    p_cantidad: cantidad,
+    p_nota: nota || undefined,
+  })
+
+  if (error) return { error: 'No se pudieron otorgar los tokens.' }
   revalidatePath('/admin', 'layout')
   return { error: null }
 }
