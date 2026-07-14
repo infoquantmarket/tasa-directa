@@ -42,3 +42,16 @@ o corrígelas antes de que despache la Fase 2.
   ¿Ajustamos?
 - ¿Un usuario puede hacer **varias intenciones sobre la misma oferta** (dentro de su
   cuota) o solo una por oferta?
+
+## Actualización 2026-07-14 — cambio de modelo comercial
+
+Se abandonan los tiers **Plus/Premium** y las **cuotas diarias** descritos en el
+punto 4 de este documento (decisión estratégica: el modelo de cuotas monetiza
+*restringir la actividad* justo cuando el marketplace más necesita liquidez;
+el nuevo modelo monetiza *atención*, no actividad). Las reglas de cuota de esta
+Fase 1 quedan reemplazadas por la migration
+[`0003_modelo_comercial.sql`](../supabase/migrations/0003_modelo_comercial.sql):
+una sola membresía `estandar` sin límites + billetera de tokens para futuros
+servicios de atención (destacar, alertas premium, urgente, republicación). Ver
+[`docs/arquitectura-pagos-bold.md`](arquitectura-pagos-bold.md) para el diseño de
+cobro con Bold.
