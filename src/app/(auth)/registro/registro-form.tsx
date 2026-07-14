@@ -1,23 +1,12 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
 import { registrarse, type AuthState } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
-import { CIUDADES_COLOMBIA, etiquetaCiudad } from '@/lib/data/ciudades-colombia'
+import { CiudadCombobox } from './ciudad-combobox'
 
 const CAMPOS_ANTES = [
   { name: 'razonSocial', label: 'Razón social *', placeholder: 'Nutifinanzas S.A.S.', type: 'text' },
@@ -45,7 +34,6 @@ export function RegistroForm() {
   // estado durante el render (patrón "adjust state while rendering" de React,
   // en vez de un efecto) comparando contra el `state` del render anterior.
   const [resetKey, setResetKey] = useState(0)
-  const [ciudadOpen, setCiudadOpen] = useState(false)
   const [selectedCiudad, setSelectedCiudad] = useState(state.valores?.ciudad ?? '')
   const [prevState, setPrevState] = useState(state)
 
@@ -75,55 +63,7 @@ export function RegistroForm() {
 
       <div>
         <Label htmlFor="ciudad-trigger" className="mb-1.5 block">Ciudad *</Label>
-        <Popover open={ciudadOpen} onOpenChange={setCiudadOpen}>
-          <PopoverTrigger
-            render={
-              <Button
-                id="ciudad-trigger"
-                type="button"
-                variant="outline"
-                className="w-full justify-between font-normal"
-              />
-            }
-          >
-            <span className={cn(!selectedCiudad && 'text-muted-foreground')}>
-              {selectedCiudad || 'Seleccione una ciudad'}
-            </span>
-            <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-          </PopoverTrigger>
-          <PopoverContent className="w-72 p-0">
-            <Command>
-              <CommandInput placeholder="Buscar ciudad..." />
-              <CommandList>
-                <CommandEmpty>No se encontró la ciudad.</CommandEmpty>
-                <CommandGroup>
-                  {CIUDADES_COLOMBIA.map((c) => {
-                    const etiqueta = etiquetaCiudad(c)
-                    return (
-                      <CommandItem
-                        key={etiqueta}
-                        value={etiqueta}
-                        onSelect={(value) => {
-                          setSelectedCiudad(value)
-                          setCiudadOpen(false)
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            'mr-2 size-4',
-                            selectedCiudad === etiqueta ? 'opacity-100' : 'opacity-0'
-                          )}
-                        />
-                        {etiqueta}
-                      </CommandItem>
-                    )
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-        <input type="hidden" name="ciudad" value={selectedCiudad} required />
+        <CiudadCombobox value={selectedCiudad} onChange={setSelectedCiudad} />
       </div>
 
       {CAMPOS_DESPUES.map((campo) => (
