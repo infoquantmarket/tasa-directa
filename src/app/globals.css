@@ -12,32 +12,32 @@
   --card-foreground: oklch(0.208 0.042 265.8);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.208 0.042 265.8);
-  /* Acento verde — confianza, dinero, crecimiento */
-  --primary: oklch(0.627 0.17 149.2);            /* #16a34a green-600 */
+  /* Acento verde — extraído directamente del logo (#088060), confianza/dinero/crecimiento */
+  --primary: oklch(0.533 0.107 167.4);           /* #088060 — verde del logo */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.968 0.007 247.9);         /* slate-100 */
   --secondary-foreground: oklch(0.208 0.042 265.8);
   --muted: oklch(0.968 0.007 247.9);
   --muted-foreground: oklch(0.554 0.046 257.4);  /* slate-500 */
-  --accent: oklch(0.962 0.044 156.7);            /* green-50 */
-  --accent-foreground: oklch(0.448 0.119 151.3); /* green-800 */
+  --accent: oklch(0.962 0.03 167.4);             /* tinte muy claro del verde del logo */
+  --accent-foreground: oklch(0.42 0.075 167.4);  /* verde oscuro legible sobre --accent */
   --destructive: oklch(0.577 0.245 27.3);
   --border: oklch(0.929 0.013 255.5);            /* slate-200 */
   --input: oklch(0.929 0.013 255.5);
-  --ring: oklch(0.627 0.17 149.2);
-  --chart-1: oklch(0.627 0.17 149.2);
-  --chart-2: oklch(0.527 0.154 150.1);
-  --chart-3: oklch(0.723 0.192 149.6);
-  --chart-4: oklch(0.448 0.119 151.3);
-  --chart-5: oklch(0.87 0.087 154.9);
+  --ring: oklch(0.533 0.107 167.4);
+  --chart-1: oklch(0.533 0.107 167.4);
+  --chart-2: oklch(0.44 0.1 167.4);
+  --chart-3: oklch(0.63 0.13 167.4);
+  --chart-4: oklch(0.42 0.075 167.4);
+  --chart-5: oklch(0.78 0.06 167.4);
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.208 0.042 265.8);
-  --sidebar-primary: oklch(0.627 0.17 149.2);
+  --sidebar-primary: oklch(0.533 0.107 167.4);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.962 0.044 156.7);
-  --sidebar-accent-foreground: oklch(0.448 0.119 151.3);
+  --sidebar-accent: oklch(0.962 0.03 167.4);
+  --sidebar-accent-foreground: oklch(0.42 0.075 167.4);
   --sidebar-border: oklch(0.929 0.013 255.5);
-  --sidebar-ring: oklch(0.627 0.17 149.2);
+  --sidebar-ring: oklch(0.533 0.107 167.4);
 }
 
 @theme inline {

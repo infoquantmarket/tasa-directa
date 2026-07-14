@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { cerrarSesion } from '@/app/(auth)/actions'
@@ -21,9 +22,14 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-white/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground">
-            T
-          </span>
+          <Image
+            src="/logo-icon.png"
+            alt="Tasa Directa"
+            width={36}
+            height={36}
+            className="rounded-lg"
+            priority
+          />
           <span className="text-lg font-semibold tracking-tight">Tasa Directa</span>
         </Link>
         <nav className="flex items-center gap-3">
