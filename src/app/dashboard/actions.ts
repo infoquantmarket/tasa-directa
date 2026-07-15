@@ -66,6 +66,10 @@ export async function registrarDocumento(
     }
   }
 
+  // DocumentoUploader se reutiliza también en /vinculacion — revalidar ambas
+  // rutas para que el estado del documento se refresque sin importar desde
+  // dónde se subió.
   revalidatePath('/dashboard')
+  revalidatePath('/vinculacion')
   return { error: null, ok: true }
 }

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
+import { perfilCompleto } from '@/lib/validation/perfil'
 
 export default async function DashboardLayout({
   children,
@@ -17,7 +18,7 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .single()
 
-  if (!perfil?.perfil_completo) redirect('/vinculacion')
+  if (!perfilCompleto(perfil)) redirect('/vinculacion')
 
   return (
     <>
