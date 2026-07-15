@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 const celular = z.string().regex(/^\d{7,10}$/, 'Número inválido (7 a 10 dígitos)')
 const celularOpc = celular.or(z.literal('')).optional()
+const telefonoOpc = celular.or(z.literal('')).optional()
 
 export const TIPOS_SOCIEDAD = [
   { valor: 'sas', etiqueta: 'S.A.S.' },
@@ -13,18 +14,25 @@ export const TIPOS_SOCIEDAD = [
 
 export const TIPOS_DOC_REP = ['CC', 'CE', 'Pasaporte', 'NIT'] as const
 
+// El enum de zod se deriva de los arrays de arriba (no se duplica a mano) para
+// que no puedan desincronizarse si alguien agrega/quita una opción.
+const VALORES_TIPO_SOCIEDAD = TIPOS_SOCIEDAD.map((t) => t.valor) as [
+  (typeof TIPOS_SOCIEDAD)[number]['valor'],
+  ...(typeof TIPOS_SOCIEDAD)[number]['valor'][],
+]
+
 export const perfilSchema = z.object({
   razonSocial: z.string().min(3, 'Ingrese la razón social registrada ante la DIAN'),
   nombreComercial: z.string().optional(),
   nit: z.string().regex(/^\d{8,10}(-\d)?$/, 'NIT inválido. Formato: 901234567-8'),
-  tipoSociedad: z.enum(['sas', 'sa', 'ltda', 'persona_natural', 'otra']),
+  tipoSociedad: z.enum(VALORES_TIPO_SOCIEDAD),
   sede: z.string().min(2, 'Ingrese el nombre de la sede principal'),
   direccion: z.string().min(5, 'Ingrese la dirección exacta de la sede principal'),
   ciudad: z.string().min(2, 'Seleccione la ciudad'),
-  telefono: z.string().regex(/^\d{7,10}$/).or(z.literal('')).optional(),
+  telefono: telefonoOpc,
   sitioWeb: z.string().url('URL inválida').or(z.literal('')).optional(),
   repNombre: z.string().min(3, 'Ingrese el nombre del representante legal'),
-  repTipoDoc: z.enum(['CC', 'CE', 'Pasaporte', 'NIT']),
+  repTipoDoc: z.enum(TIPOS_DOC_REP),
   repNumDoc: z.string().min(5, 'Ingrese el número de documento'),
   repCorreo: z.string().email('Correo del representante inválido'),
   repCelular: celular,
