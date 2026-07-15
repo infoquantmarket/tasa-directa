@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button'
 import { EstadoBadge } from '@/components/estado-badge'
 import { TIPOS_DOCUMENTO } from '@/lib/validation/kyc'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
-import { Coins, BadgeCheck, FileText } from 'lucide-react'
+import { CONTRATO_VERSION } from '@/lib/legal/contrato'
+import { Coins, BadgeCheck, FileText, FileCheck2 } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Mi cuenta' }
 
@@ -17,12 +18,14 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: aceptacionContrato }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', user.id).single(),
     supabase.from('documentos_kyc').select('tipo_documento, estado').eq('usuario_id', user.id),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
       .eq('usuario_id', user.id).eq('estado', 'activa').maybeSingle(),
     supabase.from('token_saldos').select('saldo').eq('usuario_id', user.id).maybeSingle(),
+    supabase.from('aceptaciones').select('created_at')
+      .eq('usuario_id', user.id).eq('documento', 'contrato_servicios').eq('version', CONTRATO_VERSION).maybeSingle(),
   ])
 
   if (!perfil) redirect('/login')
@@ -32,6 +35,7 @@ export default async function DashboardPage() {
   const docsAprobados = TIPOS_DOCUMENTO.filter((tipo) =>
     docs?.some((d) => d.tipo_documento === tipo && d.estado === 'aprobado')
   ).length
+  const contratoAceptado = Boolean(aceptacionContrato)
 
   return (
     <div className="grid gap-8">
@@ -70,6 +74,31 @@ export default async function DashboardPage() {
         </Alert>
       )}
 
+      {perfil.estado === 'aprobado' && !contratoAceptado && (
+        <Card className="border-primary/40 bg-accent/40">
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base">Falta un paso: acepte el contrato de servicios</CardTitle>
+            <FileCheck2 className="size-5 text-primary" />
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              Debe aceptar el contrato de prestación de servicios y la autorización
+              de tratamiento de datos para activar el acceso al mercado.
+            </p>
+            <Button size="sm" render={<Link href="/contrato" />}>
+              Ir al contrato
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {perfil.estado === 'aprobado' && contratoAceptado && aceptacionContrato && (
+        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <FileCheck2 className="size-4 text-primary" />
+          Contrato aceptado el {new Date(aceptacionContrato.created_at).toLocaleDateString('es-CO')}
+        </p>
+      )}
+
       {perfil.estado === 'aprobado' && (
         <section className="grid gap-4 sm:grid-cols-2">
           <Card>
@@ -90,8 +119,9 @@ export default async function DashboardPage() {
                 <>
                   <p className="font-medium">Inactiva</p>
                   <p className="text-muted-foreground">
-                    Su empresa está verificada. Para activar el acceso al mercado,
-                    nuestro equipo le enviará el enlace de pago de la suscripción.
+                    {contratoAceptado
+                      ? 'Su empresa está verificada. Para activar el acceso al mercado, nuestro equipo le enviará el enlace de pago de la suscripción.'
+                      : 'Acepte el contrato de servicios para habilitar el pago de la suscripción.'}
                   </p>
                 </>
               )}
