@@ -4,7 +4,7 @@ import { useActionState, useState } from 'react'
 import { aceptarTerminos, type ContratoState } from './actions'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CONTRATO_SERVICIOS, TRATAMIENTO_DATOS } from '@/lib/legal/contrato'
+import { CONTRATO_SERVICIOS, TRATAMIENTO_DATOS, ES_BORRADOR } from '@/lib/legal/contrato'
 
 export function ContratoForm() {
   const [state, formAction, pending] = useActionState<ContratoState, FormData>(
@@ -16,6 +16,14 @@ export function ContratoForm() {
 
   return (
     <form action={formAction} className="grid gap-6">
+      {ES_BORRADOR && (
+        <Alert className="border-amber-300 bg-amber-50 text-amber-900">
+          <AlertDescription className="font-medium">
+            ⚠️ Documento en borrador, pendiente de aprobación legal. El texto que
+            se muestra a continuación aún no es la versión definitiva.
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="grid gap-2">
         <h3 className="font-semibold">Contrato de prestación de servicios</h3>
         <div className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">

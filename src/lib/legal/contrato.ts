@@ -1,5 +1,11 @@
 // El TEXTO es un placeholder para que Jaime lo reemplace (idealmente revisado por
 // abogado del sector cambiario). La plataforma versiona y registra la aceptación.
+//
+// IMPORTANTE: mientras ES_BORRADOR sea true, /contrato muestra una advertencia
+// visible de que el texto no es definitivo. Cambiar a false SOLO cuando el
+// contrato y la autorización de datos hayan sido aprobados y reemplazados.
+export const ES_BORRADOR = true
+
 export const CONTRATO_VERSION = 'v1-2026-07'
 export const TRATAMIENTO_VERSION = 'v1-2026-07'
 
