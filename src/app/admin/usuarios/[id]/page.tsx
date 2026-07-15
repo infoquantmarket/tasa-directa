@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { EstadoBadge } from '@/components/estado-badge'
-import { ETIQUETAS_DOCUMENTO, TIPOS_DOCUMENTO, puedeAprobarUsuario } from '@/lib/validation/kyc'
+import { ETIQUETAS_DOCUMENTO, TODOS_TIPOS_DOCUMENTO, puedeAprobarUsuario } from '@/lib/validation/kyc'
 import { revisarDocumento, aprobarUsuario, rechazarUsuario } from '../../actions'
 import { GestionComercial } from './gestion-comercial'
+import { PerfilEmpresa } from './perfil-empresa'
+import { CONTRATO_VERSION } from '@/lib/legal/contrato'
 
 export const metadata: Metadata = { title: 'Expediente PCD' }
 
@@ -20,7 +22,7 @@ export default async function ExpedientePage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }, { data: aceptacionContrato }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', id).single(),
     supabase.from('documentos_kyc').select('*').eq('usuario_id', id),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
@@ -29,6 +31,9 @@ export default async function ExpedientePage({
     supabase.from('token_movimientos')
       .select('id, delta, concepto, nota, created_at')
       .eq('usuario_id', id).order('created_at', { ascending: false }).limit(5),
+    supabase.from('aceptaciones').select('created_at')
+      .eq('usuario_id', id).eq('documento', 'contrato_servicios').eq('version', CONTRATO_VERSION)
+      .maybeSingle(),
   ])
 
   if (!perfil) notFound()
@@ -80,14 +85,26 @@ export default async function ExpedientePage({
             <p className="text-sm text-muted-foreground">
               {perfil.correo} · Tel {perfil.telefono ?? '—'} · WhatsApp {perfil.whatsapp ?? '—'}
             </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Contrato de servicios:{' '}
+              {aceptacionContrato ? (
+                <span className="text-primary">
+                  Aceptado el {new Date(aceptacionContrato.created_at).toLocaleDateString('es-CO')}
+                </span>
+              ) : (
+                'Pendiente'
+              )}
+            </p>
           </div>
           <EstadoBadge estado={perfil.estado} />
         </CardHeader>
       </Card>
 
+      <PerfilEmpresa perfil={perfil} />
+
       <section className="grid gap-4">
         <h2 className="text-lg font-semibold">Documentos</h2>
-        {TIPOS_DOCUMENTO.map((tipo) => {
+        {TODOS_TIPOS_DOCUMENTO.map((tipo) => {
           const doc = docs?.find((d) => d.tipo_documento === tipo)
           return (
             <Card key={tipo}>
