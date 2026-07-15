@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ContratoForm } from './contrato-form'
 import { SLUGS_ETAPA_CONTRATO, VERSION_LEGAL } from '@/lib/legal/documentos'
 
-export const metadata: Metadata = { title: 'Contrato de servicios' }
+export const metadata: Metadata = { title: 'Documentos legales' }
 
 export default async function ContratoPage() {
   const supabase = await createClient()
@@ -37,7 +37,7 @@ export default async function ContratoPage() {
       <main className="mx-auto w-full max-w-2xl px-6 py-10">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Contrato de servicios</CardTitle>
+            <CardTitle className="text-2xl">Documentos legales</CardTitle>
             <CardDescription>
               Para activar el acceso al mercado, revise y acepte los siguientes
               documentos.
