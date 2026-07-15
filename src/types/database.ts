@@ -16,7 +16,14 @@ export type Condicion    = 'efectivo' | 'transferencia' | 'para_recoger' | 'en_o
 export type EstadoOferta = 'activa' | 'expirada' | 'eliminada'
 export type TipoIntencion = 'aceptar_precio' | 'solicitar_contacto'
 export type EstadoIntencion = 'enviada' | 'vista' | 'cerrada'
-export type TipoAceptacion = 'contrato_servicios' | 'tratamiento_datos'
+export type TipoAceptacion =
+  | 'contrato_servicios'
+  | 'tratamiento_datos'
+  | 'politica_tratamiento'
+  | 'terminos_condiciones'
+  | 'aviso_privacidad'
+  | 'politica_kyc'
+  | 'politica_reembolsos'
 
 export interface Database {
   public: {
@@ -158,6 +165,10 @@ export interface Database {
           version:    string
           ip:         string | null
           user_agent: string | null
+          razon_social: string | null
+          nit:          string | null
+          rep_nombre:   string | null
+          rep_num_doc:  string | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['aceptaciones']['Row'], 'id' | 'created_at'>
