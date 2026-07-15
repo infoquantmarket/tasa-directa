@@ -54,7 +54,7 @@ export async function iniciarSesion(
   if (!correo || !password) return { error: 'Ingrese su correo y contraseña.' }
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword({ email: correo, password })
+  const { data, error } = await supabase.auth.signInWithPassword({ email: correo, password })
 
   if (error) {
     if (error.code === 'email_not_confirmed') {
@@ -63,8 +63,14 @@ export async function iniciarSesion(
     return { error: 'Credenciales incorrectas.' }
   }
 
+  const { data: perfil } = await supabase
+    .from('perfiles_usuarios')
+    .select('rol')
+    .eq('id', data.user.id)
+    .single()
+
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  redirect(perfil?.rol === 'admin' ? '/admin' : '/dashboard')
 }
 
 export async function cerrarSesion() {

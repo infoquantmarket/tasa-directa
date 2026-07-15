@@ -14,11 +14,11 @@ export default async function DashboardLayout({
 
   const { data: perfil } = await supabase
     .from('perfiles_usuarios')
-    .select('perfil_completo')
+    .select('perfil_completo, rol')
     .eq('id', user.id)
     .single()
 
-  if (!perfilCompleto(perfil)) redirect('/vinculacion')
+  if (perfil?.rol !== 'admin' && !perfilCompleto(perfil)) redirect('/vinculacion')
 
   return (
     <>
