@@ -5,7 +5,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json } | 
 
 export type EstadoPerfil = 'pendiente' | 'aprobado' | 'rechazado' | 'suspendido'
 export type RolPerfil    = 'usuario' | 'admin'
-export type TipoDoc      = 'rut' | 'camara_comercio' | 'resolucion_dian'
+export type TipoDoc      = 'rut' | 'camara_comercio' | 'resolucion_dian' | 'composicion_accionaria'
 export type EstadoDoc    = 'pendiente' | 'aprobado' | 'rechazado'
 export type TipoMembresia = 'estandar'
 export type EstadoMembresia = 'activa' | 'vencida' | 'cancelada'
@@ -16,6 +16,7 @@ export type Condicion    = 'efectivo' | 'transferencia' | 'para_recoger' | 'en_o
 export type EstadoOferta = 'activa' | 'expirada' | 'eliminada'
 export type TipoIntencion = 'aceptar_precio' | 'solicitar_contacto'
 export type EstadoIntencion = 'enviada' | 'vista' | 'cerrada'
+export type TipoAceptacion = 'contrato_servicios' | 'tratamiento_datos'
 
 export interface Database {
   public: {
@@ -24,7 +25,7 @@ export interface Database {
         Row: {
           id:               string
           tipo_usuario:     'PCD'
-          razon_social:     string
+          razon_social:     string | null
           nombre_comercial: string | null
           nit:              string | null
           sede:             string | null
@@ -35,6 +36,19 @@ export interface Database {
           rol:              RolPerfil
           estado:           EstadoPerfil
           motivo_estado:    string | null
+          tipo_sociedad:    string | null
+          direccion:        string | null
+          sitio_web:        string | null
+          rep_nombre:       string | null
+          rep_tipo_doc:     string | null
+          rep_num_doc:      string | null
+          rep_correo:       string | null
+          rep_celular:      string | null
+          contacto_nombre:  string | null
+          contacto_cargo:   string | null
+          contacto_celular: string | null
+          contacto_correo:  string | null
+          perfil_completo:  boolean
           created_at:       string
           updated_at:       string
         }
@@ -133,6 +147,20 @@ export interface Database {
           created_at: string
         }
         Insert: never
+        Update: never
+        Relationships: []
+      }
+      aceptaciones: {
+        Row: {
+          id:         string
+          usuario_id: string
+          documento:  TipoAceptacion
+          version:    string
+          ip:         string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['aceptaciones']['Row'], 'id' | 'created_at'>
         Update: never
         Relationships: []
       }
