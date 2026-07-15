@@ -1,0 +1,95 @@
+TASA DIRECTA
+
+Documentos legales de la plataforma
+
+Términos y Condiciones de Uso
+
+Uso de la plataforma Tasa Directa · marketplace B2B de contacto entre PCD
+
+Operador legal
+
+BitWave S.A.S. — NIT 901.920.120-1
+
+Plataforma
+
+Tasa Directa — www.tasadirecta.com
+
+1. Aceptación de los términos
+
+Estos Términos y Condiciones regulan el uso de la plataforma Tasa Directa (www.tasadirecta.com), operada por BitWave S.A.S. (NIT 901.920.120-1). Al registrarse y aceptar digitalmente estos términos, el usuario declara conocerlos y obligarse por ellos. La aceptación se realiza mediante mecanismo «click-wrap», con validez conforme a la Ley 527 de 1999.
+
+2. Descripción y naturaleza del servicio
+
+Tasa Directa es un marketplace B2B que pone en contacto la oferta y la demanda de divisas entre Profesionales de Compra y Venta de Divisas (PCD) autorizados por la DIAN. El servicio es exclusivamente tecnológico y de contacto.
+
+La Plataforma NO ejecuta, NO intermedia, NO liquida y NO custodia ninguna operación cambiaria ni movimiento de dinero. Únicamente pone en contacto a las partes.
+
+La negociación, el cierre, el pago y la totalidad de la operación ocurren DIRECTAMENTE entre los PCD, por fuera de la Plataforma y bajo su exclusiva responsabilidad.
+
+Tasa Directa no es una casa de cambio, ni un intermediario del mercado cambiario, ni un sistema de pagos, ni una billetera de activos virtuales.
+
+3. Requisitos de uso y cuenta
+
+Solo pueden usar el servicio los PCD autorizados por la DIAN que completen la verificación de identidad y autorización.
+
+El usuario se registra con un correo (que es su usuario de acceso) y una contraseña, y confirma su correo.
+
+El usuario es responsable de la veracidad de la información suministrada y de mantenerla actualizada.
+
+El usuario custodia sus credenciales y responde por las actividades realizadas con su cuenta.
+
+4. Modelo comercial
+
+El acceso al mercado se presta mediante una suscripción única «estándar» cobrada por empresa (NIT). Opcionalmente, el usuario puede adquirir tokens prepagados para servicios de visibilidad y velocidad de aviso (destacar oferta, alertas premium, oferta urgente, republicación). Estos servicios no otorgan acceso a información privilegiada. Los pagos se procesan a través de Bold; la Plataforma no almacena datos de tarjetas.
+
+5. Conducta del usuario
+
+El usuario se obliga a:
+
+Usar la Plataforma de buena fe y conforme a la ley.
+
+Publicar información veraz y no engañosa.
+
+No suplantar identidades ni usar datos falsos.
+
+No emplear la Plataforma para actividades ilícitas, incluidas conductas asociadas al lavado de activos o la financiación del terrorismo.
+
+No interferir con el funcionamiento del servicio ni intentar acceder de forma no autorizada a sistemas o datos.
+
+Cumplir por su cuenta su propio régimen de cumplimiento (SARLAFT y obligaciones cambiarias y tributarias).
+
+6. Contenido y publicaciones
+
+Las cotizaciones, ofertas y demás contenidos publicados por los usuarios son de su exclusiva responsabilidad. La Plataforma no garantiza su veracidad, vigencia o exactitud, y podrá retirar contenidos que infrinjan estos términos o la ley.
+
+7. Propiedad intelectual
+
+El software, las marcas, el nombre comercial, los diseños, las bases de datos y demás elementos de la Plataforma son propiedad de BitWave S.A.S. o de sus licenciantes. Se concede al usuario una licencia de uso limitada, no exclusiva e intransferible, únicamente para acceder al servicio. Queda prohibida su reproducción, distribución o explotación no autorizada.
+
+8. Disponibilidad del servicio
+
+La Plataforma procura una disponibilidad razonable, pero no garantiza operación ininterrumpida. Podrá realizar mantenimientos, actualizaciones o suspensiones temporales. No será responsable por interrupciones o fallas atribuibles a fuerza mayor, caso fortuito o a proveedores tecnológicos de terceros.
+
+9. Limitación de responsabilidad
+
+Como facilitador tecnológico de contacto, BitWave no responde por las operaciones que los usuarios pacten entre sí, ni por su cumplimiento, legalidad o resultado, ni por la solvencia o idoneidad de otros usuarios. El usuario asume el riesgo de sus negociaciones. Las limitaciones aplican en la máxima medida permitida por la ley, sin afectar normas imperativas.
+
+10. Protección de datos
+
+El tratamiento de datos personales se rige por la Política de Tratamiento de Datos Personales y el Aviso de Privacidad de Tasa Directa, disponibles en www.tasadirecta.com, que el usuario declara conocer y aceptar.
+
+11. Suspensión y terminación
+
+La Plataforma podrá suspender o cancelar cuentas ante el incumplimiento de estos términos, la pérdida de la autorización DIAN, el uso indebido o la mora en el pago. El usuario puede cancelar su cuenta en cualquier momento, sin perjuicio de las obligaciones pendientes.
+
+12. Modificaciones
+
+BitWave podrá modificar estos términos y publicar nuevas versiones. Los cambios sustanciales requerirán una nueva aceptación electrónica para seguir usando el servicio, conservándose la trazabilidad de la versión aceptada.
+
+13. Ley aplicable y jurisdicción
+
+Estos términos se rigen por las leyes de la República de Colombia. En lo aplicable a comercio electrónico se observará la Ley 1480 de 2011. Las controversias se someterán a tribunal de arbitraje , con sede en Medellín.
+
+14. Contacto
+
+Para dudas o solicitudes sobre estos términos: info@bitwaveco.com

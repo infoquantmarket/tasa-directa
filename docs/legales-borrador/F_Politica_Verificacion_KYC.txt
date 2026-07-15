@@ -1,0 +1,75 @@
+TASA DIRECTA
+
+Documentos legales de la plataforma
+
+Política de Verificación de Identidad y Vinculación (KYC)
+
+Documento informativo · qué se solicita, para qué y su alcance
+
+Operador legal
+
+BitWave S.A.S. — NIT 901.920.120-1
+
+Plataforma
+
+Tasa Directa — www.tasadirecta.com
+
+1. Propósito
+
+Esta Política describe el proceso de verificación de identidad y vinculación que Tasa Directa aplica a los Profesionales de Compra y Venta de Divisas (PCD) que solicitan acceso al marketplace, los documentos que se solicitan y el alcance de dicha verificación.
+
+2. Alcance y límite de la verificación
+
+La verificación que realiza la Plataforma se limita a comprobar la identidad del PCD y la vigencia de su autorización ante la DIAN, para efectos de admisión al marketplace.
+
+Esta verificación NO sustituye ni asume el cumplimiento normativo propio del PCD (SARLAFT, oficial de cumplimiento, reportes, obligaciones cambiarias y tributarias), que es de su exclusiva responsabilidad.
+
+Tasa Directa no es sujeto obligado del régimen cambiario ni del régimen SARLAFT respecto de las operaciones de los PCD, porque no ejecuta, intermedia, liquida ni custodia operaciones. Los sujetos obligados son los propios PCD.
+
+3. Proceso de vinculación (3 etapas)
+
+Etapa 1 — Crear cuenta
+
+El usuario registra un correo (que es su usuario de acceso) y una contraseña, y confirma el correo mediante un enlace.
+
+Etapa 2 — Perfil de empresa y documentos (KYC)
+
+El usuario completa los datos de la empresa, del representante legal y de la persona de contacto, y carga los documentos de vinculación. La Plataforma revisa la identidad y la autorización, y aprueba o rechaza la solicitud.
+
+Etapa 3 — Aceptación de contrato
+
+Aprobada la empresa, el usuario acepta digitalmente (click-wrap) el contrato de prestación de servicios y la autorización de tratamiento de datos antes de acceder al mercado. La aceptación queda registrada con trazabilidad.
+
+4. Documentos que se solicitan
+
+4.1. Requeridos para aprobar
+
+RUT (Registro Único Tributario) vigente, expedido por la DIAN.
+
+Certificado de existencia y representación legal de la Cámara de Comercio, con expedición no mayor a 30 días.
+
+Resolución de la DIAN que autoriza a la empresa como Profesional de Compra y Venta de Divisas.
+
+4.2. Opcional (no requerido para aprobar)
+
+Composición accionaria (detalle de socios o accionistas).
+
+Formatos aceptados: PDF, JPG o PNG (máximo 10 MB por archivo). Los documentos se almacenan en un repositorio privado (no público), con control de acceso por fila (RLS) y acceso restringido al personal autorizado.
+
+5. Datos personales en los documentos KYC
+
+Algunos documentos pueden contener datos personales del representante legal, de la persona de contacto o de terceros (por ejemplo, socios o accionistas en la composición accionaria). Estos datos se tratan conforme a la Política de Tratamiento de Datos Personales y a la autorización otorgada, con las finalidades de verificación de identidad y de dar seguridad y confianza al marketplace.
+
+El usuario que aporta datos de terceros declara contar con la autorización de dichas personas. BitWave S.A.S. actúa como Responsable (no Encargado) del tratamiento de los datos personales de terceros contenidos en los documentos de vinculación (por ejemplo, socios o accionistas en la composición accionaria), toda vez que los trata para una finalidad propia —verificación de admisión al marketplace y seguridad de los demás usuarios— y no meramente por instrucción del PCD que los aporta. En consecuencia, el PCD debe contar previamente con la autorización de dichos terceros para compartir sus datos con BitWave, y estos terceros quedan protegidos como titulares bajo la Política de Tratamiento de Datos Personales de la plataforma.
+
+6. Resultado de la verificación
+
+Aprobación: la empresa queda habilitada para aceptar los documentos legales y acceder al mercado.
+
+Rechazo o solicitud de subsanación: cuando la documentación esté incompleta, vencida o no permita verificar la identidad o la autorización DIAN vigente.
+
+Revisión posterior: la Plataforma podrá solicitar la actualización de documentos y verificar la vigencia de la autorización durante la relación.
+
+7. Conservación
+
+Los documentos y datos de vinculación se conservan mientras exista la relación con el usuario y durante los plazos legales y probatorios aplicables. El plazo específico se define en la Política de Tratamiento de Datos Personales: “Los datos se conservarán mientras exista la relación con el Usuario y durante los plazos adicionales exigidos por obligaciones legales, contables y probatorias. Los datos se conservarán durante el tiempo que dure la relación contractual con el Usuario y, posteriormente, durante el plazo necesario para el cumplimiento de las obligaciones legales, contables, fiscales y probatorias en Colombia. Una vez terminada la relación y finalizados los términos de prescripción de las acciones legales pertinentes, los datos serán suprimidos o anonimizados de forma segura. Vencidos los plazos y cesada la finalidad, los datos se suprimirán o anonimizarán de forma segura”.

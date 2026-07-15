@@ -1,0 +1,260 @@
+====================================================================
+BRIEF PARA REDACCIÓN DE DOCUMENTOS LEGALES — TASA DIRECTA
+Documento de contexto para un asistente que redactará los legales.
+Última actualización: 2026-07-15
+====================================================================
+
+CÓMO USAR ESTE DOCUMENTO
+------------------------
+Este archivo le da TODO el contexto de negocio, técnico y regulatorio de
+la plataforma Tasa Directa para que redacte los documentos legales listados
+al final. Léalo completo antes de escribir una sola cláusula. Hay reglas de
+terminología y de alcance que son OBLIGATORIAS y que un redactor legal
+genérico se saltaría; respetarlas es lo más importante de este encargo.
+
+IMPORTANTE: usted NO es abogado del cliente y estos documentos deben ser
+revisados por un abogado colombiano del sector cambiario / protección de
+datos antes de usarse en producción. Redacte borradores sólidos y bien
+fundamentados, pero incluya al final de cada documento una nota que indique
+qué puntos requieren validación de un abogado.
+
+
+====================================================================
+1. IDENTIDAD DEL RESPONSABLE
+====================================================================
+- Razón social / operador legal: BitWave S.A.S.
+- NIT: 901.920.120-1
+- Nombre comercial de la plataforma: Tasa Directa
+- Sitio web: www.tasadirecta.com
+- País de operación: Colombia
+- Rol frente a datos personales: RESPONSABLE del tratamiento
+  (BitWave S.A.S. decide las finalidades y los medios).
+
+Nota: los correos de contacto (para PQRS de datos, notificaciones, etc.)
+todavía no están definidos. Deje un marcador claro tipo
+[CORREO DE CONTACTO — PENDIENTE] donde haga falta, no invente direcciones.
+
+
+====================================================================
+2. QUÉ ES LA PLATAFORMA (Y QUÉ NO ES) — LÍMITE CRÍTICO
+====================================================================
+Tasa Directa es un MARKETPLACE B2B que conecta la oferta y la demanda de
+divisas entre profesionales autorizados del sector cambiario en Colombia.
+
+LÍMITE LEGAL FUNDAMENTAL — repetir en todos los documentos:
+  >> La plataforma NO ejecuta, NO intermedia, NO liquida y NO custodia
+  >> ninguna operación cambiaria ni movimiento de dinero. Únicamente pone
+  >> en contacto a las partes. La negociación, el cierre, el cumplimiento,
+  >> el pago y toda la operación cambiaria ocurren DIRECTAMENTE entre los
+  >> profesionales, por fuera de la plataforma y bajo su exclusiva
+  >> responsabilidad.
+
+Esto es decisivo para la responsabilidad legal: Tasa Directa NO es una casa
+de cambio, NO es un intermediario del mercado cambiario, NO es un sistema de
+pagos, y NO asume responsabilidad por el resultado, cumplimiento o legalidad
+de las operaciones que los usuarios pacten entre sí. El contrato y los
+términos deben dejar esto blindado (limitación de responsabilidad, la
+plataforma como mero facilitador tecnológico de contacto).
+
+Mantra de marca: "Seguridad y Confianza".
+
+
+====================================================================
+3. REGLAS DE TERMINOLOGÍA (OBLIGATORIAS)
+====================================================================
+1. NUNCA usar el término "casas de cambio". SIEMPRE referirse a los usuarios
+   como "Profesionales de Compra y Venta de Divisas (PCD)", autorizados por
+   la DIAN. Puede abreviar como "PCD" tras la primera mención.
+
+2. Los PCD son personas jurídicas (o naturales) autorizadas mediante
+   resolución de la DIAN para actuar como profesionales del cambio. Su
+   condición de autorizados por la DIAN implica que YA cuentan con su propio
+   régimen de cumplimiento (SARLAFT, oficial de cumplimiento, etc.). La
+   plataforma NO asume ese cumplimiento por ellos; solo verifica su
+   identidad y su autorización vigente para admitirlos.
+
+3. La plataforma es "marketplace B2B", nunca "bolsa", "exchange",
+   "intermediario cambiario" ni "sistema de pagos".
+
+
+====================================================================
+4. CÓMO SE VINCULA UN USUARIO (ONBOARDING EN 3 ETAPAS)
+====================================================================
+Etapa 1 — Crear cuenta: el usuario registra un correo (que es su usuario) y
+  una contraseña. Confirma el correo por un enlace.
+
+Etapa 2 — Perfil de empresa + documentos (KYC): completa los datos de la
+  empresa, del representante legal y de una persona de contacto, y sube los
+  documentos de vinculación (ver sección 5). La plataforma revisa
+  (verificación de cumplimiento/identidad) y aprueba o rechaza.
+
+Etapa 3 — Aceptación de contrato: una vez aprobada la empresa, el usuario
+  debe ACEPTAR DIGITALMENTE (click-wrap) el contrato de prestación de
+  servicios y la autorización de tratamiento de datos antes de acceder al
+  mercado. La aceptación queda registrada con trazabilidad (ver sección 6).
+
+Modelo comercial: suscripción única "estándar" (acceso total al mercado, sin
+cuotas) cobrada POR EMPRESA (NIT), más una billetera de tokens prepagados
+para servicios de atención opcionales (destacar una oferta, alertas
+premium, oferta urgente, republicación). El pago se procesa por un tercero
+(Bold); la plataforma no almacena datos de tarjetas. Regla de marca: nunca
+se vende información privilegiada, solo visibilidad y velocidad de aviso.
+
+
+====================================================================
+5. DOCUMENTOS DE VINCULACIÓN (KYC) QUE SE SOLICITAN
+====================================================================
+Requeridos para aprobar al PCD:
+  - RUT (Registro Único Tributario vigente, expedido por la DIAN).
+  - Certificado de Cámara de Comercio (existencia y representación legal,
+    no mayor a 30 días).
+  - Resolución de la DIAN que autoriza a la empresa como Profesional de
+    Compra y Venta de Divisas.
+
+Opcional (no requerido para aprobar):
+  - Composición accionaria (detalle de socios o accionistas).
+
+Formatos aceptados: PDF, JPG, PNG (máx. 10 MB). Se almacenan en un bucket
+PRIVADO (no público) con control de acceso por fila (RLS).
+
+
+====================================================================
+6. DATOS PERSONALES QUE SE RECOLECTAN (para la política de datos)
+====================================================================
+Enumere estos datos explícitamente en la autorización y en la política de
+tratamiento. Distinga datos de la EMPRESA (no personales) de datos de
+PERSONAS NATURALES (sí protegidos por Habeas Data).
+
+Datos de la empresa (persona jurídica):
+  - Razón social, nombre comercial (opcional), NIT, tipo de sociedad
+    (S.A.S. / S.A. / Ltda. / persona natural / otra), sede principal,
+    dirección exacta, ciudad, teléfono (opcional), sitio web (opcional).
+
+Datos de personas naturales (PROTEGIDOS):
+  - Correo electrónico de la cuenta (usuario de acceso).
+  - Representante legal: nombre completo, tipo de documento (CC / CE /
+    Pasaporte / NIT), número de documento, correo electrónico, celular.
+  - Persona de contacto: nombre completo, cargo (opcional), celular,
+    correo electrónico, WhatsApp (opcional).
+  - Documentos KYC que pueden contener datos personales de terceros
+    (p. ej. la composición accionaria: nombres e identificación de socios
+    o accionistas).
+  - Metadatos de la aceptación de términos (ver abajo): dirección IP,
+    identificador del navegador (user-agent), fecha y hora, y versión del
+    documento aceptado.
+
+Finalidades del tratamiento (base para la autorización):
+  - Verificar la identidad de la empresa y de sus representantes y su
+    autorización vigente ante la DIAN.
+  - Dar seguridad y confianza a los demás usuarios del marketplace.
+  - Operar la cuenta, la suscripción y la facturación (por NIT).
+  - Enviar comunicaciones transaccionales y notificaciones del servicio.
+  - Conservar evidencia de la aceptación de términos (trazabilidad legal).
+La información es confidencial y NO se comparte con terceros salvo
+obligación legal o proveedores estrictamente necesarios para operar
+(correo transaccional, procesador de pagos, infraestructura en la nube).
+
+MECANISMO DE ACEPTACIÓN YA IMPLEMENTADO (describir tal cual en el contrato):
+  La aceptación es digital tipo "click-wrap": el usuario marca casillas de
+  aceptación y confirma. El sistema registra en un libro INMUTABLE (no se
+  puede editar ni borrar) una fila por documento aceptado con: id del
+  usuario, documento aceptado, versión del texto, dirección IP, user-agent
+  y marca de tiempo. Cada documento tiene una versión; si el texto cambia,
+  el usuario debe volver a aceptar la nueva versión. NO es firma electrónica
+  certificada con PDF; es aceptación digital con trazabilidad. Los textos
+  legales deben ser compatibles con este mecanismo (p. ej. cláusula que
+  reconozca la validez de la aceptación electrónica y de sus registros como
+  prueba, conforme a la Ley 527 de 1999 sobre mensajes de datos).
+
+
+====================================================================
+7. MARCO NORMATIVO COLOMBIANO A CONSIDERAR
+====================================================================
+Ancle los documentos en la normativa colombiana aplicable. Verifique
+vigencia, pero como punto de partida:
+  - Ley 1581 de 2012 y Decreto 1074 de 2015 (antes 1377 de 2013):
+    protección de datos personales / Habeas Data. Derechos ARCO, deber de
+    la política de tratamiento, aviso de privacidad, autorización previa.
+  - Ley 527 de 1999: mensajes de datos, comercio electrónico, validez de la
+    aceptación y firma electrónica.
+  - Ley 1480 de 2011 (Estatuto del Consumidor) en lo aplicable a comercio
+    electrónico y a la relación con el usuario de la plataforma.
+  - Régimen cambiario y normativa de la DIAN aplicable a los PCD — pero
+    RECORDANDO que la plataforma NO es sujeto de ese régimen (no ejecuta
+    operaciones); los sujetos obligados son los PCD.
+  - Normativa SARLAFT: son los PCD quienes están obligados, no la
+    plataforma. La plataforma solo verifica identidad y autorización.
+
+
+====================================================================
+8. DOCUMENTOS A REDACTAR (ENTREGABLES)
+====================================================================
+Redacte cada uno como documento independiente, en español, con lenguaje
+claro pero jurídicamente sólido, listo para revisión de abogado:
+
+  A) CONTRATO DE PRESTACIÓN DE SERVICIOS (plataforma <> PCD)
+     - Objeto: acceso a un marketplace B2B de contacto entre PCD.
+     - Deja MUY claro el límite: no ejecuta/intermedia/liquida operaciones.
+     - Suscripción, tokens, facturación por NIT, pago vía tercero.
+     - Obligaciones del usuario (información veraz, mantener autorización
+       DIAN vigente, uso conforme, su propio cumplimiento SARLAFT).
+     - Limitación de responsabilidad de la plataforma (facilitador
+       tecnológico; no responde por las operaciones pactadas).
+     - Vigencia, suspensión, terminación, causales de retiro.
+     - Reconocimiento de la aceptación electrónica como válida (Ley 527).
+
+  B) AUTORIZACIÓN DE TRATAMIENTO DE DATOS PERSONALES (Habeas Data)
+     - Texto breve que el usuario acepta (click-wrap) autorizando el
+       tratamiento para las finalidades de la sección 6.
+     - Remite a la política de tratamiento completa.
+
+  C) POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES (documento público)
+     - El documento extenso exigido por la Ley 1581: responsable,
+       finalidades, datos tratados, derechos del titular, canal de PQRS,
+       procedimiento para consultas y reclamos, vigencia.
+
+  D) TÉRMINOS Y CONDICIONES DE USO DE LA PLATAFORMA
+     - Reglas de uso del marketplace, cuenta, conducta, propiedad
+       intelectual, disponibilidad del servicio, ley aplicable y
+       jurisdicción (Colombia).
+
+  E) AVISO DE PRIVACIDAD (versión corta, para captura del dato)
+
+  F) (OPCIONAL, si aplica) POLÍTICA / AVISO SOBRE VERIFICACIÓN DE IDENTIDAD
+     Y VINCULACIÓN (KYC de la plataforma) — describe qué documentos se
+     piden, para qué, y que la verificación no sustituye el cumplimiento
+     propio del PCD.
+
+
+====================================================================
+9. TONO, RESTRICCIONES Y VERSIONADO
+====================================================================
+- Español de Colombia, formal pero legible.
+- NO inventar datos que no estén aquí (correos, direcciones físicas,
+  nombres de funcionarios). Use marcadores [PENDIENTE — ...].
+- Respetar SIEMPRE la terminología PCD y el límite "no ejecuta
+  transacciones". Si una cláusula estándar sugiere lo contrario, adáptela.
+- Cada documento debe llevar una etiqueta de versión y fecha en el
+  encabezado (p. ej. "Versión v1 — 2026-07"), porque el sistema versiona
+  las aceptaciones.
+- Al final de cada documento, incluya una sección "PUNTOS PARA REVISIÓN
+  LEGAL" con las decisiones que un abogado debe confirmar (p. ej. plazo de
+  conservación de datos, jurisdicción, penalidades, si la plataforma actúa
+  como Responsable o también Encargado frente a datos de terceros en los
+  documentos KYC).
+
+
+====================================================================
+10. DECISIONES ABIERTAS QUE EL REDACTOR DEBE PLANTEAR
+====================================================================
+Estas no están resueltas; propóngalas con una recomendación, no las dé por
+hechas:
+  - Plazo de conservación de los datos y de la evidencia de aceptación.
+  - Correo/canal oficial para PQRS de datos y para notificaciones.
+  - Ciudad/jurisdicción para resolución de controversias.
+  - Si se usará cláusula de arbitraje o justicia ordinaria.
+  - Política de reembolsos de la suscripción y de los tokens.
+  - Tratamiento de los datos de terceros contenidos en la composición
+    accionaria (¿la plataforma es Responsable o Encargado de esos datos?).
+
+FIN DEL BRIEF.

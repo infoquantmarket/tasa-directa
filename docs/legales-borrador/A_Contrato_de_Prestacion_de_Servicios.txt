@@ -1,0 +1,153 @@
+Contrato de Prestación de Servicios
+
+Acceso al marketplace B2B Tasa Directa · Plataforma ⟷ Profesional de Compra y Venta de Divisas (PCD)
+
+Operador legal
+
+BitWave S.A.S. — NIT 901.920.120-1
+
+Plataforma
+
+Tasa Directa — www.tasadirecta.com
+
+Fecha
+
+Julio de 2026
+
+Partes
+
+Entre los suscritos, a saber: de una parte, BITWAVE S.A.S., sociedad comercial constituida y existente conforme a las leyes de la República de Colombia, identificada con NIT 901.920.120-1, con domicilio principal en la ciudad de MEDELLÍN, Calle 6 Sur 32 A 132 int 701, representada legalmente por CATALINA CARDONA CEBALLOS, mayor de edad, identificada con la cédula de ciudadanía No. 43.271.047, quien obra en nombre y representación de la sociedad, y quien es propietaria y operadora de la plataforma tecnológica «Tasa Directa» (en adelante, «la Plataforma» o «Tasa Directa»); y, de la otra parte, la persona jurídica o natural que se registra, verifica su identidad y acepta electrónicamente el presente contrato en calidad de Profesional de Compra y Venta de Divisas autorizado por la DIAN (en adelante, «el Usuario» o «el PCD»); ambas denominadas conjuntamente «las Partes», hemos convenido celebrar el presente Contrato de Prestación de Servicios, previas las siguientes consideraciones y cláusulas.
+
+Consideraciones
+
+Que BitWave S.A.S es titular y operadora de Tasa Directa, un marketplace B2B que pone en contacto la oferta y la demanda de divisas entre Profesionales de Compra y Venta de Divisas (PCD) autorizados en Colombia.
+
+Que el Usuario declara ser un PCD debidamente autorizado por la Dirección de Impuestos y Aduanas Nacionales (DIAN) mediante resolución vigente, y contar con su propio régimen de cumplimiento (incluido SARLAFT y oficial de cumplimiento, cuando le aplique).
+
+Que el Usuario está interesado en acceder a la Plataforma para publicar y consultar cotizaciones y ponerse en contacto con otros PCD, con pleno conocimiento del alcance y los límites del servicio descritos en este contrato.
+
+Cláusula 1. Objeto
+
+El objeto del presente contrato es regular las condiciones bajo las cuales se concede al Usuario acceso a la Plataforma www.tasadirecta.com, entendida como un servicio tecnológico de contacto que permite a los PCD registrados publicar cotizaciones, consultar la oferta y la demanda de divisas de otros PCD, y establecer contacto entre ellos para negociar directamente. El servicio es de naturaleza exclusivamente tecnológica e informativa.
+
+Cláusula 2. Naturaleza y límite del servicio (declaración esencial)
+
+Las Partes reconocen y aceptan expresamente que el alcance de la Plataforma se limita a facilitar el contacto entre PCD. En consecuencia:
+
+La Plataforma NO ejecuta, NO intermedia, NO liquida y NO custodia ninguna operación cambiaria ni movimiento de dinero. Únicamente pone en contacto a las partes. La negociación, el cierre, el cumplimiento, el pago y la totalidad de la operación cambiaria ocurren DIRECTAMENTE entre los PCD, por fuera de la Plataforma y bajo su exclusiva responsabilidad.
+
+Por lo anterior, Tasa Directa no es una casa de cambio ni una empresa que realice operaciones de cambio, no es un intermediario del mercado cambiario, no es un sistema de pago ni una entidad que administre, transporte o custodie recursos, y no es una billetera de activos virtuales. www.tasadirecta.com actúa únicamente como facilitador tecnológico de contacto entre profesionales y no es parte de las operaciones que los Usuarios pacten entre sí.
+
+Las cotizaciones publicadas por los PCD en la Plataforma tienen carácter meramente informativo y de referencia, similar a un aviso o anuncio entre profesionales. La Plataforma no garantiza su vigencia, exactitud ni disponibilidad al momento del contacto entre las partes. El monto, la tasa definitiva, las condiciones de entrega y los demás términos de cada operación serán establecidos y acordados exclusivamente entre los PCD involucrados, quienes son los únicos responsables de validar y confirmar dichas condiciones antes de perfeccionar cualquier negociación.
+
+Cláusula 3. Alcance frente a otras líneas de negocio de BitWave S.A.S.
+
+El Usuario reconoce y acepta que BitWave S.A.S. podrá desarrollar, de forma independiente y bajo marcas comerciales distintas, otras líneas de negocio no relacionadas con Tasa Directa, incluyendo servicios de intercambio de criptoactivos por pesos colombianos prestados bajo otras que la sociedad opere en el futuro. Dichas líneas de negocio operan bajo su propio marco de cumplimiento, contratos, políticas SARLAFT y procesos independientes, y no guardan relación operativa, comercial ni de infraestructura con Tasa Directa.
+
+Las facultades del objeto social de BitWave S.A.S. relacionadas con intermediación en pagos, gestión de activos criptográficos o recepción y distribución de recursos por cuenta de terceros corresponden exclusivamente al desarrollo de dichas otras líneas de negocio y no se ejercen, activan ni aplican en la operación de la Plataforma Tasa Directa, la cual se rige íntegramente por los límites establecidos en la Cláusula 2.
+
+Cláusula 4. Condición de PCD del Usuario
+
+El Usuario declara, bajo su exclusiva responsabilidad, que es un Profesional de Compra y Venta de Divisas autorizado por la DIAN mediante resolución vigente, y que dicha autorización se mantiene válida durante toda la vigencia del contrato.
+
+El Usuario es el único responsable de su propio régimen de cumplimiento, incluido el Sistema de Autocontrol y Gestión del Riesgo Integral de Lavado de Activos y Financiación del Terrorismo (SARLAFT/SAGRILAFT) que le sea exigible, la designación de oficial de cumplimiento, el reporte de operaciones y la generación de la Declaración de Cambio (Formulario 18) cuando corresponda.
+
+La verificación que realiza la Plataforma se limita a comprobar la identidad del Usuario y la vigencia de su autorización ante la DIAN para efectos de admisión. Esta verificación no sustituye ni asume el cumplimiento normativo propio del PCD.
+
+Cláusula 5. Modelo comercial: suscripción y tokens
+
+5.1. Suscripción
+
+El acceso al mercado se presta mediante una suscripción única denominada «estándar», que otorga acceso total al marketplace sin cuotas por operación. La suscripción se cobra por empresa, identificada por su NIT.
+
+5.2. Billetera de tokens (servicios opcionales)
+
+De forma adicional y opcional, el Usuario podrá adquirir una billetera de tokens prepagados para acceder a servicios de atención que aumentan la visibilidad o la velocidad de aviso de sus publicaciones (por ejemplo: destacar una oferta, alertas premium, oferta urgente o republicación). Estos servicios otorgan únicamente visibilidad y velocidad de aviso; en ningún caso implican el acceso a información privilegiada, la cual nunca se comercializa.
+
+5.3. Pago por tercero
+
+Los pagos se procesan a través de un proveedor tecnológico de pagos externo. La Plataforma no almacena ni administra datos de tarjetas de crédito o débito del Usuario. La relación de pago se rige adicionalmente por los términos del procesador. La política de reembolsos de la suscripción y de los tokens se describe en el documento de POLÍTICA DE REEMBOLSOS.
+
+Cláusula 6. Vinculación y aceptación electrónica
+
+La vinculación del Usuario se surte en tres etapas: (i) creación de cuenta con correo y contraseña, con confirmación del correo; (ii) diligenciamiento del perfil de la empresa y carga de los documentos de vinculación (KYC), sujetos a verificación de identidad y autorización; y (iii) aceptación digital del presente contrato y de la autorización de tratamiento de datos, previa habilitación del acceso al mercado.
+
+El Usuario reconoce que su aceptación digital tipo «click-wrap» (marcación de casillas y confirmación) constituye manifestación válida y vinculante de su consentimiento, conforme a la Ley 527 de 1999 sobre mensajes de datos y comercio electrónico. El Usuario acepta que la Plataforma conserve, en un registro inmutable, la evidencia de cada aceptación —incluyendo el identificador del usuario, el documento y su versión aceptados, la dirección IP, el identificador del navegador (user-agent) y la marca de tiempo— y que dichos registros constituyen prueba de la aceptación. Cuando el texto de un documento cambie de versión, el Usuario deberá aceptar nuevamente la nueva versión para continuar accediendo al servicio.
+
+Cláusula 7. Obligaciones del Usuario
+
+Suministrar información veraz, completa y actualizada sobre la empresa, su representante legal y su persona de contacto, y actualizarla cuando cambie.
+
+Mantener vigente su autorización de la DIAN como PCD e informar de inmediato a la Plataforma cualquier suspensión, revocatoria o modificación de dicha autorización.
+
+Cumplir por su cuenta y riesgo la totalidad de las obligaciones cambiarias, tributarias, de prevención de lavado de activos y financiación del terrorismo y demás que le sean aplicables.
+
+Usar la Plataforma de buena fe, absteniéndose de publicar información falsa, engañosa o que induzca a error a otros Usuarios.
+
+Custodiar sus credenciales de acceso y responder por las actuaciones realizadas con ellas.
+
+Abstenerse de usar la Plataforma para fines distintos al contacto profesional entre PCD o de manera contraria a la ley.
+
+Cláusula 8. Obligaciones de la Plataforma
+
+Poner a disposición del Usuario el acceso al marketplace en los términos de la suscripción contratada, en condiciones razonables de disponibilidad.
+
+Verificar, para efectos de admisión, la identidad del Usuario y la vigencia de su autorización ante la DIAN.
+
+Tratar los datos personales conforme a la Política de Tratamiento de Datos Personales y a la ley aplicable.
+
+Conservar la evidencia de las aceptaciones electrónicas del Usuario.
+
+Cláusula 9. Limitación de responsabilidad
+
+Dado que la Plataforma es un mero facilitador tecnológico de contacto, www.tasadirecta.com no responde por la existencia, validez, cumplimiento, legalidad, oportunidad ni resultado de las operaciones que los Usuarios pacten entre sí. El Usuario asume íntegramente el riesgo de sus negociaciones y libera a la Plataforma de cualquier reclamación derivada de ellas.
+
+www.tasadirecta.com no garantiza la veracidad de la información publicada por otros Usuarios, ni la solvencia, idoneidad o cumplimiento de estos. Sin perjuicio de las obligaciones que la ley imponga de forma imperativa, la responsabilidad de la Plataforma se limita a la correcta prestación del servicio tecnológico de contacto contratado.
+
+La Plataforma no será responsable por fallas, interrupciones o indisponibilidad ocasionadas por causas ajenas a su control, fuerza mayor, caso fortuito o por proveedores tecnológicos de terceros. El límite máximo de responsabilidad contractual se sujeta a los pagos realizados por el usuario en la plataforma.
+
+Cláusula 10. Propiedad intelectual
+
+La Plataforma, su software, marcas, nombre comercial, diseños, bases de datos y demás elementos son de propiedad de www.tasadirecta.com o de sus licenciantes. El presente contrato no transfiere ningún derecho de propiedad intelectual al Usuario, quien solo obtiene una licencia de uso limitada, no exclusiva e intransferible para acceder al servicio durante la vigencia del contrato.
+
+Cláusula 11. Confidencialidad y datos
+
+La información suministrada por el Usuario es confidencial y se trata conforme a la Autorización y a la Política de Tratamiento de Datos Personales de Tasa Directa, que forman parte integral de este contrato. La información no se comparte con terceros salvo obligación legal o cuando resulte estrictamente necesario para operar el servicio (proveedor de correo transaccional, procesador de pagos e infraestructura en la nube).
+
+Cláusula 12. Vigencia, suspensión y terminación
+
+12.1. Vigencia
+
+El contrato rige desde la aceptación electrónica del Usuario y mientras se mantenga activa la suscripción, salvo terminación anticipada conforme a esta cláusula.
+
+12.2. Suspensión
+
+La Plataforma podrá suspender el acceso del Usuario, previo aviso cuando sea posible, si detecta información falsa, vencimiento o pérdida de la autorización DIAN, uso indebido de la Plataforma, o mora en el pago de la suscripción.
+
+12.3. Terminación y causales de retiro
+
+Por mutuo acuerdo de las Partes.
+
+Por decisión del Usuario, cancelando su suscripción.
+
+Por incumplimiento de cualquiera de las obligaciones del Usuario.
+
+Por pérdida, suspensión o revocatoria de la autorización DIAN del Usuario.
+
+Por uso de la Plataforma para fines ilícitos o contrarios a este contrato.
+
+Cláusula 13. Modificaciones
+
+www.tasadirecta.com podrá modificar el presente contrato y publicar nuevas versiones. Las modificaciones se informarán al Usuario y requerirán una nueva aceptación electrónica para continuar usando el servicio, conservándose la trazabilidad de la versión aceptada.
+
+Cláusula 14. Ley aplicable y solución de controversias
+
+Este contrato se rige por las leyes de la República de Colombia. Las controversias que surjan se intentarán resolver primero de forma directa entre las Partes. De no lograrse acuerdo, se someterán a un TRIBUNAL DE ARBITRAMENTO, con sede en Medellín.
+
+Cláusula 15. Notificaciones
+
+Las notificaciones a la Plataforma se surtirán al correo info@bitwaveco.com; las notificaciones al Usuario se surtirán al correo registrado en su cuenta. Las Partes reconocen la validez de las comunicaciones electrónicas.
+
+Aceptación
+
+El Usuario declara haber leído y comprendido el presente contrato y lo acepta digitalmente en la etapa de vinculación, dejando registro inmutable de dicha aceptación con la trazabilidad descrita en la Cláusula 6.

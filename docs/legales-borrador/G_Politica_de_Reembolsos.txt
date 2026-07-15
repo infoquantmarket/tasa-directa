@@ -1,0 +1,83 @@
+TASA DIRECTA
+
+Documentos legales de la plataforma
+
+Política de Reembolsos
+
+Suscripción estándar y billetera de tokens prepagados
+
+Operador legal
+
+BitWave S.A.S. — NIT 901.920.120-1
+
+Plataforma
+
+Tasa Directa — www.tasadirecta.com
+
+1. Objeto y alcance
+
+Esta Política regula en qué casos procede el reembolso de los pagos realizados por el Usuario (PCD) a BitWave S.A.S. por concepto de: (i) la suscripción estándar de acceso al marketplace Tasa Directa, y (ii) la compra de tokens prepagados para servicios de atención opcionales (destacar oferta, alertas premium, oferta urgente, republicación).
+
+2. Naturaleza de los pagos y marco aplicable
+
+Los Usuarios de Tasa Directa son Profesionales de Compra y Venta de Divisas que contratan la suscripción y los tokens para el ejercicio de su actividad económica y profesional, no para el consumo final, personal, familiar o doméstico. Por esta razón, en principio no resultarían aplicables las reglas de protección al consumidor de la Ley 1480 de 2011 pensadas para consumidores finales (entre ellas, el derecho de retracto de los artículos 47 y 48 para ventas a distancia), y en su lugar rigen las reglas generales de la contratación mercantil y lo pactado entre las Partes.
+
+Esta calificación —Usuario profesional vs. consumidor— es precisamente uno de los puntos que debe confirmar el abogado revisor, verificando el caso concreto frente a la definición de "consumidor" del artículo 5 de la Ley 1480.
+
+3. Reembolsos de la suscripción
+
+3.1. Cancelacion
+
+La suscripción otorga acceso inmediato y total al marketplace desde su activación. Por tratarse de un servicio digital de ejecución instantánea que el Usuario puede utilizar desde el primer momento,  la suscripción no será reembolsable una vez activada, salvo en los supuestos excepcionales de la sección 5.
+
+3.2. Cancelación por el Usuario
+
+El Usuario puede cancelar su suscripción en cualquier momento para que no se renueve en el siguiente periodo, pero dicha cancelación no genera devolución de lo ya pagado por el periodo en curso, durante el cual conserva el acceso al servicio.
+
+3.3. Cambios de plan
+
+Si en el futuro existieran distintos niveles de suscripción, los ajustes o cambios de plan y su eventual prorrateo se definirán en las nuevas políticas de los planes que serán presentadas por la plataforma.
+
+4. Reembolsos de tokens
+
+4.1. Tokens no consumidos
+
+Se permite el reembolso de los tokens comprados y aún no utilizados, solicitado dentro de los 30 días calendario, siguientes a la compra, descontando cualquier comisión de procesamiento de pago no recuperable cobrada por el procesador.
+
+4.2. Tokens ya consumidos
+
+Los tokens ya aplicados a un servicio de atención (por ejemplo, una publicación ya destacada o una alerta ya enviada) no son reembolsables, pues el servicio contratado con ellos ya fue prestado.
+
+4.3. Vigencia de los tokens no utilizados
+
+La vigencia o caducidad de los tokens comprados y no utilizados se define en 360 dias posteriores a la compra
+
+5. Casos excepcionales en que sí procede el reembolso
+
+Independientemente de las reglas anteriores, procederá el reembolso total o parcial cuando:
+
+Se compruebe un cobro duplicado o un error de facturación atribuible a www.tasadirecta.com o al procesador de pagos.
+
+La Plataforma cobre por un servicio de atención (destacar oferta, alerta premium, oferta urgente, republicación) que finalmente no se preste por una falla imputable a www.tasadirecta.com.
+
+La plataforma suspenda o dé de baja al Usuario sin que medie incumplimiento de este, caso en el cual se reembolsará la parte no disfrutada de la suscripción y los tokens no consumidos.
+
+Exista una orden de autoridad competente que así lo disponga.
+
+6. Procedimiento para solicitar un reembolso
+
+El Usuario envía su solicitud al canal info@bitwaveco.com, indicando el concepto, la fecha del pago y el motivo.
+
+www.tasadirecta.com, revisa la solicitud y responde dentro de los 10 dias habiles siguientes a la recepcion de la solicitud.
+
+Si el reembolso procede, se tramita a través del mismo medio de pago utilizado por el Usuario, por conducto del procesador de pagos o transferencia bancaria, en los plazos que éste disponga para la devolución de fondos no superando los 30 dias calendarios posteriores a la radicación de la solicitud de reembolso.
+
+Si el reembolso no procede, www.tasadirecta.com informará por escrito los motivos de la negativa.
+
+7. Efectos de la terminación del contrato sobre los saldos
+
+Si el contrato termina por incumplimiento del Usuario, no habrá lugar a reembolso de la suscripción ni de los tokens. Si termina por una causa no imputable al Usuario (por ejemplo, decisión unilateral de La Plataforma sin incumplimiento del Usuario, o retiro voluntario de www.tasadirecta.com del mercado), se reembolsará la parte proporcional no disfrutada de la suscripción y el saldo de tokens no consumidos, salvo que se acuerde otra cosa.
+
+8. Relación con otros documentos
+
+Esta Política forma parte integral del Contrato de Prestación de Servicios (Cláusula 4.3) y de los Términos y Condiciones de uso de la Plataforma, y debe leerse de forma conjunta con ellos. En caso de contradicción, prevalecerán las reglas específicas de esta Política en materia de reembolsos.
