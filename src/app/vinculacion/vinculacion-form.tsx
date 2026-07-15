@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CiudadCombobox } from '@/app/(auth)/registro/ciudad-combobox'
 import { TIPOS_SOCIEDAD, TIPOS_DOC_REP } from '@/lib/validation/perfil'
-import { documentoPorSlug } from '@/lib/legal/documentos'
+import { documentoPorSlug, SLUG_ETAPA_VINCULACION } from '@/lib/legal/documentos'
 
 type CampoTexto = {
   name: string
@@ -98,7 +98,7 @@ export function VinculacionForm({
   }
 
   const valores: Record<string, string> = state.valores ?? valoresIniciales
-  const docDatos = documentoPorSlug('tratamiento_datos')!
+  const docDatos = documentoPorSlug(SLUG_ETAPA_VINCULACION)!
 
   return (
     <form action={formAction} className="grid gap-8">

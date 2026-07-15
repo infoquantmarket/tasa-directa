@@ -90,7 +90,7 @@ export async function guardarPerfil(
 
   if (!yaAcepto) {
     const headerList = await headers()
-    await supabase.from('aceptaciones').insert({
+    const { error: errorAceptacion } = await supabase.from('aceptaciones').insert({
       usuario_id: user.id,
       documento: SLUG_ETAPA_VINCULACION,
       version: VERSION_LEGAL,
@@ -101,6 +101,12 @@ export async function guardarPerfil(
       rep_nombre: d.repNombre,
       rep_num_doc: d.repNumDoc,
     })
+    if (errorAceptacion) {
+      return {
+        error: 'Se guardó el perfil, pero no se pudo registrar la autorización de datos. Intente guardar de nuevo.',
+        valores: valoresDesdeFormData(formData),
+      }
+    }
   }
 
   revalidatePath('/dashboard')
