@@ -4,66 +4,47 @@ import { useActionState, useState } from 'react'
 import { aceptarTerminos, type ContratoState } from './actions'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CONTRATO_SERVICIOS, TRATAMIENTO_DATOS, ES_BORRADOR } from '@/lib/legal/contrato'
+import { documentosPorEtapa } from '@/lib/legal/documentos'
+
+const DOCS = documentosPorEtapa('contrato') // 6 documentos
 
 export function ContratoForm() {
   const [state, formAction, pending] = useActionState<ContratoState, FormData>(
     aceptarTerminos,
     { error: null }
   )
-  const [aceptaContrato, setAceptaContrato] = useState(false)
-  const [aceptaDatos, setAceptaDatos] = useState(false)
+  const [marcados, setMarcados] = useState<Record<string, boolean>>({})
+  const todos = DOCS.every((d) => marcados[d.slug])
 
   return (
-    <form action={formAction} className="grid gap-6">
-      {ES_BORRADOR && (
-        <Alert className="border-amber-300 bg-amber-50 text-amber-900">
-          <AlertDescription className="font-medium">
-            ⚠️ Documento en borrador, pendiente de aprobación legal. El texto que
-            se muestra a continuación aún no es la versión definitiva.
-          </AlertDescription>
-        </Alert>
-      )}
-      <div className="grid gap-2">
-        <h3 className="font-semibold">Contrato de prestación de servicios</h3>
-        <div className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-          {CONTRATO_SERVICIOS}
+    <form action={formAction} className="grid gap-8">
+      {DOCS.map((doc) => (
+        <div key={doc.slug} className="grid gap-2">
+          <h3 className="font-semibold">{doc.titulo}</h3>
+          <div className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+            {doc.texto}
+          </div>
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              name={doc.slug}
+              checked={Boolean(marcados[doc.slug])}
+              onChange={(e) =>
+                setMarcados((m) => ({ ...m, [doc.slug]: e.target.checked }))
+              }
+              className="mt-0.5"
+            />
+            {doc.etiquetaCasilla}
+          </label>
         </div>
-        <label className="flex items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            name="contrato"
-            checked={aceptaContrato}
-            onChange={(e) => setAceptaContrato(e.target.checked)}
-            className="mt-0.5"
-          />
-          He leído y acepto el contrato de servicios.
-        </label>
-      </div>
-
-      <div className="grid gap-2">
-        <h3 className="font-semibold">Autorización de tratamiento de datos personales</h3>
-        <div className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-          {TRATAMIENTO_DATOS}
-        </div>
-        <label className="flex items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            name="datos"
-            checked={aceptaDatos}
-            onChange={(e) => setAceptaDatos(e.target.checked)}
-            className="mt-0.5"
-          />
-          Autorizo el tratamiento de mis datos personales.
-        </label>
-      </div>
+      ))}
 
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}
-      <Button type="submit" disabled={pending || !aceptaContrato || !aceptaDatos} size="lg" className="w-fit">
+      <Button type="submit" disabled={pending || !todos} size="lg" className="w-fit">
         {pending ? 'Guardando…' : 'Aceptar y continuar'}
       </Button>
     </form>
