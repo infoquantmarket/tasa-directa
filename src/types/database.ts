@@ -159,17 +159,17 @@ export interface Database {
       }
       aceptaciones: {
         Row: {
-          id:         string
-          usuario_id: string
-          documento:  TipoAceptacion
-          version:    string
-          ip:         string | null
-          user_agent: string | null
+          id:           string
+          usuario_id:   string
+          documento:    TipoAceptacion
+          version:      string
+          ip:           string | null
+          user_agent:   string | null
           razon_social: string | null
           nit:          string | null
           rep_nombre:   string | null
           rep_num_doc:  string | null
-          created_at: string
+          created_at:   string
         }
         Insert: Omit<Database['public']['Tables']['aceptaciones']['Row'], 'id' | 'created_at'>
         Update: never
