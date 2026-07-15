@@ -10,7 +10,7 @@ import { ETIQUETAS_DOCUMENTO, TODOS_TIPOS_DOCUMENTO, puedeAprobarUsuario } from 
 import { revisarDocumento, aprobarUsuario, rechazarUsuario } from '../../actions'
 import { GestionComercial } from './gestion-comercial'
 import { PerfilEmpresa } from './perfil-empresa'
-import { CONTRATO_VERSION } from '@/lib/legal/contrato'
+import { DOCUMENTOS_LEGALES, VERSION_LEGAL } from '@/lib/legal/documentos'
 
 export const metadata: Metadata = { title: 'Expediente PCD' }
 
@@ -22,7 +22,7 @@ export default async function ExpedientePage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }, { data: aceptacionContrato }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }, { data: aceptaciones }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', id).single(),
     supabase.from('documentos_kyc').select('*').eq('usuario_id', id),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
@@ -31,12 +31,17 @@ export default async function ExpedientePage({
     supabase.from('token_movimientos')
       .select('id, delta, concepto, nota, created_at')
       .eq('usuario_id', id).order('created_at', { ascending: false }).limit(5),
-    supabase.from('aceptaciones').select('created_at')
-      .eq('usuario_id', id).eq('documento', 'contrato_servicios').eq('version', CONTRATO_VERSION)
-      .maybeSingle(),
+    supabase.from('aceptaciones').select('documento, version, ip, created_at')
+      .eq('usuario_id', id),
   ])
 
   if (!perfil) notFound()
+
+  const aceptadoPorSlug = new Map(
+    (aceptaciones ?? [])
+      .filter((a) => a.version === VERSION_LEGAL)
+      .map((a) => [a.documento, a])
+  )
 
   const urls: Record<string, string | null> = {}
   for (const doc of docs ?? []) {
@@ -85,22 +90,31 @@ export default async function ExpedientePage({
             <p className="text-sm text-muted-foreground">
               {perfil.correo} · Tel {perfil.telefono ?? '—'} · WhatsApp {perfil.whatsapp ?? '—'}
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Contrato de servicios:{' '}
-              {aceptacionContrato ? (
-                <span className="text-primary">
-                  Aceptado el {new Date(aceptacionContrato.created_at).toLocaleDateString('es-CO')}
-                </span>
-              ) : (
-                'Pendiente'
-              )}
-            </p>
           </div>
           <EstadoBadge estado={perfil.estado} />
         </CardHeader>
       </Card>
 
       <PerfilEmpresa perfil={perfil} />
+
+      <section className="grid gap-1 rounded-lg border border-border bg-white p-6">
+        <h2 className="mb-2 text-lg font-semibold">Documentos legales</h2>
+        <ul className="grid gap-1 text-sm">
+          {DOCUMENTOS_LEGALES.map((d) => {
+            const a = aceptadoPorSlug.get(d.slug)
+            return (
+              <li key={d.slug} className="flex items-center justify-between gap-4">
+                <span>{d.titulo}</span>
+                <span className="text-muted-foreground">
+                  {a
+                    ? `Aceptado ${new Date(a.created_at).toLocaleDateString('es-CO')} · IP ${a.ip ?? '—'}`
+                    : 'Pendiente'}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
 
       <section className="grid gap-4">
         <h2 className="text-lg font-semibold">Documentos</h2>

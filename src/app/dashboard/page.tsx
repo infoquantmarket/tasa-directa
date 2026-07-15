@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { EstadoBadge } from '@/components/estado-badge'
 import { TIPOS_DOCUMENTO } from '@/lib/validation/kyc'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
-import { CONTRATO_VERSION } from '@/lib/legal/contrato'
+import { SLUGS_ETAPA_CONTRATO, VERSION_LEGAL } from '@/lib/legal/documentos'
 import { Coins, BadgeCheck, FileText, FileCheck2 } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Mi cuenta' }
@@ -18,14 +18,14 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: aceptacionContrato }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: aceptacionesContrato }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', user.id).single(),
     supabase.from('documentos_kyc').select('tipo_documento, estado').eq('usuario_id', user.id),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
       .eq('usuario_id', user.id).eq('estado', 'activa').maybeSingle(),
     supabase.from('token_saldos').select('saldo').eq('usuario_id', user.id).maybeSingle(),
-    supabase.from('aceptaciones').select('created_at')
-      .eq('usuario_id', user.id).eq('documento', 'contrato_servicios').eq('version', CONTRATO_VERSION).maybeSingle(),
+    supabase.from('aceptaciones').select('documento, created_at')
+      .eq('usuario_id', user.id).eq('version', VERSION_LEGAL).in('documento', SLUGS_ETAPA_CONTRATO),
   ])
 
   if (!perfil) redirect('/login')
@@ -35,7 +35,14 @@ export default async function DashboardPage() {
   const docsAprobados = TIPOS_DOCUMENTO.filter((tipo) =>
     docs?.some((d) => d.tipo_documento === tipo && d.estado === 'aprobado')
   ).length
-  const contratoAceptado = Boolean(aceptacionContrato)
+  const contratoAceptado =
+    new Set((aceptacionesContrato ?? []).map((a) => a.documento)).size === SLUGS_ETAPA_CONTRATO.length
+  const fechaAceptacionContrato = contratoAceptado
+    ? (aceptacionesContrato ?? []).reduce(
+        (max, a) => (a.created_at > max ? a.created_at : max),
+        aceptacionesContrato![0].created_at
+      )
+    : null
 
   return (
     <div className="grid gap-8">
@@ -77,25 +84,26 @@ export default async function DashboardPage() {
       {perfil.estado === 'aprobado' && !contratoAceptado && (
         <Card className="border-primary/40 bg-accent/40">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">Falta un paso: acepte el contrato de servicios</CardTitle>
+            <CardTitle className="text-base">Falta un paso: acepte los documentos legales</CardTitle>
             <FileCheck2 className="size-5 text-primary" />
           </CardHeader>
           <CardContent className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              Debe aceptar el contrato de prestación de servicios y la autorización
-              de tratamiento de datos para activar el acceso al mercado.
+              Debe aceptar el contrato de prestación de servicios, los términos y
+              condiciones y las demás políticas de la plataforma para activar el
+              acceso al mercado.
             </p>
             <Button size="sm" render={<Link href="/contrato" />}>
-              Ir al contrato
+              Ir a los documentos
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {perfil.estado === 'aprobado' && contratoAceptado && aceptacionContrato && (
+      {perfil.estado === 'aprobado' && contratoAceptado && fechaAceptacionContrato && (
         <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <FileCheck2 className="size-4 text-primary" />
-          Contrato aceptado el {new Date(aceptacionContrato.created_at).toLocaleDateString('es-CO')}
+          Documentos legales aceptados el {new Date(fechaAceptacionContrato).toLocaleDateString('es-CO')}
         </p>
       )}
 
@@ -121,7 +129,7 @@ export default async function DashboardPage() {
                   <p className="text-muted-foreground">
                     {contratoAceptado
                       ? 'Su empresa está verificada. Para activar el acceso al mercado, nuestro equipo le enviará el enlace de pago de la suscripción.'
-                      : 'Acepte el contrato de servicios para habilitar el pago de la suscripción.'}
+                      : 'Acepte los documentos legales para habilitar el pago de la suscripción.'}
                   </p>
                 </>
               )}
