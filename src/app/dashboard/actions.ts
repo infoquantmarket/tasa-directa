@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { TIPOS_DOCUMENTO } from '@/lib/validation/kyc'
+import { TIPOS_DOCUMENTO, TODOS_TIPOS_DOCUMENTO } from '@/lib/validation/kyc'
 import { notificarTelegram } from '@/lib/telegram/notificar'
 import type { TipoDoc } from '@/types/database'
 
@@ -17,7 +17,7 @@ export async function registrarDocumento(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Sesión expirada. Vuelva a ingresar.' }
 
-  if (!TIPOS_DOCUMENTO.includes(tipo)) return { error: 'Tipo de documento inválido.' }
+  if (!TODOS_TIPOS_DOCUMENTO.includes(tipo)) return { error: 'Tipo de documento inválido.' }
 
   // El path DEBE estar dentro de la carpeta del usuario (defensa además del RLS de Storage)
   if (!storagePath.startsWith(`${user.id}/`)) {

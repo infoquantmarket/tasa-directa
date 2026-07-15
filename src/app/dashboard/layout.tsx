@@ -11,6 +11,14 @@ export default async function DashboardLayout({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const { data: perfil } = await supabase
+    .from('perfiles_usuarios')
+    .select('perfil_completo')
+    .eq('id', user.id)
+    .single()
+
+  if (!perfil?.perfil_completo) redirect('/vinculacion')
+
   return (
     <>
       <SiteHeader />

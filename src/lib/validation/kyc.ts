@@ -2,16 +2,21 @@ import type { TipoDoc, EstadoDoc } from '@/types/database'
 
 export const TIPOS_DOCUMENTO = ['rut', 'camara_comercio', 'resolucion_dian'] as const
 
+/** Los 4 tipos válidos de documento (los 3 requeridos + el opcional), para validar uploads. */
+export const TODOS_TIPOS_DOCUMENTO = [...TIPOS_DOCUMENTO, 'composicion_accionaria'] as const
+
 export const ETIQUETAS_DOCUMENTO: Record<TipoDoc, string> = {
   rut: 'RUT',
   camara_comercio: 'Cámara de Comercio',
   resolucion_dian: 'Resolución DIAN',
+  composicion_accionaria: 'Composición accionaria (opcional)',
 }
 
 export const DESCRIPCIONES_DOCUMENTO: Record<TipoDoc, string> = {
   rut: 'Registro Único Tributario vigente, expedido por la DIAN.',
   camara_comercio: 'Certificado de existencia y representación legal (no mayor a 30 días).',
   resolucion_dian: 'Resolución de autorización como Profesional de Compra y Venta de Divisas.',
+  composicion_accionaria: 'Detalle de socios o accionistas de la empresa. No es obligatorio para la aprobación.',
 }
 
 export const MAX_TAMANO_BYTES = 10 * 1024 * 1024 // 10 MB — igual al límite del bucket
@@ -28,7 +33,7 @@ export function validarArchivoKyc(mime: string, tamanoBytes: number): string | n
   return null
 }
 
-/** La aprobación final del PCD solo se habilita con los 3 documentos aprobados. */
+/** La aprobación final del PCD solo se habilita con los 3 documentos REQUERIDOS aprobados. */
 export function puedeAprobarUsuario(
   docs: Array<{ tipo_documento: TipoDoc; estado: EstadoDoc }>
 ): boolean {

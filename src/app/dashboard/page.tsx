@@ -1,17 +1,14 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { EstadoBadge } from '@/components/estado-badge'
-import { DocumentoUploader } from './documento-uploader'
-import {
-  TIPOS_DOCUMENTO,
-  ETIQUETAS_DOCUMENTO,
-  DESCRIPCIONES_DOCUMENTO,
-} from '@/lib/validation/kyc'
+import { TIPOS_DOCUMENTO } from '@/lib/validation/kyc'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
-import { Coins, BadgeCheck } from 'lucide-react'
+import { Coins, BadgeCheck, FileText } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Mi cuenta' }
 
@@ -22,7 +19,7 @@ export default async function DashboardPage() {
 
   const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', user.id).single(),
-    supabase.from('documentos_kyc').select('*').eq('usuario_id', user.id),
+    supabase.from('documentos_kyc').select('tipo_documento, estado').eq('usuario_id', user.id),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
       .eq('usuario_id', user.id).eq('estado', 'activa').maybeSingle(),
     supabase.from('token_saldos').select('saldo').eq('usuario_id', user.id).maybeSingle(),
@@ -30,13 +27,11 @@ export default async function DashboardPage() {
 
   if (!perfil) redirect('/login')
 
-  const documentos = TIPOS_DOCUMENTO.map((tipo) => ({
-    tipo,
-    doc: docs?.find((d) => d.tipo_documento === tipo) ?? null,
-  }))
-
   const membresiaVigente = esMembresiaVigente(membresia, fechaColombiaHoy())
   const saldoTokens = saldoRow?.saldo ?? 0
+  const docsAprobados = TIPOS_DOCUMENTO.filter((tipo) =>
+    docs?.some((d) => d.tipo_documento === tipo && d.estado === 'aprobado')
+  ).length
 
   return (
     <div className="grid gap-8">
@@ -118,45 +113,20 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      <section className="grid gap-4">
-        <h2 className="text-lg font-semibold">Documentos de vinculación</h2>
-        {documentos.map(({ tipo, doc }) => (
-          <Card key={tipo}>
-            <CardHeader className="flex-row items-center justify-between space-y-0">
-              <div>
-                <CardTitle className="text-base">{ETIQUETAS_DOCUMENTO[tipo]}</CardTitle>
-                <CardDescription>{DESCRIPCIONES_DOCUMENTO[tipo]}</CardDescription>
-              </div>
-              {doc && <EstadoBadge estado={doc.estado} />}
-            </CardHeader>
-            <CardContent className="grid gap-3">
-              {doc?.estado === 'rechazado' && doc.notas_revision && (
-                <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                  Motivo del rechazo: {doc.notas_revision}
-                </p>
-              )}
-              {doc?.estado === 'aprobado' ? (
-                <p className="text-sm text-muted-foreground">
-                  Documento aprobado{doc.nombre_archivo ? `: ${doc.nombre_archivo}` : ''}.
-                </p>
-              ) : (
-                <>
-                  {doc && (
-                    <p className="text-sm text-muted-foreground">
-                      Archivo actual: {doc.nombre_archivo ?? doc.storage_path}
-                    </p>
-                  )}
-                  <DocumentoUploader
-                    tipo={tipo}
-                    usuarioId={user.id}
-                    esReemplazo={Boolean(doc)}
-                  />
-                </>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </section>
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-base">Perfil y documentos</CardTitle>
+          <FileText className="size-5 text-primary" />
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            {docsAprobados}/{TIPOS_DOCUMENTO.length} documentos requeridos aprobados.
+          </p>
+          <Button variant="outline" size="sm" render={<Link href="/vinculacion" />}>
+            Ver y editar
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }
