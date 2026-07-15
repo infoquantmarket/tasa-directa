@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CiudadCombobox } from '@/app/(auth)/registro/ciudad-combobox'
 import { TIPOS_SOCIEDAD, TIPOS_DOC_REP } from '@/lib/validation/perfil'
+import { documentoPorSlug } from '@/lib/legal/documentos'
 
 type CampoTexto = {
   name: string
@@ -74,8 +75,10 @@ const selectClases =
 
 export function VinculacionForm({
   valoresIniciales,
+  yaAceptoDatos,
 }: {
   valoresIniciales: Record<string, string>
+  yaAceptoDatos?: boolean
 }) {
   const [state, formAction, pending] = useActionState<PerfilState, FormData>(
     guardarPerfil,
@@ -95,6 +98,7 @@ export function VinculacionForm({
   }
 
   const valores: Record<string, string> = state.valores ?? valoresIniciales
+  const docDatos = documentoPorSlug('tratamiento_datos')!
 
   return (
     <form action={formAction} className="grid gap-8">
@@ -144,6 +148,22 @@ export function VinculacionForm({
           </div>
         </div>
       ))}
+
+      {!yaAceptoDatos && (
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" name="autorizacion_datos" className="mt-0.5" />
+          <span>
+            {docDatos.etiquetaCasilla}{' '}
+            <a href="/legal/tratamiento_datos" target="_blank" className="text-primary hover:underline">
+              Ver autorización
+            </a>{' '}
+            ·{' '}
+            <a href="/legal/politica_tratamiento" target="_blank" className="text-primary hover:underline">
+              Política de Tratamiento
+            </a>
+          </span>
+        </label>
+      )}
 
       {state.error && (
         <Alert variant="destructive">

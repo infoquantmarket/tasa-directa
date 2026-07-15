@@ -11,6 +11,7 @@ import {
   ETIQUETAS_DOCUMENTO,
   DESCRIPCIONES_DOCUMENTO,
 } from '@/lib/validation/kyc'
+import { SLUG_ETAPA_VINCULACION, VERSION_LEGAL } from '@/lib/legal/documentos'
 import { Lock } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Vinculación de la empresa' }
@@ -20,9 +21,16 @@ export default async function VinculacionPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: perfil }, { data: docs }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: aceptacionDatos }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', user.id).single(),
     supabase.from('documentos_kyc').select('*').eq('usuario_id', user.id),
+    supabase
+      .from('aceptaciones')
+      .select('id')
+      .eq('usuario_id', user.id)
+      .eq('documento', SLUG_ETAPA_VINCULACION)
+      .eq('version', VERSION_LEGAL)
+      .maybeSingle(),
   ])
 
   if (!perfil) redirect('/login')
@@ -86,7 +94,7 @@ export default async function VinculacionPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <VinculacionForm valoresIniciales={valoresIniciales} />
+            <VinculacionForm valoresIniciales={valoresIniciales} yaAceptoDatos={Boolean(aceptacionDatos)} />
           </CardContent>
         </Card>
 
