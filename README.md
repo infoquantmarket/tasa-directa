@@ -4,6 +4,10 @@ Marketplace **B2B** para el sector cambiario en Colombia — [www.tasadirecta.co
 
 > **Mantra de producto:** *Seguridad y Confianza.*
 
+> 📌 **¿Retomando el proyecto en una sesión nueva?** Lee primero
+> [`docs/CONTEXTO-PROYECTO.md`](docs/CONTEXTO-PROYECTO.md) — resume el
+> workflow, las decisiones estratégicas y el estado actual de cada fase.
+
 ---
 
 ## Reglas de oro del negocio (obligatorias para todo el equipo)
@@ -47,22 +51,48 @@ de la plataforma, no un trámite de entrada:
 2. Confirmar correo      →  enlace del correo  →  login
 3. Perfil de empresa     →  /vinculacion       (Empresa · Representante legal ·
    + documentos                                 Persona de contacto · RUT ·
-                                                 Cámara de Comercio · Resolución
+   + autorización de datos                      Cámara de Comercio · Resolución
                                                  DIAN · Composición accionaria
-                                                 [opcional])
+                                                 [opcional] · click-wrap de la
+                                                 Autorización de Tratamiento de
+                                                 Datos, con trazabilidad)
 4. Revisión de cumplimiento (admin) → aprobar/rechazar por documento y en conjunto
-5. Aceptar contrato       →  /contrato         (click-wrap: contrato de servicios +
-   + tratamiento de datos                       autorización Habeas Data, con
-                                                 trazabilidad IP/user-agent/versión)
+5. Aceptar documentos     →  /contrato         (click-wrap de los otros 6
+   legales                                     documentos: contrato de servicios,
+                                                política de tratamiento, términos
+                                                y condiciones, aviso de privacidad,
+                                                política KYC, política de reembolsos)
 6. Membresía activa (admin) → acceso al mercado
 ```
 
 El dashboard (`/dashboard`) redirige automáticamente a `/vinculacion` mientras el
 perfil esté incompleto (`perfil_completo=false`), y muestra un aviso para ir a
-`/contrato` una vez la empresa está aprobada pero aún no ha aceptado el contrato.
-El texto legal en `src/lib/legal/contrato.ts` es un **borrador** (`ES_BORRADOR=true`)
-— hay que reemplazarlo por el contrato y la autorización de datos definitivos
-(revisados por abogado) antes de ir a producción con usuarios reales.
+`/contrato` una vez la empresa está aprobada pero aún no ha aceptado los 6
+documentos pendientes.
+
+### Documentos legales (Fase 2.7)
+
+Los 7 documentos (contrato de servicios, autorización de tratamiento de datos,
+política de tratamiento de datos, términos y condiciones, aviso de privacidad,
+política de verificación KYC y política de reembolsos) viven como un registro
+central en [`src/lib/legal/documentos.ts`](src/lib/legal/documentos.ts), versionados
+en conjunto (`VERSION_LEGAL`, actualmente `v1-2026-07`), y se publican como páginas
+públicas en `/legal` y `/legal/[slug]`.
+
+La aceptación es **click-wrap por documento** (una casilla cada uno) y queda
+registrada en la tabla inmutable `aceptaciones`, con **snapshot de identidad**
+(razón social, NIT, representante legal) tomado en el momento de aceptar — así
+la evidencia no depende de un perfil que puede editarse después. La autorización
+de datos se acepta en `/vinculacion` (etapa 2, junto con la entrega de los datos,
+por exigencia de la Ley 1581 de 2012); los otros 6 se aceptan en `/contrato`
+(etapa 3). Ver `supabase/migrations/0005_documentos_legales.sql`.
+
+Los textos fueron redactados por un asistente legal externo (brief en
+[`BRIEF-LEGALES-tasadirecta.txt`](BRIEF-LEGALES-tasadirecta.txt)) y se publican
+como versión final v1, **pendientes de revisión por un abogado del sector
+cambiario** antes de tratarlos como definitivos en producción. Cuando el abogado
+apruebe o ajuste el texto, se sube `VERSION_LEGAL` a una nueva versión y el
+sistema exige re-aceptación automáticamente (por versión, no por documento).
 
 ## Roadmap por fases
 
@@ -70,6 +100,7 @@ El texto legal en `src/lib/legal/contrato.ts` es un **borrador** (`ES_BORRADOR=t
 - [x] **Fase 2 — Admin y KYC** · registro *Pendiente*, carga de documentos, panel de cumplimiento, endpoint de validación de identidad.
 - [x] **Fase 2.5 — Modelo comercial** · suscripción única + billetera de tokens, gestión comercial en el panel admin, arquitectura de pagos Bold. ⟶ `supabase/migrations/0003_modelo_comercial.sql`
 - [x] **Fase 2.6 — Onboarding en 3 etapas** · cuenta mínima, perfil de empresa completo (`/vinculacion`), contrato de servicios con aceptación digital (`/contrato`). ⟶ `supabase/migrations/0004_onboarding_perfil_contrato.sql`
+- [x] **Fase 2.7 — 7 documentos legales** · registro central versionado, páginas públicas `/legal`, click-wrap por documento con snapshot de identidad. ⟶ `supabase/migrations/0005_documentos_legales.sql`
 - [ ] **Fase 3 — Marketplace** · publicación de ofertas, edición limitada, borrado lógico, sedes múltiples por empresa.
 - [ ] **Fase 4 — UI del marketplace** · tarjeta de oferta y modal "Realizar Oferta".
 - [ ] **Fase 5 — Notificaciones y DevOps** · Resend + despliegue en Vercel.
