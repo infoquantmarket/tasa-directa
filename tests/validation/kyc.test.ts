@@ -1,15 +1,23 @@
 import { describe, it, expect } from 'vitest'
 import {
   TIPOS_DOCUMENTO,
+  TODOS_TIPOS_DOCUMENTO,
   ETIQUETAS_DOCUMENTO,
   validarArchivoKyc,
   puedeAprobarUsuario,
 } from '@/lib/validation/kyc'
 
 describe('constantes KYC', () => {
-  it('define exactamente los 3 documentos requeridos', () => {
+  it('define exactamente los 3 documentos requeridos para aprobar', () => {
     expect(TIPOS_DOCUMENTO).toEqual(['rut', 'camara_comercio', 'resolucion_dian'])
-    expect(Object.keys(ETIQUETAS_DOCUMENTO)).toHaveLength(3)
+  })
+  it('TODOS_TIPOS_DOCUMENTO agrega el opcional de composición accionaria', () => {
+    expect(TODOS_TIPOS_DOCUMENTO).toEqual([
+      'rut', 'camara_comercio', 'resolucion_dian', 'composicion_accionaria',
+    ])
+  })
+  it('ETIQUETAS_DOCUMENTO cubre los 4 tipos de documento', () => {
+    expect(Object.keys(ETIQUETAS_DOCUMENTO)).toHaveLength(4)
   })
 })
 
