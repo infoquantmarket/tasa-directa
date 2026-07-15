@@ -36,11 +36,40 @@ Plus/Premium con cuotas diarias descrito originalmente en la Fase 1 — ver
 [`docs/decisiones-fase-1.md`](docs/decisiones-fase-1.md) para el historial de esa
 decisión.
 
+## Onboarding del PCD (decisión 2026-07-15, Fase 2.6)
+
+El registro se separó en 3 etapas para no abrumar al usuario con un formulario
+gigante y para que el perfil de empresa sea el verdadero activo de confianza
+de la plataforma, no un trámite de entrada:
+
+```
+1. Crear cuenta          →  /registro         (solo correo + contraseña)
+2. Confirmar correo      →  enlace del correo  →  login
+3. Perfil de empresa     →  /vinculacion       (Empresa · Representante legal ·
+   + documentos                                 Persona de contacto · RUT ·
+                                                 Cámara de Comercio · Resolución
+                                                 DIAN · Composición accionaria
+                                                 [opcional])
+4. Revisión de cumplimiento (admin) → aprobar/rechazar por documento y en conjunto
+5. Aceptar contrato       →  /contrato         (click-wrap: contrato de servicios +
+   + tratamiento de datos                       autorización Habeas Data, con
+                                                 trazabilidad IP/user-agent/versión)
+6. Membresía activa (admin) → acceso al mercado
+```
+
+El dashboard (`/dashboard`) redirige automáticamente a `/vinculacion` mientras el
+perfil esté incompleto (`perfil_completo=false`), y muestra un aviso para ir a
+`/contrato` una vez la empresa está aprobada pero aún no ha aceptado el contrato.
+El texto legal en `src/lib/legal/contrato.ts` es un **borrador** (`ES_BORRADOR=true`)
+— hay que reemplazarlo por el contrato y la autorización de datos definitivos
+(revisados por abogado) antes de ir a producción con usuarios reales.
+
 ## Roadmap por fases
 
 - [x] **Fase 1 — Datos y arquitectura** · esquema SQL, RLS, expiración diaria. ⟶ `supabase/migrations/0001_esquema_inicial.sql`
 - [x] **Fase 2 — Admin y KYC** · registro *Pendiente*, carga de documentos, panel de cumplimiento, endpoint de validación de identidad.
 - [x] **Fase 2.5 — Modelo comercial** · suscripción única + billetera de tokens, gestión comercial en el panel admin, arquitectura de pagos Bold. ⟶ `supabase/migrations/0003_modelo_comercial.sql`
+- [x] **Fase 2.6 — Onboarding en 3 etapas** · cuenta mínima, perfil de empresa completo (`/vinculacion`), contrato de servicios con aceptación digital (`/contrato`). ⟶ `supabase/migrations/0004_onboarding_perfil_contrato.sql`
 - [ ] **Fase 3 — Marketplace** · publicación de ofertas, edición limitada, borrado lógico, sedes múltiples por empresa.
 - [ ] **Fase 4 — UI del marketplace** · tarjeta de oferta y modal "Realizar Oferta".
 - [ ] **Fase 5 — Notificaciones y DevOps** · Resend + despliegue en Vercel.
