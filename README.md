@@ -94,6 +94,18 @@ cambiario** antes de tratarlos como definitivos en producción. Cuando el abogad
 apruebe o ajuste el texto, se sube `VERSION_LEGAL` a una nueva versión y el
 sistema exige re-aceptación automáticamente (por versión, no por documento).
 
+## Autenticación
+
+El login (`/login`, tanto para PCD como para admin, según su `rol`) incluye
+recuperación de contraseña: `/recuperar` pide el correo y llama a
+`resetPasswordForEmail` (respuesta idéntica exista o no la cuenta, para no
+revelar qué correos están registrados); el enlace del correo reutiliza
+`/auth/confirm` (misma ruta que confirma el registro), que redirige a
+`/restablecer` cuando `type=recovery`. Al guardar la contraseña nueva, el
+usuario entra directo a su cuenta (`/admin` o `/dashboard` según su rol) sin
+tener que loguearse otra vez. Ver el spec en
+[`docs/superpowers/specs/2026-07-15-recuperar-contrasena-design.md`](docs/superpowers/specs/2026-07-15-recuperar-contrasena-design.md).
+
 ## Roadmap por fases
 
 - [x] **Fase 1 — Datos y arquitectura** · esquema SQL, RLS, expiración diaria. ⟶ `supabase/migrations/0001_esquema_inicial.sql`
