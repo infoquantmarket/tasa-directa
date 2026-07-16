@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useActionState } from 'react'
 import { iniciarSesion, type AuthState } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,11 @@ export function LoginForm({ errorInicial }: { errorInicial?: string }) {
       <div>
         <Label htmlFor="password" className="mb-1.5 block">Contraseña</Label>
         <Input id="password" name="password" type="password" required autoComplete="current-password" />
+        <p className="mt-1.5 text-right text-sm">
+          <Link href="/recuperar" className="text-primary hover:underline">
+            ¿Olvidó su contraseña?
+          </Link>
+        </p>
       </div>
       {state.error && (
         <Alert variant="destructive">
