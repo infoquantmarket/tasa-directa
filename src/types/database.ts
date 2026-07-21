@@ -133,7 +133,7 @@ export interface Database {
           created_at:      string
           updated_at:      string
         }
-        Insert: Omit<Database['public']['Tables']['intenciones']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: Omit<Database['public']['Tables']['intenciones']['Row'], 'id' | 'fecha_intencion' | 'created_at' | 'updated_at'> & { fecha_intencion?: string }
         Update: Partial<Pick<Database['public']['Tables']['intenciones']['Row'], 'estado'>>
         Relationships: []
       }
