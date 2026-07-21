@@ -7,6 +7,8 @@ import { perfilSchema } from '@/lib/validation/perfil'
 import { headers } from 'next/headers'
 import { capturarIp } from '@/lib/http/ip'
 import { SLUG_ETAPA_VINCULACION, VERSION_LEGAL } from '@/lib/legal/documentos'
+import { crearSesionVerificacion } from '@/lib/didit/cliente'
+import { construirOrigin } from '@/lib/http/origin'
 
 export type PerfilState = { error: string | null; valores?: Record<string, string> }
 
@@ -111,4 +113,50 @@ export async function guardarPerfil(
 
   revalidatePath('/dashboard')
   redirect('/dashboard')
+}
+
+export type VerificacionIdentidadState = { error: string | null }
+
+export async function iniciarVerificacionIdentidad(
+  _prev: VerificacionIdentidadState,
+  _formData: FormData
+): Promise<VerificacionIdentidadState> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión expirada. Vuelva a ingresar.' }
+
+  const { data: perfil } = await supabase
+    .from('perfiles_usuarios')
+    .select('rep_nombre, rep_tipo_doc, rep_num_doc')
+    .eq('id', user.id)
+    .single()
+
+  if (!perfil?.rep_nombre || !perfil?.rep_tipo_doc || !perfil?.rep_num_doc) {
+    return { error: 'Guarde primero los datos del representante legal en el perfil.' }
+  }
+
+  const headerList = await headers()
+  const origin = construirOrigin(headerList)
+
+  let sesion: { sessionId: string; url: string }
+  try {
+    sesion = await crearSesionVerificacion({
+      usuarioId: user.id,
+      repNombre: perfil.rep_nombre,
+      callback: `${origin}/vinculacion`,
+    })
+  } catch {
+    return { error: 'No se pudo iniciar la verificación de identidad. Intente de nuevo.' }
+  }
+
+  const { error } = await supabase.from('validaciones_identidad').insert({
+    usuario_id: user.id,
+    session_id: sesion.sessionId,
+  })
+
+  if (error) {
+    return { error: 'No se pudo registrar la verificación. Intente de nuevo.' }
+  }
+
+  redirect(sesion.url)
 }
