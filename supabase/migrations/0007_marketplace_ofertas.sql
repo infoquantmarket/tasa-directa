@@ -128,6 +128,11 @@ begin
       using errcode = 'check_violation';
   end if;
 
+  -- Serializa inserciones concurrentes del mismo usuario para que el conteo
+  -- de abajo sea preciso (un SELECT count(*) no se puede bloquear con FOR
+  -- UPDATE). El lock se libera automáticamente al terminar la transacción.
+  perform pg_advisory_xact_lock(hashtext(new.usuario_id::text));
+
   select count(*) into v_activas
   from public.ofertas
   where usuario_id = new.usuario_id
@@ -146,6 +151,49 @@ $$;
 -- El trigger trg_acceso_oferta ya existe y apunta a esta función.
 
 -- 6. Ciclo de negociación ----------------------------------------------------------
+
+-- verificar_acceso_intencion: redefinida (viene de 0003) para que el chequeo de
+-- estado='activa' no pueda ser sorteado por dos intenciones concurrentes sobre
+-- la misma oferta — se bloquea la fila de la oferta con FOR UPDATE, así la
+-- segunda transacción espera a que la primera confirme (y el trigger
+-- trg_iniciar_negociacion ya haya puesto estado='en_negociacion') antes de leerla.
+create or replace function public.verificar_acceso_intencion()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  v_owner  uuid;
+  v_estado text;
+begin
+  if not public.es_aprobado(new.usuario_id) then
+    raise exception 'El usuario no está aprobado para realizar intenciones.'
+      using errcode = 'check_violation';
+  end if;
+  if not public.tiene_membresia_activa(new.usuario_id) then
+    raise exception 'Se requiere una membresía activa para realizar intenciones.'
+      using errcode = 'check_violation';
+  end if;
+
+  select usuario_id, estado into v_owner, v_estado
+  from public.ofertas where id = new.oferta_id for update;
+
+  if v_owner = new.usuario_id then
+    raise exception 'No puede realizar una intención sobre su propia publicación.'
+      using errcode = 'check_violation';
+  end if;
+  if v_estado is distinct from 'activa' then
+    raise exception 'Esta oferta ya está en negociación con otro interesado o no está activa.'
+      using errcode = 'check_violation';
+  end if;
+  return new;
+end;
+$$;
+-- El trigger trg_acceso_intencion ya existe (creado en 0003) y apunta a esta
+-- función; el `create or replace` de arriba basta, no hace falta recrear el trigger.
+
+-- Nota: si una negociación queda en 'en_negociacion' y ninguna de las partes
+-- la completa o la cierra, no hay expiración automática para ese estado (v1
+-- acepta esta limitación); el admin puede forzar el cierre eliminando la
+-- oferta desde el panel de Operaciones, igual que ya toleramos sesiones de
+-- verificación Didit huérfanas.
 create or replace function public.iniciar_negociacion()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
@@ -167,7 +215,7 @@ declare
   v_estado text;
 begin
   select usuario_id, estado into v_dueno, v_estado
-  from public.ofertas where id = p_oferta_id;
+  from public.ofertas where id = p_oferta_id for update;
 
   if v_estado is distinct from 'en_negociacion' then
     raise exception 'Esta oferta no está en negociación.'
@@ -194,7 +242,7 @@ declare
   v_puede_cerrar boolean;
 begin
   select usuario_id, estado into v_dueno, v_estado
-  from public.ofertas where id = p_oferta_id;
+  from public.ofertas where id = p_oferta_id for update;
 
   if v_estado is distinct from 'en_negociacion' then
     raise exception 'Esta oferta no está en negociación.'
@@ -241,7 +289,22 @@ create trigger trg_liberar_ofertas_cancelacion
   after update on public.membresias
   for each row execute function public.liberar_ofertas_por_cancelacion();
 
--- 8. Cron: expiración por oferta (24h) en vez de medianoche global ----------------
+-- 8. Restringe qué puede escribir el dueño de la oferta directamente en
+--    intenciones.estado (antes permitía cualquier valor) — ahora que el ciclo
+--    de negociación depende de mantener esto sincronizado con ofertas.estado,
+--    solo se permite marcar vista/cerrada; el resto pasa por las funciones
+--    completar_oferta()/cerrar_negociacion_sin_acuerdo().
+drop policy if exists "intencion: dueño oferta gestiona" on public.intenciones;
+create policy "intencion: dueño oferta gestiona" on public.intenciones
+  for update to authenticated
+  using (
+    exists (select 1 from public.ofertas o
+             where o.id = oferta_id and o.usuario_id = auth.uid())
+    or public.es_admin()
+  )
+  with check (estado in ('vista','cerrada'));
+
+-- 9. Cron: expiración por oferta (24h) en vez de medianoche global ----------------
 do $$
 begin
   perform cron.unschedule('expirar-ofertas-medianoche');
