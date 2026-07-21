@@ -22,7 +22,7 @@ export default async function ExpedientePage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }, { data: aceptaciones }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }, { data: aceptaciones }, { data: verificacionIdentidad }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', id).single(),
     supabase.from('documentos_kyc').select('*').eq('usuario_id', id),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
@@ -33,6 +33,8 @@ export default async function ExpedientePage({
       .eq('usuario_id', id).order('created_at', { ascending: false }).limit(5),
     supabase.from('aceptaciones').select('documento, version, ip, created_at')
       .eq('usuario_id', id),
+    supabase.from('validaciones_identidad').select('estado, created_at')
+      .eq('usuario_id', id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
   ])
 
   if (!perfil) notFound()
@@ -52,7 +54,8 @@ export default async function ExpedientePage({
   }
 
   const listo = puedeAprobarUsuario(
-    (docs ?? []).map((d) => ({ tipo_documento: d.tipo_documento, estado: d.estado }))
+    (docs ?? []).map((d) => ({ tipo_documento: d.tipo_documento, estado: d.estado })),
+    verificacionIdentidad
   )
 
   const revisarBound = revisarDocumento.bind(null, { error: null })
@@ -114,6 +117,18 @@ export default async function ExpedientePage({
             )
           })}
         </ul>
+      </section>
+
+      <section className="grid gap-1 rounded-lg border border-border bg-white p-6">
+        <h2 className="mb-2 text-lg font-semibold">Verificación de identidad (Didit)</h2>
+        <p className="text-sm">
+          Representante legal:{' '}
+          <span className="text-muted-foreground">
+            {verificacionIdentidad
+              ? `${verificacionIdentidad.estado} · ${new Date(verificacionIdentidad.created_at).toLocaleDateString('es-CO')}`
+              : 'Aún no iniciada'}
+          </span>
+        </p>
       </section>
 
       <section className="grid gap-4">
@@ -185,7 +200,8 @@ export default async function ExpedientePage({
             </Button>
             {!listo && (
               <p className="mt-2 text-sm text-muted-foreground">
-                Se habilita cuando los 3 documentos estén aprobados.
+                Se habilita cuando los 3 documentos y la verificación de
+                identidad del representante legal estén aprobados.
               </p>
             )}
           </form>

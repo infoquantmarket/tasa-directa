@@ -36,24 +36,32 @@ describe('validarArchivoKyc', () => {
 })
 
 describe('puedeAprobarUsuario', () => {
-  it('true solo cuando los 3 documentos están aprobados', () => {
-    expect(puedeAprobarUsuario([
-      { tipo_documento: 'rut', estado: 'aprobado' },
-      { tipo_documento: 'camara_comercio', estado: 'aprobado' },
-      { tipo_documento: 'resolucion_dian', estado: 'aprobado' },
-    ])).toBe(true)
+  const docsCompletos = [
+    { tipo_documento: 'rut' as const, estado: 'aprobado' as const },
+    { tipo_documento: 'camara_comercio' as const, estado: 'aprobado' as const },
+    { tipo_documento: 'resolucion_dian' as const, estado: 'aprobado' as const },
+  ]
+
+  it('true cuando los 3 documentos están aprobados Y la identidad está Approved', () => {
+    expect(puedeAprobarUsuario(docsCompletos, { estado: 'Approved' })).toBe(true)
   })
-  it('false si falta un documento', () => {
-    expect(puedeAprobarUsuario([
-      { tipo_documento: 'rut', estado: 'aprobado' },
-      { tipo_documento: 'camara_comercio', estado: 'aprobado' },
-    ])).toBe(false)
+  it('false si falta un documento, aunque la identidad esté Approved', () => {
+    expect(puedeAprobarUsuario(docsCompletos.slice(0, 2), { estado: 'Approved' })).toBe(false)
   })
-  it('false si alguno está pendiente o rechazado', () => {
-    expect(puedeAprobarUsuario([
-      { tipo_documento: 'rut', estado: 'aprobado' },
-      { tipo_documento: 'camara_comercio', estado: 'rechazado' },
-      { tipo_documento: 'resolucion_dian', estado: 'aprobado' },
-    ])).toBe(false)
+  it('false si alguno de los documentos está pendiente o rechazado', () => {
+    const docsConUnoRechazado = [
+      docsCompletos[0],
+      { tipo_documento: 'camara_comercio' as const, estado: 'rechazado' as const },
+      docsCompletos[2],
+    ]
+    expect(puedeAprobarUsuario(docsConUnoRechazado, { estado: 'Approved' })).toBe(false)
+  })
+  it('false si los 3 documentos están aprobados pero la identidad NO está Approved', () => {
+    expect(puedeAprobarUsuario(docsCompletos, { estado: 'Not Started' })).toBe(false)
+    expect(puedeAprobarUsuario(docsCompletos, { estado: 'In Review' })).toBe(false)
+  })
+  it('false si los 3 documentos están aprobados pero no hay verificación de identidad todavía', () => {
+    expect(puedeAprobarUsuario(docsCompletos, null)).toBe(false)
+    expect(puedeAprobarUsuario(docsCompletos, undefined)).toBe(false)
   })
 })

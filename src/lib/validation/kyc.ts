@@ -33,11 +33,17 @@ export function validarArchivoKyc(mime: string, tamanoBytes: number): string | n
   return null
 }
 
-/** La aprobación final del PCD solo se habilita con los 3 documentos REQUERIDOS aprobados. */
+/**
+ * La aprobación final del PCD requiere los 3 documentos REQUERIDOS
+ * aprobados Y que la verificación de identidad del representante legal
+ * (Didit) esté en estado 'Approved'.
+ */
 export function puedeAprobarUsuario(
-  docs: Array<{ tipo_documento: TipoDoc; estado: EstadoDoc }>
+  docs: Array<{ tipo_documento: TipoDoc; estado: EstadoDoc }>,
+  verificacionIdentidad: { estado: string } | null | undefined
 ): boolean {
-  return TIPOS_DOCUMENTO.every((tipo) =>
+  const docsOk = TIPOS_DOCUMENTO.every((tipo) =>
     docs.some((d) => d.tipo_documento === tipo && d.estado === 'aprobado')
   )
+  return docsOk && verificacionIdentidad?.estado === 'Approved'
 }

@@ -68,8 +68,18 @@ export async function aprobarUsuario(
     .select('tipo_documento, estado')
     .eq('usuario_id', usuarioId)
 
-  if (!puedeAprobarUsuario(docs ?? [])) {
-    return { error: 'No se puede aprobar: los 3 documentos deben estar aprobados primero.' }
+  const { data: verificacion } = await supabase
+    .from('validaciones_identidad')
+    .select('estado')
+    .eq('usuario_id', usuarioId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (!puedeAprobarUsuario(docs ?? [], verificacion)) {
+    return {
+      error: 'No se puede aprobar: los 3 documentos y la verificación de identidad del representante legal deben estar aprobados primero.',
+    }
   }
 
   const { error } = await supabase
