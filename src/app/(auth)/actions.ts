@@ -33,8 +33,14 @@ export async function registrarse(
 
   const { correo, password } = parsed.data
   const supabase = await createClient()
+  const headerList = await headers()
+  const origin = construirOrigin(headerList)
 
-  const { error } = await supabase.auth.signUp({ email: correo, password })
+  const { error } = await supabase.auth.signUp({
+    email: correo,
+    password,
+    options: { emailRedirectTo: `${origin}/auth/confirm` },
+  })
 
   if (error) {
     return {
