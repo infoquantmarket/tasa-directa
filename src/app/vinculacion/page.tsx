@@ -7,7 +7,6 @@ import { EstadoBadge } from '@/components/estado-badge'
 import { DocumentoUploader } from '@/app/dashboard/documento-uploader'
 import { VinculacionForm } from './vinculacion-form'
 import { VerificacionIdentidad } from './verificacion-identidad'
-import type { EstadoVerificacionIdentidad } from '@/types/database'
 import {
   TODOS_TIPOS_DOCUMENTO,
   ETIQUETAS_DOCUMENTO,
@@ -159,7 +158,7 @@ export default async function VinculacionPage() {
             </CardHeader>
             <CardContent>
               <VerificacionIdentidad
-                estado={(verificacion?.estado ?? null) as EstadoVerificacionIdentidad | null}
+                estado={verificacion?.estado ?? null}
                 repCompleto={Boolean(perfil.rep_nombre && perfil.rep_tipo_doc && perfil.rep_num_doc)}
               />
             </CardContent>
