@@ -24,14 +24,19 @@ create index if not exists idx_validaciones_identidad_usuario
 create unique index if not exists uniq_validaciones_identidad_session
   on public.validaciones_identidad(session_id);
 
+drop trigger if exists trg_upd_validaciones_identidad on public.validaciones_identidad;
+create trigger trg_upd_validaciones_identidad
+  before update on public.validaciones_identidad
+  for each row execute function public.set_updated_at();
+
 alter table public.validaciones_identidad enable row level security;
 
 drop policy if exists "validaciones_identidad: leer propias" on public.validaciones_identidad;
 create policy "validaciones_identidad: leer propias" on public.validaciones_identidad
   for select to authenticated using (usuario_id = auth.uid() or public.es_admin());
 
-drop policy if exists "validaciones_identidad: crear propias" on public.validaciones_identidad;
-create policy "validaciones_identidad: crear propias" on public.validaciones_identidad
+drop policy if exists "validaciones_identidad: registrar propias" on public.validaciones_identidad;
+create policy "validaciones_identidad: registrar propias" on public.validaciones_identidad
   for insert to authenticated with check (usuario_id = auth.uid());
 -- No hay policy de update para el cliente autenticado: solo el webhook,
 -- corriendo con service_role (que sortea RLS), puede cambiar estado/decision
