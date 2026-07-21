@@ -112,6 +112,7 @@ export async function guardarPerfil(
   }
 
   revalidatePath('/dashboard')
+  revalidatePath('/vinculacion')
   redirect('/dashboard')
 }
 
