@@ -7,8 +7,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, XCircle, Clock } from 'lucide-react'
 import type { EstadoVerificacionIdentidad } from '@/types/database'
 
+// 'Not Started' NO se incluye aquí a propósito: es el estado inicial de una
+// sesión recién creada, pero si el usuario abandona el flujo de Didit antes
+// de siquiera empezarlo (cierra la pestaña), la fila queda en 'Not Started'
+// para siempre — sin webhook que la actualice. Tratarlo como "en proceso"
+// dejaría al usuario sin botón para reintentar de forma permanente. Crear
+// una sesión nueva en ese caso es seguro: el diseño ya tolera sesiones
+// huérfanas (ver docs/superpowers/specs/2026-07-21-verificacion-identidad-didit-design.md).
 const ESTADOS_EN_PROCESO: EstadoVerificacionIdentidad[] = [
-  'Not Started', 'In Progress', 'Awaiting User', 'Resubmitted',
+  'In Progress', 'Awaiting User', 'Resubmitted',
 ]
 const ESTADOS_RECHAZADOS: EstadoVerificacionIdentidad[] = [
   'Declined', 'Abandoned', 'Expired', 'Kyc Expired',
