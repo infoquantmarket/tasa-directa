@@ -13,12 +13,17 @@ export async function POST(request: NextRequest) {
 
   const timestamp = Number(timestampHeader)
   const secreto = process.env.DIDIT_WEBHOOK_SECRET
-  if (!secreto || Number.isNaN(timestamp)) {
+  if (!secreto) {
+    console.error('[webhook/didit] DIDIT_WEBHOOK_SECRET no configurado')
+    return NextResponse.json({ ok: false, error: 'Configuración inválida' }, { status: 401 })
+  }
+  if (Number.isNaN(timestamp)) {
     return NextResponse.json({ ok: false, error: 'Configuración inválida' }, { status: 401 })
   }
 
   const valido = verificarFirmaWebhook({ cuerpoRaw, firmaV2, timestamp, secreto })
   if (!valido) {
+    console.warn('[webhook/didit] firma inválida recibida')
     return NextResponse.json({ ok: false, error: 'Firma inválida' }, { status: 401 })
   }
 
@@ -37,13 +42,17 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createServiceClient()
-  await supabase
+  const { error } = await supabase
     .from('validaciones_identidad')
     .update({
       estado: estado as never,
       decision: (decision ?? null) as never,
     })
     .eq('session_id', sessionId)
+
+  if (error) {
+    console.error('[webhook/didit] no se pudo actualizar validaciones_identidad:', error)
+  }
 
   return NextResponse.json({ ok: true })
 }
