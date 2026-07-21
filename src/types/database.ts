@@ -196,10 +196,11 @@ export interface Database {
           session_id: string
           estado?: EstadoVerificacionIdentidad
         }
+        // updated_at NO se incluye: lo maneja el trigger set_updated_at()
+        // (migration 0006), igual que en el resto de tablas mutables.
         Update: {
           estado?: EstadoVerificacionIdentidad
           decision?: Json | null
-          updated_at?: string
         }
         Relationships: []
       }

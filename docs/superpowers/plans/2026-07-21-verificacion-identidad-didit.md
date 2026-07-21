@@ -653,13 +653,16 @@ export async function POST(request: NextRequest) {
     .update({
       estado: estado as never,
       decision: (decision ?? null) as never,
-      updated_at: new Date().toISOString(),
     })
     .eq('session_id', sessionId)
 
   return NextResponse.json({ ok: true })
 }
 ```
+
+Nota: no se envía `updated_at` en el `.update()` — el trigger
+`trg_upd_validaciones_identidad` (migration 0006) lo fija automáticamente en
+cada UPDATE, igual que en el resto de tablas mutables del proyecto.
 
 Nota: los `as never` en `estado`/`decision` son necesarios porque el tipo
 `Update` de `validaciones_identidad` usa el enum estricto
