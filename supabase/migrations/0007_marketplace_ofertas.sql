@@ -307,6 +307,11 @@ create policy "intencion: dueño oferta gestiona" on public.intenciones
 -- 9. Refuerza el paywall del mercado a nivel de RLS (antes solo lo aplicaba la
 --    página /ofertas en el cliente, lo cual no bloquea una llamada directa al
 --    API de Supabase desde un usuario sin aprobación o sin membresía activa).
+--    Además, quien respondió con una intención sigue viendo la oferta aunque
+--    el trigger iniciar_negociacion() ya la haya sacado de estado='activa'
+--    (y aunque luego se complete/expire/elimine) — si no, /ofertas/mis-intenciones
+--    pierde la fila apenas el usuario responde, y no puede usar el botón
+--    "No se realizó la negociación".
 drop policy if exists "oferta: mercado activo" on public.ofertas;
 create policy "oferta: mercado activo" on public.ofertas
   for select to authenticated
@@ -314,6 +319,10 @@ create policy "oferta: mercado activo" on public.ofertas
     (estado = 'activa' and public.es_aprobado() and public.tiene_membresia_activa())
     or usuario_id = auth.uid()
     or public.es_admin()
+    or exists (
+      select 1 from public.intenciones i
+      where i.oferta_id = ofertas.id and i.usuario_id = auth.uid()
+    )
   );
 
 -- 10. Cron: expiración por oferta (24h) en vez de medianoche global ----------------
