@@ -7,7 +7,7 @@ import { perfilSchema } from '@/lib/validation/perfil'
 import { headers } from 'next/headers'
 import { capturarIp } from '@/lib/http/ip'
 import { SLUG_ETAPA_VINCULACION, VERSION_LEGAL } from '@/lib/legal/documentos'
-import { crearSesionVerificacion } from '@/lib/didit/cliente'
+import { crearSesionVerificacion, type SesionVerificacion } from '@/lib/didit/cliente'
 import { construirOrigin } from '@/lib/http/origin'
 
 export type PerfilState = { error: string | null; valores?: Record<string, string> }
@@ -138,14 +138,15 @@ export async function iniciarVerificacionIdentidad(
   const headerList = await headers()
   const origin = construirOrigin(headerList)
 
-  let sesion: { sessionId: string; url: string }
+  let sesion: SesionVerificacion
   try {
     sesion = await crearSesionVerificacion({
       usuarioId: user.id,
       repNombre: perfil.rep_nombre,
       callback: `${origin}/vinculacion`,
     })
-  } catch {
+  } catch (err) {
+    console.error('[vinculacion] error al crear sesión Didit:', err)
     return { error: 'No se pudo iniciar la verificación de identidad. Intente de nuevo.' }
   }
 
