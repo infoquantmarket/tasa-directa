@@ -121,14 +121,19 @@ export default async function ExpedientePage({
 
       <section className="grid gap-1 rounded-lg border border-border bg-white p-6">
         <h2 className="mb-2 text-lg font-semibold">Verificación de identidad (Didit)</h2>
-        <p className="text-sm">
-          Representante legal:{' '}
-          <span className="text-muted-foreground">
-            {verificacionIdentidad
-              ? `${verificacionIdentidad.estado} · ${new Date(verificacionIdentidad.created_at).toLocaleDateString('es-CO')}`
-              : 'Aún no iniciada'}
-          </span>
-        </p>
+        <div className="flex items-center gap-2 text-sm">
+          <span>Representante legal:</span>
+          {verificacionIdentidad ? (
+            <>
+              <EstadoBadge estado={verificacionIdentidad.estado} />
+              <span className="text-muted-foreground">
+                {new Date(verificacionIdentidad.created_at).toLocaleDateString('es-CO')}
+              </span>
+            </>
+          ) : (
+            <span className="text-muted-foreground">Aún no iniciada</span>
+          )}
+        </div>
       </section>
 
       <section className="grid gap-4">

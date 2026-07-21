@@ -1,4 +1,4 @@
-import type { TipoDoc, EstadoDoc } from '@/types/database'
+import type { TipoDoc, EstadoDoc, EstadoVerificacionIdentidad } from '@/types/database'
 
 export const TIPOS_DOCUMENTO = ['rut', 'camara_comercio', 'resolucion_dian'] as const
 
@@ -40,7 +40,7 @@ export function validarArchivoKyc(mime: string, tamanoBytes: number): string | n
  */
 export function puedeAprobarUsuario(
   docs: Array<{ tipo_documento: TipoDoc; estado: EstadoDoc }>,
-  verificacionIdentidad: { estado: string } | null | undefined
+  verificacionIdentidad: { estado: EstadoVerificacionIdentidad } | null | undefined
 ): boolean {
   const docsOk = TIPOS_DOCUMENTO.every((tipo) =>
     docs.some((d) => d.tipo_documento === tipo && d.estado === 'aprobado')
