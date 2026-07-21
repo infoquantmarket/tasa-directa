@@ -41,7 +41,12 @@ export function verificarFirmaWebhook(input: {
   ahoraSegundos?: number
 }): boolean {
   const ahora = input.ahoraSegundos ?? Math.floor(Date.now() / 1000)
-  if (Math.abs(ahora - input.timestamp) > VENTANA_SEGUNDOS_MAX) return false
+  // Number.isFinite explícito: si el timestamp llega NaN (cabecera ausente o
+  // corrupta), `Math.abs(NaN) > 300` es `false`, así que sin este guard la
+  // ventana de repetición fallaría "abierta" en vez de rechazar.
+  if (!Number.isFinite(input.timestamp) || Math.abs(ahora - input.timestamp) > VENTANA_SEGUNDOS_MAX) {
+    return false
+  }
 
   const canonico = canonicalizarJson(input.cuerpoRaw)
   const esperada = createHmac('sha256', input.secreto).update(canonico).digest('hex')

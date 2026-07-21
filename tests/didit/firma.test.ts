@@ -89,4 +89,15 @@ describe('verificarFirmaWebhook', () => {
     })
     expect(resultado).toBe(false)
   })
+
+  it('rechaza si el timestamp es NaN en vez de fallar abierto', () => {
+    const resultado = verificarFirmaWebhook({
+      cuerpoRaw,
+      firmaV2: firmaValida,
+      timestamp: NaN,
+      secreto,
+      ahoraSegundos: ahora,
+    })
+    expect(resultado).toBe(false)
+  })
 })
