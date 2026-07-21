@@ -304,7 +304,19 @@ create policy "intencion: dueño oferta gestiona" on public.intenciones
   )
   with check (estado in ('vista','cerrada'));
 
--- 9. Cron: expiración por oferta (24h) en vez de medianoche global ----------------
+-- 9. Refuerza el paywall del mercado a nivel de RLS (antes solo lo aplicaba la
+--    página /ofertas en el cliente, lo cual no bloquea una llamada directa al
+--    API de Supabase desde un usuario sin aprobación o sin membresía activa).
+drop policy if exists "oferta: mercado activo" on public.ofertas;
+create policy "oferta: mercado activo" on public.ofertas
+  for select to authenticated
+  using (
+    (estado = 'activa' and public.es_aprobado() and public.tiene_membresia_activa())
+    or usuario_id = auth.uid()
+    or public.es_admin()
+  );
+
+-- 10. Cron: expiración por oferta (24h) en vez de medianoche global ----------------
 do $$
 begin
   perform cron.unschedule('expirar-ofertas-medianoche');

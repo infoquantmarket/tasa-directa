@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
+import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 import { TarjetaOferta } from './tarjeta-oferta'
 import { ModalRealizarOferta } from './modal-realizar-oferta'
 
@@ -14,20 +15,15 @@ export default async function OfertasPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: perfil } = await supabase
-    .from('perfiles_usuarios')
-    .select('estado')
-    .eq('id', user.id)
-    .single()
+  const [{ data: perfil }, { data: membresia }] = await Promise.all([
+    supabase.from('perfiles_usuarios').select('estado').eq('id', user.id).single(),
+    supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
+      .eq('usuario_id', user.id).eq('estado', 'activa').maybeSingle(),
+  ])
 
-  const { data: membresia } = await supabase
-    .from('membresias')
-    .select('estado')
-    .eq('usuario_id', user.id)
-    .eq('estado', 'activa')
-    .maybeSingle()
+  if (!perfil) redirect('/login')
 
-  const puedeVerMercado = perfil?.estado === 'aprobado' && Boolean(membresia)
+  const puedeVerMercado = perfil?.estado === 'aprobado' && esMembresiaVigente(membresia, fechaColombiaHoy())
 
   const { data: ofertas } = puedeVerMercado
     ? await supabase
