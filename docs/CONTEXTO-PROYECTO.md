@@ -43,9 +43,8 @@ Resumen:
 | 2.6 — Onboarding en 3 etapas | ✅ | Cuenta → perfil de empresa → contrato digital (ver README) |
 | 2.7 — 7 documentos legales | ✅ | Registro versionado, páginas públicas `/legal`, click-wrap con snapshot de identidad |
 | Verificación de identidad (Didit) | ✅ | Cuarto requisito de aprobación, webhook firmado, ver README |
-| 3 — Marketplace | ⬜ | Publicación de ofertas, edición limitada, sedes múltiples |
-| 4 — UI del marketplace | ⬜ | Tarjeta de oferta, modal "Realizar Oferta" |
-| 5 — Notificaciones y DevOps | ⬜ | Resend + despliegue Vercel |
+| 3+4 — Marketplace y su UI | ✅ | Publicar/ver ofertas, ciclo de negociación, panel admin Operaciones — ver README |
+| 5 — Notificaciones y DevOps | ⬜ | Telegram/WhatsApp para el PCD + despliegue Vercel |
 
 Rama activa: `fase-2-kyc`. **No mergeada a `master`** — pendiente E2E completo.
 
@@ -90,6 +89,28 @@ Rama activa: `fase-2-kyc`. **No mergeada a `master`** — pendiente E2E completo
   departamento propio (no anidado bajo Cundinamarca), según ISO 3166-2:CO.
 - **Notificaciones internas:** bot de Telegram (@Tasa_Directa_bot) avisa de
   nuevo registro, KYC completo, y PCD aprobado.
+- **Marketplace de ofertas (2026-07-21, Fase 3+4):** al construir la UI se
+  descubrió que la mayor parte del backend (RLS, triggers de acceso, la vista
+  `perfiles_publicos`, el modelo de tokens) ya existía desde las Fases 1 y
+  2.5 — Fase 3/4 solo faltaba la capa de UI. Se ajustó el modelo de límites:
+  ya no hay tope fijo de 5 gratis, ahora son **2 gratis + hasta 3 más pagando
+  1 token cada una** (nuevo concepto `oferta_adicional`), y la expiración pasó
+  de "medianoche Colombia para todas" a **24h individuales por oferta** (cron
+  cada hora). Se agregó un ciclo de negociación (`en_negociacion` →
+  completada/reactivada) que no existía en el diseño original de Fase 1:
+  al llegar la primera intención la oferta se bloquea para nuevas respuestas;
+  el dueño puede completar o republicar, quien respondió puede liberar sin
+  acuerdo — ambas acciones de liberar son **siempre gratis** (reactivan la
+  misma fila, no crean una nueva) porque cobrar por una negociación fallida
+  se consideró poco ético. Al cancelar la membresía de un PCD se eliminan
+  automáticamente todas sus ofertas activas. Durante la implementación se
+  encontraron y corrigieron varios bugs reales vía el ciclo de revisión:
+  condiciones de carrera en el tope de ofertas/negociación (falta de locks),
+  una brecha de RLS que dejaba ver el mercado completo sin aprobación ni
+  membresía, y otra que —al cerrarla— por poco le quitaba a quien responde
+  la visibilidad de su propia negociación. Detalle completo:
+  `docs/superpowers/specs/2026-07-21-marketplace-ofertas-design.md` y
+  `supabase/migrations/0007_marketplace_ofertas.sql`.
 
 ## Pendiente explícito (lo próximo)
 
@@ -110,6 +131,13 @@ Rama activa: `fase-2-kyc`. **No mergeada a `master`** — pendiente E2E completo
    Liveness + Face Match) está funcionando correctamente en Preview, y
    actualizar la URL del webhook registrada en Didit al dominio de
    producción cuando se haga el merge a `master`.
+5. **Correr `supabase/migrations/0007_marketplace_ofertas.sql`** en el SQL
+   Editor de Supabase — el marketplace no tiene efecto en la base real hasta
+   que esto se aplique. Después, probar el ciclo completo con dos cuentas
+   PCD reales (publicar → responder → negociar → completar/republicar).
+6. **Notificación por Telegram/WhatsApp de nuevas intenciones** — se dejó
+   fuera de la Fase 3+4 a propósito (por ahora solo correo + badge en
+   plataforma); evaluar junto con el resto de la Fase 5.
 
 ## Dónde está cada cosa
 

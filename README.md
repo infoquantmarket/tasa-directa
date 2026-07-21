@@ -120,6 +120,35 @@ ahí, además de los 3 documentos — ver
 aprueba automáticamente al PCD: sigue siendo el admin quien aprueba, con
 esta verificación como requisito adicional visible en el expediente.
 
+## Marketplace de ofertas
+
+PCD aprobados con membresía activa pueden publicar su necesidad de compra/venta
+de divisas en `/ofertas/mis-ofertas`: hasta **5 ofertas activas simultáneas**
+por empresa — las primeras **2 gratis**, de la 3ra en adelante consume **1
+token** cada una (concepto `oferta_adicional`). Cada oferta expira **24 horas**
+después de publicarse (cron por hora, no a medianoche). Otros PCD la ven en el
+tablero `/ofertas` y responden con "Realizar Oferta" (revela el contacto
+operativo de la empresa para negociar fuera de la plataforma, más notificación
+por correo vía Resend), lo que pasa la oferta a `en_negociacion` y bloquea
+nuevas respuestas mientras dure. Desde ahí:
+
+- El dueño ve **"Oferta completada"** (cierra definitivamente) o
+  **"Republicar"** (si no hubo acuerdo).
+- Quien respondió ve **"No se realizó la negociación"** en `/ofertas/mis-intenciones`.
+- Ambas acciones de liberar la negociación reactivan la **misma fila** (no una
+  nueva) con 24h nuevas — son **siempre gratis**, no cuentan contra el tope ni
+  consumen tokens (cobrar por esto se consideró poco ético: la negociación
+  pudo fallar sin culpa del PCD).
+
+Al cancelar la membresía de un PCD se eliminan automáticamente (borrado
+lógico) todas sus ofertas activas o en negociación, y se cierran las
+intenciones pendientes que tuvieran. El admin tiene visibilidad total en
+`/admin/operaciones`, con opción de eliminar cualquier oferta. La mayor parte
+del backend (RLS, triggers de acceso, la vista `perfiles_publicos`) ya existía
+desde las Fases 1 y 2.5 — este marketplace solo amplía esas piezas y agrega
+toda la capa de UI. Ver `supabase/migrations/0007_marketplace_ofertas.sql` y
+el spec en `docs/superpowers/specs/2026-07-21-marketplace-ofertas-design.md`.
+
 ## Roadmap por fases
 
 - [x] **Fase 1 — Datos y arquitectura** · esquema SQL, RLS, expiración diaria. ⟶ `supabase/migrations/0001_esquema_inicial.sql`
@@ -127,9 +156,8 @@ esta verificación como requisito adicional visible en el expediente.
 - [x] **Fase 2.5 — Modelo comercial** · suscripción única + billetera de tokens, gestión comercial en el panel admin, arquitectura de pagos Bold. ⟶ `supabase/migrations/0003_modelo_comercial.sql`
 - [x] **Fase 2.6 — Onboarding en 3 etapas** · cuenta mínima, perfil de empresa completo (`/vinculacion`), contrato de servicios con aceptación digital (`/contrato`). ⟶ `supabase/migrations/0004_onboarding_perfil_contrato.sql`
 - [x] **Fase 2.7 — 7 documentos legales** · registro central versionado, páginas públicas `/legal`, click-wrap por documento con snapshot de identidad. ⟶ `supabase/migrations/0005_documentos_legales.sql`
-- [ ] **Fase 3 — Marketplace** · publicación de ofertas, edición limitada, borrado lógico, sedes múltiples por empresa.
-- [ ] **Fase 4 — UI del marketplace** · tarjeta de oferta y modal "Realizar Oferta".
-- [ ] **Fase 5 — Notificaciones y DevOps** · Resend + despliegue en Vercel.
+- [x] **Fase 3+4 — Marketplace y su UI** · publicar/ver ofertas, ciclo de negociación, panel admin de Operaciones. ⟶ `supabase/migrations/0007_marketplace_ofertas.sql`
+- [ ] **Fase 5 — Notificaciones y DevOps** · Telegram/WhatsApp para el PCD (hoy solo correo + badge en plataforma) + despliegue en Vercel.
 
 ## Fase 1 — Cómo aplicar el esquema
 
