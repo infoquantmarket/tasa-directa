@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { EstadoBadge } from '@/components/estado-badge'
 import { DocumentoUploader } from '@/app/dashboard/documento-uploader'
 import { VinculacionForm } from './vinculacion-form'
+import { VerificacionIdentidad } from './verificacion-identidad'
+import type { EstadoVerificacionIdentidad } from '@/types/database'
 import {
   TODOS_TIPOS_DOCUMENTO,
   ETIQUETAS_DOCUMENTO,
@@ -21,7 +23,7 @@ export default async function VinculacionPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: perfil }, { data: docs }, { data: aceptacionDatos }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: aceptacionDatos }, { data: verificacion }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', user.id).single(),
     supabase.from('documentos_kyc').select('*').eq('usuario_id', user.id),
     supabase
@@ -30,6 +32,13 @@ export default async function VinculacionPage() {
       .eq('usuario_id', user.id)
       .eq('documento', SLUG_ETAPA_VINCULACION)
       .eq('version', VERSION_LEGAL)
+      .maybeSingle(),
+    supabase
+      .from('validaciones_identidad')
+      .select('estado')
+      .eq('usuario_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle(),
   ])
 
@@ -136,6 +145,25 @@ export default async function VinculacionPage() {
               </CardContent>
             </Card>
           ))}
+        </section>
+
+        <section className="mt-8 grid gap-4">
+          <h2 className="text-lg font-semibold">Verificación de identidad</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Representante legal</CardTitle>
+              <CardDescription>
+                Confirmamos la identidad del representante legal con un
+                proveedor externo (documento + prueba de vida).
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <VerificacionIdentidad
+                estado={(verificacion?.estado ?? null) as EstadoVerificacionIdentidad | null}
+                repCompleto={Boolean(perfil.rep_nombre && perfil.rep_tipo_doc && perfil.rep_num_doc)}
+              />
+            </CardContent>
+          </Card>
         </section>
       </main>
     </>
