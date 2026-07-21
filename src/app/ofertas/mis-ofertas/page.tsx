@@ -5,8 +5,10 @@ import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 import { TarjetaOferta } from '../tarjeta-oferta'
 import { ModalPublicarOferta } from './modal-publicar-oferta'
+import { BotonAccionOferta } from './boton-accion-oferta'
 import { completarOferta, cerrarNegociacionSinAcuerdo, eliminarOferta, marcarIntencionVista } from '../actions'
 
 export const metadata: Metadata = { title: 'Mis ofertas' }
@@ -18,7 +20,7 @@ export default async function MisOfertasPage() {
 
   const { data: membresia } = await supabase
     .from('membresias')
-    .select('estado')
+    .select('estado, fecha_inicio, fecha_fin')
     .eq('usuario_id', user.id)
     .eq('estado', 'activa')
     .maybeSingle()
@@ -54,31 +56,9 @@ export default async function MisOfertasPage() {
     for (const c of contactos ?? []) contactosPorUsuario.set(c.id, c)
   }
 
-  const noPuedePublicar = !membresia ? 'Necesita una membresía activa para publicar ofertas.'
+  const noPuedePublicar = !esMembresiaVigente(membresia, fechaColombiaHoy()) ? 'Necesita una membresía activa para publicar ofertas.'
     : activas.length >= 5 ? 'Ya tiene 5 ofertas activas. Espere a que una expire, se complete o elimine una.'
     : null
-
-  const completarBound = completarOferta.bind(null, { error: null })
-  const cerrarBound = cerrarNegociacionSinAcuerdo.bind(null, { error: null })
-  const eliminarBound = eliminarOferta.bind(null, { error: null })
-  const marcarVistaBound = marcarIntencionVista.bind(null, { error: null })
-
-  const completarAction = async (formData: FormData) => {
-    'use server'
-    await completarBound(formData)
-  }
-  const cerrarAction = async (formData: FormData) => {
-    'use server'
-    await cerrarBound(formData)
-  }
-  const eliminarAction = async (formData: FormData) => {
-    'use server'
-    await eliminarBound(formData)
-  }
-  const marcarVistaAction = async (formData: FormData) => {
-    'use server'
-    await marcarVistaBound(formData)
-  }
 
   return (
     <>
@@ -99,7 +79,7 @@ export default async function MisOfertasPage() {
 
         <section className="grid gap-4">
           {activas.map((o) => {
-            const propias = (intenciones ?? []).filter((i) => i.oferta_id === o.id)
+            const propias = (intenciones ?? []).filter((i) => i.oferta_id === o.id && i.estado !== 'cerrada')
             const nuevas = propias.filter((i) => i.estado === 'enviada').length
 
             return (
@@ -114,10 +94,14 @@ export default async function MisOfertasPage() {
                   <div className="grid gap-3">
                     {o.estado === 'activa' && (
                       <>
-                        <form action={eliminarAction}>
-                          <input type="hidden" name="ofertaId" value={o.id} />
-                          <Button type="submit" variant="outline" size="sm">Eliminar</Button>
-                        </form>
+                        <BotonAccionOferta
+                          accion={eliminarOferta}
+                          campoNombre="ofertaId"
+                          campoValor={o.id}
+                          etiqueta="Eliminar"
+                          etiquetaCargando="Eliminando…"
+                          variante="outline"
+                        />
                         {propias.length > 0 && (
                           <div className="grid gap-2 rounded-md border border-border p-3">
                             <p className="text-xs font-medium">
@@ -130,10 +114,14 @@ export default async function MisOfertasPage() {
                                   <p>{contacto?.razon_social} · {contacto?.contacto_nombre} · {contacto?.contacto_celular} · {contacto?.contacto_correo}</p>
                                   {i.comentarios && <p>&ldquo;{i.comentarios}&rdquo;</p>}
                                   {i.estado === 'enviada' && (
-                                    <form action={marcarVistaAction}>
-                                      <input type="hidden" name="intencionId" value={i.id} />
-                                      <Button type="submit" variant="ghost" size="sm">Marcar como vista</Button>
-                                    </form>
+                                    <BotonAccionOferta
+                                      accion={marcarIntencionVista}
+                                      campoNombre="intencionId"
+                                      campoValor={i.id}
+                                      etiqueta="Marcar como vista"
+                                      etiquetaCargando="Marcando…"
+                                      variante="ghost"
+                                    />
                                   )}
                                 </div>
                               )
@@ -144,14 +132,21 @@ export default async function MisOfertasPage() {
                     )}
                     {o.estado === 'en_negociacion' && (
                       <div className="flex gap-2">
-                        <form action={completarAction}>
-                          <input type="hidden" name="ofertaId" value={o.id} />
-                          <Button type="submit" size="sm">Oferta completada</Button>
-                        </form>
-                        <form action={cerrarAction}>
-                          <input type="hidden" name="ofertaId" value={o.id} />
-                          <Button type="submit" variant="outline" size="sm">Republicar</Button>
-                        </form>
+                        <BotonAccionOferta
+                          accion={completarOferta}
+                          campoNombre="ofertaId"
+                          campoValor={o.id}
+                          etiqueta="Oferta completada"
+                          etiquetaCargando="Guardando…"
+                        />
+                        <BotonAccionOferta
+                          accion={cerrarNegociacionSinAcuerdo}
+                          campoNombre="ofertaId"
+                          campoValor={o.id}
+                          etiqueta="Republicar"
+                          etiquetaCargando="Republicando…"
+                          variante="outline"
+                        />
                       </div>
                     )}
                   </div>
