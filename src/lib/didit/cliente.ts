@@ -30,16 +30,22 @@ export function construirDetallesEsperados(repNombre: string): { first_name: str
  * después por webhook (ver src/app/api/webhooks/didit/route.ts).
  */
 export async function crearSesionVerificacion(input: CrearSesionInput): Promise<SesionVerificacion> {
+  const apiKey = process.env.DIDIT_API_KEY
+  const workflowId = process.env.DIDIT_WORKFLOW_ID
+  if (!apiKey || !workflowId) {
+    throw new Error('DIDIT_API_KEY o DIDIT_WORKFLOW_ID no están configurados')
+  }
+
   const { first_name, last_name } = construirDetallesEsperados(input.repNombre)
 
   const respuesta = await fetch(DIDIT_SESSION_URL, {
     method: 'POST',
     headers: {
-      'x-api-key': process.env.DIDIT_API_KEY!,
+      'x-api-key': apiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      workflow_id: process.env.DIDIT_WORKFLOW_ID,
+      workflow_id: workflowId,
       vendor_data: input.usuarioId,
       callback: input.callback,
       expected_details: {

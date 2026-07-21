@@ -112,4 +112,20 @@ describe('crearSesionVerificacion', () => {
       })
     ).rejects.toThrow()
   })
+
+  it('lanza un error claro (sin llamar a fetch) si faltan las variables de entorno', async () => {
+    delete process.env.DIDIT_API_KEY
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(
+      crearSesionVerificacion({
+        usuarioId: 'user-1',
+        repNombre: 'Ana Gómez',
+        callback: 'https://tasadirecta.com/vinculacion',
+      })
+    ).rejects.toThrow(/DIDIT_API_KEY/)
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
 })
