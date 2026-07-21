@@ -25,6 +25,10 @@ export type TipoAceptacion =
   | 'politica_kyc'
   | 'politica_reembolsos'
 
+export type EstadoVerificacionIdentidad =
+  | 'Not Started' | 'In Progress' | 'Approved' | 'Declined' | 'In Review'
+  | 'Abandoned' | 'Expired' | 'Kyc Expired' | 'Resubmitted' | 'Awaiting User'
+
 export interface Database {
   public: {
     Tables: {
@@ -173,6 +177,30 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['aceptaciones']['Row'], 'id' | 'created_at'>
         Update: never
+        Relationships: []
+      }
+      validaciones_identidad: {
+        Row: {
+          id:         string
+          usuario_id: string
+          proveedor:  string
+          session_id: string
+          estado:     EstadoVerificacionIdentidad
+          decision:   Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          usuario_id: string
+          proveedor?: string
+          session_id: string
+          estado?: EstadoVerificacionIdentidad
+        }
+        Update: {
+          estado?: EstadoVerificacionIdentidad
+          decision?: Json | null
+          updated_at?: string
+        }
         Relationships: []
       }
     }
