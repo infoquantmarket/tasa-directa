@@ -275,6 +275,15 @@ create or replace function public.liberar_ofertas_por_cancelacion()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if old.estado = 'activa' and new.estado is distinct from 'activa' then
+    update public.intenciones
+      set estado = 'cerrada', updated_at = now()
+    where estado in ('enviada','vista')
+      and oferta_id in (
+        select id from public.ofertas
+        where usuario_id = new.usuario_id
+          and estado in ('activa','en_negociacion')
+      );
+
     update public.ofertas
       set estado = 'eliminada', updated_at = now()
     where usuario_id = new.usuario_id
