@@ -83,11 +83,20 @@ export async function eliminarOferta(
     .from('ofertas')
     .update({ estado: 'eliminada' })
     .eq('id', ofertaId)
+    .select('id')
+    .single()
 
   if (error) return { error: 'No se pudo eliminar la oferta.' }
 
+  await supabase
+    .from('intenciones')
+    .update({ estado: 'cerrada' })
+    .eq('oferta_id', ofertaId)
+    .in('estado', ['enviada', 'vista'])
+
   revalidatePath('/ofertas')
   revalidatePath('/ofertas/mis-ofertas')
+  revalidatePath('/admin/operaciones')
   return { error: null }
 }
 
@@ -101,7 +110,7 @@ export async function completarOferta(
   const supabase = await createClient()
   const { error } = await supabase.rpc('completar_oferta', { p_oferta_id: ofertaId })
 
-  if (error) return { error: error.message }
+  if (error) return { error: mensajeDesdeError(error) }
 
   revalidatePath('/ofertas/mis-ofertas')
   return { error: null }
@@ -117,7 +126,7 @@ export async function cerrarNegociacionSinAcuerdo(
   const supabase = await createClient()
   const { error } = await supabase.rpc('cerrar_negociacion_sin_acuerdo', { p_oferta_id: ofertaId })
 
-  if (error) return { error: error.message }
+  if (error) return { error: mensajeDesdeError(error) }
 
   revalidatePath('/ofertas')
   revalidatePath('/ofertas/mis-ofertas')
@@ -153,7 +162,7 @@ export async function realizarOferta(
 
   if (error) return { error: mensajeDesdeError(error) }
 
-  // Notificar al dueño de la oferta — best-effort, no bloquea la respuesta.
+  // Notificar al dueño de la oferta. No puede fallar la respuesta (enviarCorreo nunca lanza), pero sí se espera antes de responder.
   const [{ data: oferta }, { data: quienResponde }] = await Promise.all([
     supabase.from('ofertas').select('usuario_id').eq('id', ofertaId).single(),
     supabase.from('perfiles_publicos')
@@ -198,6 +207,8 @@ export async function marcarIntencionVista(
     .update({ estado: 'vista' })
     .eq('id', intencionId)
     .eq('estado', 'enviada')
+    .select('id')
+    .single()
 
   if (error) return { error: 'No se pudo actualizar.' }
 
