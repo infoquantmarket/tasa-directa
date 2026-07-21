@@ -24,7 +24,7 @@ export default async function OperacionesPage() {
     : { data: [] }
 
   const conteoIntenciones = (ofertaId: string) =>
-    (intenciones ?? []).filter((i) => i.oferta_id === ofertaId).length
+    (intenciones ?? []).filter((i) => i.oferta_id === ofertaId && i.estado !== 'cerrada').length
 
   return (
     <div className="grid gap-6">
