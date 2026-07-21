@@ -56,17 +56,22 @@ export default async function AdminPage({
         </p>
       </div>
 
-      <div className="flex gap-2">
-        {FILTROS.map((f) => (
-          <Button
-            key={f.valor}
-            variant={f.valor === estado ? 'default' : 'outline'}
-            size="sm"
-            render={<Link href={`/admin?estado=${f.valor}`} />}
-          >
-            {f.etiqueta}
-          </Button>
-        ))}
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          {FILTROS.map((f) => (
+            <Button
+              key={f.valor}
+              variant={f.valor === estado ? 'default' : 'outline'}
+              size="sm"
+              render={<Link href={`/admin?estado=${f.valor}`} />}
+            >
+              {f.etiqueta}
+            </Button>
+          ))}
+        </div>
+        <Button variant="outline" size="sm" render={<Link href="/admin/operaciones" />}>
+          Operaciones
+        </Button>
       </div>
 
       <div className="rounded-lg border border-border bg-white">

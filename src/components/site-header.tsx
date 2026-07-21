@@ -35,13 +35,23 @@ export async function SiteHeader() {
         <nav className="flex items-center gap-3">
           {user ? (
             <>
+              {!esAdmin && (
+                <Button variant="ghost" render={<Link href="/ofertas" />}>
+                  Ofertas
+                </Button>
+              )}
               <Button variant="ghost" render={<Link href="/dashboard" />}>
                 Mi cuenta
               </Button>
               {esAdmin && (
-                <Button variant="ghost" render={<Link href="/admin" />}>
-                  Cumplimiento
-                </Button>
+                <>
+                  <Button variant="ghost" render={<Link href="/admin" />}>
+                    Cumplimiento
+                  </Button>
+                  <Button variant="ghost" render={<Link href="/admin/operaciones" />}>
+                    Operaciones
+                  </Button>
+                </>
               )}
               <form action={cerrarSesion}>
                 <Button variant="outline" type="submit">Salir</Button>
