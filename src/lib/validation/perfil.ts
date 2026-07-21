@@ -4,6 +4,10 @@ const celular = z.string().regex(/^\d{7,10}$/, 'Número inválido (7 a 10 dígit
 const celularOpc = celular.or(z.literal('')).optional()
 const telefonoOpc = celular.or(z.literal('')).optional()
 
+// Acepta el dominio con o sin protocolo (miempresa.com, www.miempresa.com,
+// https://miempresa.com) — no exige que el usuario escriba "https://".
+const sitioWebRegex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}([/?#].*)?$/i
+
 export const TIPOS_SOCIEDAD = [
   { valor: 'sas', etiqueta: 'S.A.S.' },
   { valor: 'sa', etiqueta: 'S.A.' },
@@ -30,7 +34,7 @@ export const perfilSchema = z.object({
   direccion: z.string().min(5, 'Ingrese la dirección exacta de la sede principal'),
   ciudad: z.string().min(2, 'Seleccione la ciudad'),
   telefono: telefonoOpc,
-  sitioWeb: z.string().url('URL inválida').or(z.literal('')).optional(),
+  sitioWeb: z.string().regex(sitioWebRegex, 'Dominio inválido (ej.: miempresa.com)').or(z.literal('')).optional(),
   repNombre: z.string().min(3, 'Ingrese el nombre del representante legal'),
   repTipoDoc: z.enum(TIPOS_DOC_REP),
   repNumDoc: z.string().min(5, 'Ingrese el número de documento'),

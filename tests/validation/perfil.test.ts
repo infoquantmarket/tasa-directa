@@ -47,6 +47,18 @@ describe('perfilSchema', () => {
       ...base, nombreComercial: '', sitioWeb: '', contactoWhatsapp: '', contactoCargo: '',
     }).success).toBe(true)
   })
+  it('acepta sitioWeb sin protocolo (miempresa.com)', () => {
+    expect(perfilSchema.safeParse({ ...base, sitioWeb: 'nutifinanzas.co' }).success).toBe(true)
+  })
+  it('acepta sitioWeb con www y sin protocolo', () => {
+    expect(perfilSchema.safeParse({ ...base, sitioWeb: 'www.nutifinanzas.co' }).success).toBe(true)
+  })
+  it('acepta sitioWeb con protocolo https', () => {
+    expect(perfilSchema.safeParse({ ...base, sitioWeb: 'https://www.nutifinanzas.co' }).success).toBe(true)
+  })
+  it('rechaza sitioWeb sin dominio válido', () => {
+    expect(perfilSchema.safeParse({ ...base, sitioWeb: 'no es un dominio' }).success).toBe(false)
+  })
 })
 
 describe('perfilCompleto', () => {
