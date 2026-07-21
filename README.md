@@ -106,6 +106,20 @@ usuario entra directo a su cuenta (`/admin` o `/dashboard` según su rol) sin
 tener que loguearse otra vez. Ver el spec en
 [`docs/superpowers/specs/2026-07-15-recuperar-contrasena-design.md`](docs/superpowers/specs/2026-07-15-recuperar-contrasena-design.md).
 
+## Verificación de identidad (Didit)
+
+Antes de aprobar a un PCD, el representante legal debe completar una
+verificación de identidad externa (documento + prueba de vida + comparación
+facial) con [Didit](https://didit.me), disparada desde `/vinculacion` como
+un cuarto requisito junto a los 3 documentos KYC. El resultado llega de
+forma asíncrona por webhook (`POST /api/webhooks/didit`, firmado con
+HMAC-SHA256 sobre JSON canónico — ver `src/lib/didit/firma.ts`) y se guarda
+en `validaciones_identidad`. `puedeAprobarUsuario` exige `estado='Approved'`
+ahí, además de los 3 documentos — ver
+`supabase/migrations/0006_verificacion_identidad.sql`. El resultado NO
+aprueba automáticamente al PCD: sigue siendo el admin quien aprueba, con
+esta verificación como requisito adicional visible en el expediente.
+
 ## Roadmap por fases
 
 - [x] **Fase 1 — Datos y arquitectura** · esquema SQL, RLS, expiración diaria. ⟶ `supabase/migrations/0001_esquema_inicial.sql`

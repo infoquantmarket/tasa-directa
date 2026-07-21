@@ -42,6 +42,7 @@ Resumen:
 | 2.5 — Modelo comercial | ✅ | Suscripción única + tokens, gestión comercial admin, arquitectura Bold |
 | 2.6 — Onboarding en 3 etapas | ✅ | Cuenta → perfil de empresa → contrato digital (ver README) |
 | 2.7 — 7 documentos legales | ✅ | Registro versionado, páginas públicas `/legal`, click-wrap con snapshot de identidad |
+| Verificación de identidad (Didit) | ✅ | Cuarto requisito de aprobación, webhook firmado, ver README |
 | 3 — Marketplace | ⬜ | Publicación de ofertas, edición limitada, sedes múltiples |
 | 4 — UI del marketplace | ⬜ | Tarjeta de oferta, modal "Realizar Oferta" |
 | 5 — Notificaciones y DevOps | ⬜ | Resend + despliegue Vercel |
@@ -104,6 +105,11 @@ Rama activa: `fase-2-kyc`. **No mergeada a `master`** — pendiente E2E completo
 3. Reubicar `ciudad-combobox.tsx` de `src/app/(auth)/registro/` a
    `src/components/` (deuda técnica menor, no bloqueante — se usa desde
    `/vinculacion` importándolo cross-route).
+4. **Configurar y probar el workflow de Didit en producción** una vez
+   Jaime confirme que el workflow de consola (ID Verification + Passive
+   Liveness + Face Match) está funcionando correctamente en Preview, y
+   actualizar la URL del webhook registrada en Didit al dominio de
+   producción cuando se haga el merge a `master`.
 
 ## Dónde está cada cosa
 
