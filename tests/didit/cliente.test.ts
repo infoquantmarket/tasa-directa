@@ -76,8 +76,8 @@ describe('crearSesionVerificacion', () => {
       expected_details: {
         first_name: 'Juan',
         last_name: 'Pérez',
-        id_country: 'CO',
-        expected_document_types: ['id_card'],
+        id_country: 'COL',
+        expected_document_types: ['ID'],
       },
     })
   })
