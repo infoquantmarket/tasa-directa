@@ -8,6 +8,7 @@ export const ETIQUETAS_CONCEPTO: Record<TokenConcepto, string> = {
   oferta_urgente: 'Oferta urgente',
   republicacion: 'Republicación automática',
   reembolso: 'Reembolso',
+  oferta_adicional: 'Oferta adicional',
 }
 
 export function esCredito(delta: number): boolean {

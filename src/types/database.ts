@@ -9,11 +9,11 @@ export type TipoDoc      = 'rut' | 'camara_comercio' | 'resolucion_dian' | 'comp
 export type EstadoDoc    = 'pendiente' | 'aprobado' | 'rechazado'
 export type TipoMembresia = 'estandar'
 export type EstadoMembresia = 'activa' | 'vencida' | 'cancelada'
-export type TokenConcepto = 'compra' | 'ajuste_admin' | 'destacar_oferta' | 'alerta_premium' | 'oferta_urgente' | 'republicacion' | 'reembolso'
+export type TokenConcepto = 'compra' | 'ajuste_admin' | 'destacar_oferta' | 'alerta_premium' | 'oferta_urgente' | 'republicacion' | 'reembolso' | 'oferta_adicional'
 export type Moneda       = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'MXN' | 'CHF' | 'AUD' | 'JPY'
 export type Operacion    = 'compra' | 'venta'
 export type Condicion    = 'efectivo' | 'transferencia' | 'para_recoger' | 'en_oficina'
-export type EstadoOferta = 'activa' | 'expirada' | 'eliminada'
+export type EstadoOferta = 'activa' | 'en_negociacion' | 'completada' | 'expirada' | 'eliminada'
 export type TipoIntencion = 'aceptar_precio' | 'solicitar_contacto'
 export type EstadoIntencion = 'enviada' | 'vista' | 'cerrada'
 export type TipoAceptacion =
@@ -102,21 +102,22 @@ export interface Database {
       }
       ofertas: {
         Row: {
-          id:           string
-          usuario_id:   string
-          empresa:      string
-          sede:         string | null
-          operacion:    Operacion | null
-          moneda:       Moneda
-          cantidad:     number
-          precio_cop:   number
-          condiciones:  Condicion[]
-          estado:       EstadoOferta
-          fecha_oferta: string
-          created_at:   string
-          updated_at:   string
+          id:         string
+          usuario_id: string
+          empresa:    string
+          sede:       string | null
+          operacion:  Operacion | null
+          moneda:     Moneda
+          cantidad:   number
+          precio_cop: number
+          condiciones: Condicion[]
+          estado:     EstadoOferta
+          notas:      string | null
+          expira_en:  string
+          created_at: string
+          updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['ofertas']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: Omit<Database['public']['Tables']['ofertas']['Row'], 'id' | 'expira_en' | 'created_at' | 'updated_at'> & { expira_en?: string }
         Update: Partial<Pick<Database['public']['Tables']['ofertas']['Row'], 'cantidad' | 'precio_cop' | 'estado'>>
         Relationships: []
       }
@@ -216,6 +217,9 @@ export interface Database {
           telefono:         string | null
           whatsapp:         string | null
           correo:           string
+          contacto_nombre:  string
+          contacto_celular: string
+          contacto_correo:  string
         }
         Relationships: []
       }
@@ -233,6 +237,8 @@ export interface Database {
         Args: { p_cantidad: number; p_concepto: string; p_referencia?: string; p_nota?: string }
         Returns: number
       }
+      completar_oferta: { Args: { p_oferta_id: string }; Returns: void }
+      cerrar_negociacion_sin_acuerdo: { Args: { p_oferta_id: string }; Returns: void }
     }
   }
 }
