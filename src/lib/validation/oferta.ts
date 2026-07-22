@@ -1,6 +1,10 @@
 import { z } from 'zod'
 
-export const MONEDAS = ['USD', 'EUR', 'GBP', 'CAD', 'MXN', 'CHF', 'AUD', 'JPY'] as const
+export const MONEDAS = [
+  'USD', 'EUR', 'MXN', 'CAD',
+  'CRC', 'NOK', 'SEK', 'AUD', 'NZD', 'AWG', 'ANG', 'CHF', 'GBP', 'TRY', 'PEN',
+  'ARS', 'BOB', 'CLP', 'DOP', 'UYU', 'GTQ', 'BRL', 'INR', 'JPY', 'CNY',
+] as const
 export const CONDICIONES = ['efectivo', 'transferencia', 'para_recoger', 'en_oficina'] as const
 
 const numeroPositivo = z.string().refine(

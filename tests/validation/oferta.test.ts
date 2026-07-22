@@ -12,8 +12,12 @@ const base = {
 }
 
 describe('constantes', () => {
-  it('MONEDAS tiene las 8 monedas del esquema original', () => {
-    expect(MONEDAS).toEqual(['USD', 'EUR', 'GBP', 'CAD', 'MXN', 'CHF', 'AUD', 'JPY'])
+  it('MONEDAS tiene las 25 monedas soportadas, en el orden de despliegue', () => {
+    expect(MONEDAS).toEqual([
+      'USD', 'EUR', 'MXN', 'CAD',
+      'CRC', 'NOK', 'SEK', 'AUD', 'NZD', 'AWG', 'ANG', 'CHF', 'GBP', 'TRY', 'PEN',
+      'ARS', 'BOB', 'CLP', 'DOP', 'UYU', 'GTQ', 'BRL', 'INR', 'JPY', 'CNY',
+    ])
   })
   it('CONDICIONES tiene las 4 condiciones del esquema original', () => {
     expect(CONDICIONES).toEqual(['efectivo', 'transferencia', 'para_recoger', 'en_oficina'])
