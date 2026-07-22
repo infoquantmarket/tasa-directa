@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 import { TarjetaOferta } from './tarjeta-oferta'
 import { ModalRealizarOferta } from './modal-realizar-oferta'
@@ -25,14 +26,14 @@ export default async function OfertasPage() {
 
   const puedeVerMercado = perfil?.estado === 'aprobado' && esMembresiaVigente(membresia, fechaColombiaHoy())
 
-  const { data: ofertas } = puedeVerMercado
+  const { data: ofertas, error: errorOfertas } = puedeVerMercado
     ? await supabase
         .from('ofertas')
         .select('id, empresa, sede, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en')
         .eq('estado', 'activa')
         .neq('usuario_id', user.id)
         .order('created_at', { ascending: false })
-    : { data: [] }
+    : { data: [], error: null }
 
   return (
     <>
@@ -56,6 +57,14 @@ export default async function OfertasPage() {
               ? 'Su empresa debe estar aprobada para ver y participar en el mercado.'
               : 'Necesita una membresía activa para ver y participar en el mercado.'}
           </div>
+        ) : errorOfertas ? (
+          <Alert variant="destructive">
+            <AlertTitle>No se pudieron cargar las ofertas del mercado</AlertTitle>
+            <AlertDescription>
+              Ocurrió un error consultando la base de datos. Intente de nuevo o
+              contacte a soporte si persiste. ({errorOfertas.message})
+            </AlertDescription>
+          </Alert>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {(ofertas ?? []).map((o) => (

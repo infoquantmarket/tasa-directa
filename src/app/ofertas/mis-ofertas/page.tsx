@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 import { TarjetaOferta } from '../tarjeta-oferta'
 import { ModalPublicarOferta } from './modal-publicar-oferta'
@@ -18,14 +19,14 @@ export default async function MisOfertasPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: membresia } = await supabase
-    .from('membresias')
-    .select('estado, fecha_inicio, fecha_fin')
-    .eq('usuario_id', user.id)
-    .eq('estado', 'activa')
-    .maybeSingle()
+  const [{ data: membresia }, { data: perfil }] = await Promise.all([
+    supabase.from('membresias')
+      .select('estado, fecha_inicio, fecha_fin')
+      .eq('usuario_id', user.id).eq('estado', 'activa').maybeSingle(),
+    supabase.from('perfiles_usuarios').select('razon_social').eq('id', user.id).single(),
+  ])
 
-  const { data: todasMisOfertas } = await supabase
+  const { data: todasMisOfertas, error: errorOfertas } = await supabase
     .from('ofertas')
     .select('id, empresa, sede, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, estado, created_at')
     .eq('usuario_id', user.id)
@@ -73,9 +74,23 @@ export default async function MisOfertasPage() {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" render={<Link href="/ofertas" />}>Tablero</Button>
-            <ModalPublicarOferta deshabilitado={Boolean(noPuedePublicar)} motivo={noPuedePublicar} />
+            <ModalPublicarOferta
+              deshabilitado={Boolean(noPuedePublicar)}
+              motivo={noPuedePublicar}
+              empresa={perfil?.razon_social ?? ''}
+            />
           </div>
         </div>
+
+        {errorOfertas && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle>No se pudieron cargar sus ofertas</AlertTitle>
+            <AlertDescription>
+              Ocurrió un error consultando la base de datos. Intente de nuevo o
+              contacte a soporte si persiste. ({errorOfertas.message})
+            </AlertDescription>
+          </Alert>
+        )}
 
         <section className="grid gap-4">
           {activas.map((o) => {

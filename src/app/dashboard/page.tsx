@@ -9,7 +9,7 @@ import { EstadoBadge } from '@/components/estado-badge'
 import { TIPOS_DOCUMENTO } from '@/lib/validation/kyc'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 import { SLUGS_ETAPA_CONTRATO, VERSION_LEGAL } from '@/lib/legal/documentos'
-import { Coins, BadgeCheck, FileText, FileCheck2 } from 'lucide-react'
+import { Coins, BadgeCheck, FileText, FileCheck2, ArrowRightLeft } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Mi cuenta' }
 
@@ -149,6 +149,26 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </section>
+      )}
+
+      {perfil.estado === 'aprobado' && membresiaVigente && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 py-6">
+            <div className="flex items-center gap-3">
+              <ArrowRightLeft className="size-8 text-primary" />
+              <div>
+                <p className="text-lg font-semibold tracking-tight">Mercado de divisas</p>
+                <p className="text-sm text-muted-foreground">
+                  Publique una oferta de compra o venta, o revise lo que otros PCD
+                  están ofreciendo ahora mismo.
+                </p>
+              </div>
+            </div>
+            <Button size="lg" render={<Link href="/ofertas" />}>
+              Ir al tablero de ofertas
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       <Card>
