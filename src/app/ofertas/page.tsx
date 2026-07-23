@@ -6,8 +6,7 @@ import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
-import { TarjetaOferta } from './tarjeta-oferta'
-import { ModalRealizarOferta } from './modal-realizar-oferta'
+import { FiltroTablero } from './filtro-tablero'
 
 export const metadata: Metadata = { title: 'Tablero de ofertas' }
 
@@ -65,32 +64,25 @@ export default async function OfertasPage() {
               contacte a soporte si persiste. ({errorOfertas.message})
             </AlertDescription>
           </Alert>
+        ) : !ofertas?.length ? (
+          <p className="py-10 text-center text-muted-foreground">
+            No hay ofertas activas de otras empresas por ahora.
+          </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {(ofertas ?? []).map((o) => (
-              <TarjetaOferta
-                key={o.id}
-                oferta={{
-                  id: o.id,
-                  empresa: o.empresa,
-                  sede: o.sede,
-                  operacion: o.operacion,
-                  moneda: o.moneda,
-                  cantidad: o.cantidad,
-                  precioCop: o.precio_cop,
-                  condiciones: o.condiciones,
-                  notas: o.notas,
-                  expiraEn: o.expira_en,
-                }}
-                acciones={<ModalRealizarOferta ofertaId={o.id} />}
-              />
-            ))}
-            {!ofertas?.length && (
-              <p className="col-span-full py-10 text-center text-muted-foreground">
-                No hay ofertas activas de otras empresas por ahora.
-              </p>
-            )}
-          </div>
+          <FiltroTablero
+            ofertas={ofertas.map((o) => ({
+              id: o.id,
+              empresa: o.empresa,
+              sede: o.sede,
+              operacion: o.operacion,
+              moneda: o.moneda,
+              cantidad: o.cantidad,
+              precioCop: o.precio_cop,
+              condiciones: o.condiciones,
+              notas: o.notas,
+              expiraEn: o.expira_en,
+            }))}
+          />
         )}
       </main>
     </>
