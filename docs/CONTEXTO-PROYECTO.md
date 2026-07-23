@@ -43,10 +43,10 @@ Resumen:
 | 2.6 — Onboarding en 3 etapas | ✅ | Cuenta → perfil de empresa → contrato digital (ver README) |
 | 2.7 — 7 documentos legales | ✅ | Registro versionado, páginas públicas `/legal`, click-wrap con snapshot de identidad |
 | Verificación de identidad (Didit) | ✅ | Cuarto requisito de aprobación, webhook firmado, ver README |
-| 3+4 — Marketplace y su UI | ✅ | Publicar/ver ofertas, ciclo de negociación, panel admin Operaciones — ver README |
-| 5 — Notificaciones y DevOps | ⬜ | Telegram/WhatsApp para el PCD + despliegue Vercel |
+| 3+4 — Marketplace y su UI | ✅ | Publicar/ver ofertas, ciclo de negociación, panel admin Operaciones, rediseño tipo marketplace moderno — ver README |
+| 5 — Notificaciones y DevOps | ⬜ | Telegram/WhatsApp para el PCD (ya hay Telegram admin para ofertas/intenciones) |
 
-Rama activa: `fase-2-kyc`. **No mergeada a `master`** — pendiente E2E completo.
+**Mergeado a `master` y en producción (2026-07-22)**: decisión explícita de Jaime de migrar ya a `www.tasadirecta.com` en vez de seguir probando en el Preview de Vercel, dado que casi toda la fricción reciente (protección de despliegue, allow-list de redirect de Supabase, confusión de cuentas de Resend) era del entorno Preview y no de la app. El código no tenía ninguna URL de Vercel hardcodeada (todo usa origen dinámico), así que no hubo que tocar rutas — solo había que actualizar dos configuraciones externas: el webhook de Didit (URL de producción, sin el bypass de Vercel) y confirmar el Redirect URL de Supabase, ambos ya hechos. El ciclo completo del marketplace con dos cuentas PCD reales sigue sin probarse de punta a punta — es lo próximo, ya en producción.
 
 ## Decisiones estratégicas clave (por qué, no solo qué)
 
@@ -122,22 +122,16 @@ Rama activa: `fase-2-kyc`. **No mergeada a `master`** — pendiente E2E completo
    de confirmar: clasificación Usuario profesional vs. consumidor (Ley 1480)
    en la política de reembolsos, plazos exactos de conservación de datos, y
    la cláusula de arbitraje con sede en Medellín.
-2. **E2E manual de toda la rama `fase-2-kyc`** antes de mergear a `master`.
-3. Reubicar `ciudad-combobox.tsx` de `src/app/(auth)/registro/` a
+2. Reubicar `ciudad-combobox.tsx` de `src/app/(auth)/registro/` a
    `src/components/` (deuda técnica menor, no bloqueante — se usa desde
    `/vinculacion` importándolo cross-route).
-4. **Configurar y probar el workflow de Didit en producción** una vez
-   Jaime confirme que el workflow de consola (ID Verification + Passive
-   Liveness + Face Match) está funcionando correctamente en Preview, y
-   actualizar la URL del webhook registrada en Didit al dominio de
-   producción cuando se haga el merge a `master`.
-5. **Correr `supabase/migrations/0007_marketplace_ofertas.sql`** en el SQL
-   Editor de Supabase — el marketplace no tiene efecto en la base real hasta
-   que esto se aplique. Después, probar el ciclo completo con dos cuentas
-   PCD reales (publicar → responder → negociar → completar/republicar).
-6. **Notificación por Telegram/WhatsApp de nuevas intenciones** — se dejó
-   fuera de la Fase 3+4 a propósito (por ahora solo correo + badge en
-   plataforma); evaluar junto con el resto de la Fase 5.
+3. **Probar el ciclo completo del marketplace con dos cuentas PCD reales**
+   (publicar → responder → negociar → completar/republicar) — todas las
+   migraciones (hasta 0009) ya están corridas y verificadas contra la base
+   real de producción; falta el E2E de punta a punta con dos cuentas.
+4. **Notificación por Telegram/WhatsApp al PCD** de nuevas intenciones — se
+   dejó fuera de la Fase 3+4 a propósito (el admin ya recibe Telegram al
+   publicarse ofertas o recibirse intenciones; falta el aviso al propio PCD).
 
 ## Dónde está cada cosa
 
