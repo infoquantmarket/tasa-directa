@@ -63,10 +63,13 @@ export interface Database {
           contacto_celular: string | null
           contacto_correo:  string | null
           perfil_completo:  boolean
+          telegram_chat_id:    string | null
+          telegram_link_token: string
           created_at:       string
           updated_at:       string
         }
-        Insert: Omit<Database['public']['Tables']['perfiles_usuarios']['Row'], 'created_at' | 'updated_at'>
+        Insert: Omit<Database['public']['Tables']['perfiles_usuarios']['Row'], 'created_at' | 'updated_at' | 'telegram_chat_id' | 'telegram_link_token'>
+          & { telegram_chat_id?: string | null; telegram_link_token?: string }
         Update: Partial<Database['public']['Tables']['perfiles_usuarios']['Insert']>
         Relationships: []
       }

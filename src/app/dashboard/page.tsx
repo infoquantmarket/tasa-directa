@@ -9,6 +9,7 @@ import { EstadoBadge } from '@/components/estado-badge'
 import { TIPOS_DOCUMENTO } from '@/lib/validation/kyc'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 import { SLUGS_ETAPA_CONTRATO, VERSION_LEGAL } from '@/lib/legal/documentos'
+import { TelegramCard } from './telegram-card'
 import { Coins, BadgeCheck, FileText, FileCheck2, ArrowRightLeft } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Mi cuenta' }
@@ -169,6 +170,10 @@ export default async function DashboardPage() {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {perfil.estado === 'aprobado' && (
+        <TelegramCard chatId={perfil.telegram_chat_id} token={perfil.telegram_link_token} />
       )}
 
       <Card>

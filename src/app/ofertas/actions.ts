@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { ofertaSchema } from '@/lib/validation/oferta'
 import { intencionSchema } from '@/lib/validation/intencion'
 import { notificarNuevaIntencion } from '@/lib/notificaciones/intencion'
@@ -196,9 +197,27 @@ export async function realizarOferta(
         precioOferta: oferta.precio_cop,
       })
     }
+    const resumenOferta = `${oferta.operacion === 'venta' ? 'Vende' : 'Compra'} ${oferta.moneda} ${oferta.cantidad.toLocaleString('es-CO')} a $${oferta.precio_cop.toLocaleString('es-CO')} COP`
+
     await notificarTelegram(
-      `🤝 <b>Intención registrada</b>\n${quienResponde?.razon_social ?? 'Un usuario'} respondió a la oferta de ${oferta.empresa} (${oferta.operacion === 'venta' ? 'Vende' : 'Compra'} ${oferta.moneda} ${oferta.cantidad.toLocaleString('es-CO')} a $${oferta.precio_cop.toLocaleString('es-CO')} COP)`
+      `🤝 <b>Intención registrada</b>\n${quienResponde?.razon_social ?? 'Un usuario'} respondió a la oferta de ${oferta.empresa} (${resumenOferta})`
     )
+
+    // Aviso directo al PCD dueño de la oferta si vinculó su Telegram. El
+    // chat_id no es legible por el usuario que responde (RLS), así que se lee
+    // con el cliente de servicio.
+    const service = createServiceClient()
+    const { data: duenoTg } = await service
+      .from('perfiles_usuarios')
+      .select('telegram_chat_id')
+      .eq('id', oferta.usuario_id)
+      .single()
+    if (duenoTg?.telegram_chat_id && quienResponde) {
+      await notificarTelegram(
+        `🤝 <b>Nueva intención sobre su oferta</b>\nSu oferta: ${resumenOferta}\n${quienResponde.razon_social} — ${quienResponde.contacto_nombre} · ${quienResponde.contacto_celular} · ${quienResponde.contacto_correo}\n\nEntre a Tasa Directa para ver el detalle.`,
+        duenoTg.telegram_chat_id
+      )
+    }
   }
 
   revalidatePath('/ofertas')
