@@ -18,6 +18,10 @@ describe('notificarNuevaIntencion', () => {
       correoRespondio: 'jaime@nutifinanzas.com',
       tipo: 'aceptar_precio',
       comentarios: 'Podemos hacerlo hoy mismo',
+      operacionOferta: 'venta',
+      monedaOferta: 'USD',
+      cantidadOferta: 5000,
+      precioOferta: 3300,
     })
 
     expect(spy).toHaveBeenCalledWith(
@@ -32,6 +36,11 @@ describe('notificarNuevaIntencion', () => {
     expect(html).toContain('3113472345')
     expect(html).toContain('jaime@nutifinanzas.com')
     expect(html).toContain('Podemos hacerlo hoy mismo')
+    // Debe indicar de cuál oferta se trata (operación, moneda, cantidad, precio).
+    expect(html).toContain('Vende')
+    expect(html).toContain('USD')
+    expect(html).toContain('5.000')
+    expect(html).toContain('3.300')
   })
 
   it('no revienta si enviarCorreo falla (best-effort, ya lo maneja el cliente)', async () => {
@@ -40,6 +49,7 @@ describe('notificarNuevaIntencion', () => {
       correoDueno: 'x@y.com', empresaRespondio: 'X', contactoRespondio: 'Y',
       celularRespondio: '300', correoRespondio: 'y@z.com',
       tipo: 'solicitar_contacto', comentarios: null,
+      operacionOferta: 'compra', monedaOferta: 'EUR', cantidadOferta: 100, precioOferta: 4200,
     })).resolves.toBeUndefined()
   })
 
@@ -54,6 +64,10 @@ describe('notificarNuevaIntencion', () => {
       correoRespondio: 'jaime@nutifinanzas.com',
       tipo: 'aceptar_precio',
       comentarios: '<script>alert(1)</script>',
+      operacionOferta: 'venta',
+      monedaOferta: 'USD',
+      cantidadOferta: 5000,
+      precioOferta: 3300,
     })
 
     const html = spy.mock.calls[0][0].html

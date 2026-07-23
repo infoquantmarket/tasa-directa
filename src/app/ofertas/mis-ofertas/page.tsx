@@ -108,43 +108,52 @@ export default async function MisOfertasPage() {
                 acciones={
                   <div className="grid gap-3">
                     {o.estado === 'activa' && (
-                      <>
-                        <BotonAccionOferta
-                          accion={eliminarOferta}
-                          campoNombre="ofertaId"
-                          campoValor={o.id}
-                          etiqueta="Eliminar"
-                          etiquetaCargando="Eliminando…"
-                          variante="outline"
-                        />
-                        {propias.length > 0 && (
-                          <div className="grid gap-2 rounded-md border border-border p-3">
-                            <p className="text-xs font-medium">
-                              Intenciones recibidas {nuevas > 0 && <span className="text-primary">({nuevas} nuevas)</span>}
-                            </p>
-                            {propias.map((i) => {
-                              const contacto = contactosPorUsuario.get(i.usuario_id)
-                              return (
-                                <div key={i.id} className="text-xs text-muted-foreground">
-                                  <p>{contacto?.razon_social} · {contacto?.contacto_nombre} · {contacto?.contacto_celular} · {contacto?.contacto_correo}</p>
-                                  {i.comentarios && <p>&ldquo;{i.comentarios}&rdquo;</p>}
-                                  {i.estado === 'enviada' && (
-                                    <BotonAccionOferta
-                                      accion={marcarIntencionVista}
-                                      campoNombre="intencionId"
-                                      campoValor={i.id}
-                                      etiqueta="Marcar como vista"
-                                      etiquetaCargando="Marcando…"
-                                      variante="ghost"
-                                    />
-                                  )}
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </>
+                      <BotonAccionOferta
+                        accion={eliminarOferta}
+                        campoNombre="ofertaId"
+                        campoValor={o.id}
+                        etiqueta="Eliminar"
+                        etiquetaCargando="Eliminando…"
+                        variante="outline"
+                      />
                     )}
+
+                    {propias.length > 0 && (
+                      <div className="grid gap-2 rounded-md border border-primary/30 bg-primary/5 p-3">
+                        <p className="text-sm font-semibold text-primary">
+                          🤝 Alguien respondió a esta oferta{nuevas > 0 && <span> · {nuevas} nueva{nuevas > 1 ? 's' : ''}</span>}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Contacte a la contraparte por fuera de la plataforma para cerrar la operación.
+                        </p>
+                        {propias.map((i) => {
+                          const contacto = contactosPorUsuario.get(i.usuario_id)
+                          return (
+                            <div key={i.id} className="grid gap-0.5 border-t border-primary/15 pt-2 text-xs">
+                              <p className="font-medium text-foreground">{contacto?.razon_social}</p>
+                              <p className="text-muted-foreground">
+                                {contacto?.contacto_nombre} · {contacto?.contacto_celular} · {contacto?.contacto_correo}
+                              </p>
+                              <p className="text-muted-foreground">
+                                {i.tipo === 'aceptar_precio' ? 'Aceptó el precio publicado' : 'Solicitó contacto para negociar'}
+                              </p>
+                              {i.comentarios && <p className="text-muted-foreground">&ldquo;{i.comentarios}&rdquo;</p>}
+                              {i.estado === 'enviada' && (
+                                <BotonAccionOferta
+                                  accion={marcarIntencionVista}
+                                  campoNombre="intencionId"
+                                  campoValor={i.id}
+                                  etiqueta="Marcar como vista"
+                                  etiquetaCargando="Marcando…"
+                                  variante="ghost"
+                                />
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+
                     {o.estado === 'en_negociacion' && (
                       <div className="flex gap-2">
                         <BotonAccionOferta

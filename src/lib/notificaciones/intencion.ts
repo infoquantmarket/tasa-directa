@@ -1,5 +1,5 @@
 import { enviarCorreo } from '@/lib/resend/cliente'
-import type { TipoIntencion } from '@/types/database'
+import type { Moneda, Operacion, TipoIntencion } from '@/types/database'
 
 export interface NotificarNuevaIntencionInput {
   correoDueno: string
@@ -9,6 +9,11 @@ export interface NotificarNuevaIntencionInput {
   correoRespondio: string
   tipo: TipoIntencion
   comentarios: string | null
+  /** Datos de la oferta a la que respondieron, para que el dueño sepa cuál es. */
+  operacionOferta: Operacion | null
+  monedaOferta: Moneda
+  cantidadOferta: number
+  precioOferta: number
 }
 
 const ETIQUETA_TIPO: Record<TipoIntencion, string> = {
@@ -39,9 +44,12 @@ export async function notificarNuevaIntencion(input: NotificarNuevaIntencionInpu
   const correoRespondio = escapeHtml(input.correoRespondio)
   const comentarios = input.comentarios ? escapeHtml(input.comentarios) : null
 
+  const resumenOferta = `${input.operacionOferta === 'venta' ? 'Vende' : 'Compra'} ${input.monedaOferta} ${input.cantidadOferta.toLocaleString('es-CO')} a $${input.precioOferta.toLocaleString('es-CO')} COP`
+
   const html = `
     <h2>Nueva intención sobre su oferta</h2>
     <p><strong>${empresaRespondio}</strong> respondió a su publicación en Tasa Directa.</p>
+    <p><strong>Su oferta:</strong> ${resumenOferta}</p>
     <p><strong>Tipo:</strong> ${ETIQUETA_TIPO[input.tipo]}</p>
     ${comentarios ? `<p><strong>Comentarios:</strong> ${comentarios}</p>` : ''}
     <h3>Datos de contacto</h3>

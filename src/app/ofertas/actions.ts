@@ -169,7 +169,7 @@ export async function realizarOferta(
 
   // Notificar al dueño de la oferta. No puede fallar la respuesta (enviarCorreo nunca lanza), pero sí se espera antes de responder.
   const [{ data: oferta }, { data: quienResponde }] = await Promise.all([
-    supabase.from('ofertas').select('usuario_id, empresa, operacion, moneda, cantidad').eq('id', ofertaId).single(),
+    supabase.from('ofertas').select('usuario_id, empresa, operacion, moneda, cantidad, precio_cop').eq('id', ofertaId).single(),
     supabase.from('perfiles_publicos')
       .select('razon_social, contacto_nombre, contacto_celular, contacto_correo')
       .eq('id', user.id)
@@ -190,14 +190,19 @@ export async function realizarOferta(
         correoRespondio: quienResponde.contacto_correo,
         tipo: d.tipo,
         comentarios: d.comentarios || null,
+        operacionOferta: oferta.operacion,
+        monedaOferta: oferta.moneda,
+        cantidadOferta: oferta.cantidad,
+        precioOferta: oferta.precio_cop,
       })
     }
     await notificarTelegram(
-      `🤝 <b>Intención registrada</b>\n${quienResponde?.razon_social ?? 'Un usuario'} respondió a la oferta de ${oferta.empresa} (${oferta.operacion === 'venta' ? 'Vende' : 'Compra'} ${oferta.moneda} ${oferta.cantidad.toLocaleString('es-CO')})`
+      `🤝 <b>Intención registrada</b>\n${quienResponde?.razon_social ?? 'Un usuario'} respondió a la oferta de ${oferta.empresa} (${oferta.operacion === 'venta' ? 'Vende' : 'Compra'} ${oferta.moneda} ${oferta.cantidad.toLocaleString('es-CO')} a $${oferta.precio_cop.toLocaleString('es-CO')} COP)`
     )
   }
 
   revalidatePath('/ofertas')
+  revalidatePath('/ofertas/mis-ofertas')
   revalidatePath('/ofertas/mis-intenciones')
   return { error: null }
 }

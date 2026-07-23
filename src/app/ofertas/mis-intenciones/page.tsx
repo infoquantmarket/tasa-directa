@@ -23,9 +23,22 @@ export default async function MisIntencionesPage() {
 
   const idsOfertas = [...new Set((intenciones ?? []).map((i) => i.oferta_id))]
   const { data: ofertas } = idsOfertas.length
-    ? await supabase.from('ofertas').select('id, empresa, operacion, moneda, cantidad, precio_cop, estado').in('id', idsOfertas)
+    ? await supabase.from('ofertas').select('id, usuario_id, empresa, operacion, moneda, cantidad, precio_cop, estado').in('id', idsOfertas)
     : { data: [] }
   const ofertaPorId = new Map((ofertas ?? []).map((o) => [o.id, o]))
+
+  // Revelado mutuo: quien respondió también ve el contacto del dueño de la oferta.
+  const idsDuenos = [...new Set((ofertas ?? []).map((o) => o.usuario_id))]
+  const contactoPorUsuario = new Map<string, {
+    contacto_nombre: string; contacto_celular: string; contacto_correo: string
+  }>()
+  if (idsDuenos.length) {
+    const { data: contactos } = await supabase
+      .from('perfiles_publicos')
+      .select('id, contacto_nombre, contacto_celular, contacto_correo')
+      .in('id', idsDuenos)
+    for (const c of contactos ?? []) contactoPorUsuario.set(c.id, c)
+  }
 
   return (
     <>
@@ -40,6 +53,8 @@ export default async function MisIntencionesPage() {
           {(intenciones ?? []).map((i) => {
             const oferta = ofertaPorId.get(i.oferta_id)
             if (!oferta) return null
+            const contacto = contactoPorUsuario.get(oferta.usuario_id)
+            const activa = oferta.estado === 'en_negociacion' && i.estado !== 'cerrada'
             return (
               <Card key={i.id}>
                 <CardHeader>
@@ -53,7 +68,16 @@ export default async function MisIntencionesPage() {
                 <CardContent className="grid gap-2 text-sm">
                   <p className="text-muted-foreground">Su respuesta: {i.tipo === 'aceptar_precio' ? 'Aceptó el precio' : 'Solicitó contacto'}</p>
                   {i.comentarios && <p className="text-muted-foreground">&ldquo;{i.comentarios}&rdquo;</p>}
-                  {oferta.estado === 'en_negociacion' && i.estado !== 'cerrada' && (
+                  {activa && contacto && (
+                    <div className="grid gap-0.5 rounded-md border border-primary/30 bg-primary/5 p-3 text-xs">
+                      <p className="text-sm font-semibold text-primary">Datos de contacto de {oferta.empresa}</p>
+                      <p className="text-muted-foreground">
+                        {contacto.contacto_nombre} · {contacto.contacto_celular} · {contacto.contacto_correo}
+                      </p>
+                      <p className="text-muted-foreground">Contáctelos para cerrar la operación por fuera de la plataforma.</p>
+                    </div>
+                  )}
+                  {activa && (
                     <BotonAccionOferta
                       accion={cerrarNegociacionSinAcuerdo}
                       campoNombre="ofertaId"
