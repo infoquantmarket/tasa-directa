@@ -126,11 +126,15 @@ PCD aprobados con membresía activa pueden publicar su necesidad de compra/venta
 de divisas en `/ofertas/mis-ofertas`, en cualquiera de **25 monedas** (`MONEDAS`
 en `src/lib/validation/oferta.ts`): hasta **5 ofertas activas simultáneas**
 por empresa — las primeras **2 gratis**, de la 3ra en adelante consume **1
-token** cada una (concepto `oferta_adicional`). Cada oferta expira **24 horas**
-después de publicarse (cron por hora, no a medianoche); el conteo de "activas"
-exige además `expira_en > now()` — no basta con `estado='activa'`, porque el
-cron solo corre cada hora y una oferta recién vencida no debe seguir contando
-ni mostrándose como activa. Otros PCD la ven en el tablero `/ofertas` (con
+token** cada una (concepto `oferta_adicional`). Cada oferta **vence al final
+del día en que se publicó** (11:59:59 p.m. hora Colombia, sin importar la hora
+en que se publicó — `fin_del_dia_colombia()`), no en +24h rodantes: en un
+marketplace de divisas una oferta viva más de un día genera malos entendidos
+de tasa, así que se fuerza a republicar cada día. Esto aplica también a
+ofertas ya `en_negociacion` (antes quedaban abiertas sin límite hasta que el
+dueño decidía) — el cron corre cada 15 min y, al vencer, también cierra las
+intenciones abiertas de esa oferta. El conteo de "activas" exige además
+`expira_en > now()` — no basta con el `estado`. Otros PCD la ven en el tablero `/ofertas` (con
 filtro por operación/moneda y orden por vencimiento) y responden con "Realizar
 Oferta" (revela el contacto operativo de la empresa para negociar fuera de la
 plataforma, más notificación por correo y Telegram), lo que pasa la oferta a
@@ -144,9 +148,9 @@ plataforma, más notificación por correo y Telegram), lo que pasa la oferta a
   si no hubo acuerdo.
 - Quien respondió ve **"No se realizó la negociación"** en `/ofertas/mis-intenciones`.
 - Republicar y "no se realizó la negociación" reactivan la **misma fila** (no
-  una nueva) con 24h nuevas — son **siempre gratis**, no cuentan contra el
-  tope ni consumen tokens (cobrar por esto se consideró poco ético: la
-  negociación pudo fallar sin culpa del PCD).
+  una nueva) con vencimiento al fin del día de hoy — son **siempre gratis**,
+  no cuentan contra el tope ni consumen tokens (cobrar por esto se consideró
+  poco ético: la negociación pudo fallar sin culpa del PCD).
 - El historial reciente (últimas 5: expiradas/completadas) vive en un
   `<details>` colapsado por defecto, para no llenar la pantalla de ruido.
 
@@ -160,8 +164,35 @@ eliminar cualquier oferta. La mayor parte del backend (RLS, triggers de
 acceso, la vista `perfiles_publicos`) ya existía desde las Fases 1 y 2.5 —
 este marketplace solo amplía esas piezas y agrega toda la capa de UI. Ver
 `supabase/migrations/0007_marketplace_ofertas.sql` (base),
-`0011_expiracion_y_aceptacion.sql` y el spec en
-`docs/superpowers/specs/2026-07-21-marketplace-ofertas-design.md`.
+`0011_expiracion_y_aceptacion.sql`, `0013_expiracion_fin_de_dia.sql` y el
+spec en `docs/superpowers/specs/2026-07-21-marketplace-ofertas-design.md`.
+
+### Servicios de tokens: destacar oferta y alerta a mi ciudad
+
+Dos servicios pagados con tokens (1 cada uno), sobre el mismo modelo de
+billetera de la Fase 2.5 — el valor en pesos de un token se define después,
+esto es solo el costo interno del servicio:
+
+- **Destacar oferta** (`destacar_oferta`, columna `ofertas.destacada`): al
+  publicar (checkbox en el modal) o después desde "Mis ofertas" (botón
+  "Destacar oferta · 1 token"), la oferta se muestra en una sección
+  **"Destacadas"** siempre arriba del tablero, con fondo y borde ámbar y un
+  badge ⭐, más reciente primero entre ellas. Cuenta contra el mismo tope de 5
+  ofertas activas — no es un cupo aparte (se prevé más adelante vender cupos
+  adicionales con tokens, y destacar debe seguir contando ahí). Se puede
+  destacar varias veces sin costo extra una vez destacada (el flag no vuelve
+  a cobrar). Ver `supabase/migrations/0014_destacar_oferta.sql`.
+- **Alerta a mi ciudad** (`enviarAlertaCiudad`, concepto `alerta_premium`):
+  botón "Enviar alerta a mi ciudad · 1 token" en una oferta `activa`, envía de
+  inmediato un resumen (operación/moneda/cantidad/precio, **sin datos de
+  contacto** — igual que el resto del marketplace, el contacto solo se revela
+  al responder dentro de la plataforma) a los PCD aprobados con membresía
+  activa de la misma ciudad o **área metropolitana** (Valle de Aburrá, Bogotá
+  y sabana cercana, Cali — `src/lib/data/areas-metropolitanas.ts`). Por
+  Telegram si el destinatario vinculó el suyo; por correo solo si no lo
+  vinculó. Se puede reenviar cuantas veces se quiera, cobrando 1 token cada
+  vez. El propio publicador ve en pantalla cuántos profesionales recibieron
+  la alerta (no se le reenvía nada, ya está viendo el resultado).
 
 ## Vinculación de Telegram por PCD
 

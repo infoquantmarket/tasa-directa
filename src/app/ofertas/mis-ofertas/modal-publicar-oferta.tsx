@@ -30,6 +30,19 @@ const VACIO: OfertaInput = {
   notas: '',
 }
 
+/** Aproximación cliente de "hoy 11:59:59 p.m. hora Colombia" para la vista
+ * previa — solo cosmética; el valor real lo pone el default de la BD
+ * (fin_del_dia_colombia(), migración 0013), fuente de verdad única. */
+function finDelDiaColombiaISO(): string {
+  const OFFSET_BOGOTA_MS = 5 * 60 * 60 * 1000
+  const ahoraBogota = new Date(Date.now() - OFFSET_BOGOTA_MS)
+  const fin = Date.UTC(
+    ahoraBogota.getUTCFullYear(), ahoraBogota.getUTCMonth(), ahoraBogota.getUTCDate(),
+    23, 59, 59
+  ) + OFFSET_BOGOTA_MS
+  return new Date(fin).toISOString()
+}
+
 export function ModalPublicarOferta({
   deshabilitado,
   motivo,
@@ -44,6 +57,7 @@ export function ModalPublicarOferta({
   const [form, setForm] = useState<OfertaInput>(VACIO)
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null)
   const [expiraPreview, setExpiraPreview] = useState('')
+  const [destacar, setDestacar] = useState(false)
 
   const [state, formAction, pending] = useActionState<AccionState, FormData>(
     async (prev, formData) => {
@@ -74,7 +88,7 @@ export function ModalPublicarOferta({
       return
     }
     setErrorValidacion(null)
-    setExpiraPreview(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString())
+    setExpiraPreview(finDelDiaColombiaISO())
     setPaso('revision')
   }
 
@@ -93,8 +107,9 @@ export function ModalPublicarOferta({
             <DialogHeader>
               <DialogTitle>Publicar oferta</DialogTitle>
               <DialogDescription>
-                Esta oferta expira automáticamente 24 horas después de publicarla.
-                Si sigue vigente y quiere mantenerla, deberá publicarla de nuevo.
+                Esta oferta vence hoy a las 11:59 p.m. (hora Colombia), sin
+                importar a qué hora la publique. Si sigue vigente y quiere
+                mantenerla, deberá publicarla de nuevo mañana.
                 De la 3ra oferta activa en adelante se consume 1 token.
               </DialogDescription>
             </DialogHeader>
@@ -201,8 +216,8 @@ export function ModalPublicarOferta({
             <DialogHeader>
               <DialogTitle>Así se verá su oferta</DialogTitle>
               <DialogDescription>
-                Revísela antes de publicar. Expirará automáticamente 24 horas
-                después de confirmar.
+                Revísela antes de publicar. Vencerá hoy a las 11:59 p.m.
+                (hora Colombia).
               </DialogDescription>
             </DialogHeader>
             <TarjetaOferta
@@ -217,6 +232,7 @@ export function ModalPublicarOferta({
                 condiciones: form.condiciones,
                 notas: form.notas || null,
                 expiraEn: expiraPreview,
+                destacada: destacar,
               }}
             />
             <form action={formAction} className="grid gap-3">
@@ -229,6 +245,15 @@ export function ModalPublicarOferta({
               ))}
               <input type="hidden" name="sede" value={form.sede} />
               <input type="hidden" name="notas" value={form.notas} />
+              {destacar && <input type="hidden" name="destacar" value="on" />}
+              <label className="flex items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50/50 p-2.5 text-sm">
+                <input
+                  type="checkbox"
+                  checked={destacar}
+                  onChange={(e) => setDestacar(e.target.checked)}
+                />
+                Destacar esta oferta (1 token) — se mostrará arriba del tablero
+              </label>
               {state.error && (
                 <Alert variant="destructive">
                   <AlertDescription>{state.error}</AlertDescription>

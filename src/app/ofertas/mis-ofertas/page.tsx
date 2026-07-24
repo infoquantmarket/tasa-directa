@@ -10,7 +10,7 @@ import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia
 import { TarjetaOferta } from '../tarjeta-oferta'
 import { ModalPublicarOferta } from './modal-publicar-oferta'
 import { BotonAccionOferta } from './boton-accion-oferta'
-import { aceptarIntencion, cerrarNegociacionSinAcuerdo, eliminarOferta } from '../actions'
+import { aceptarIntencion, cerrarNegociacionSinAcuerdo, eliminarOferta, destacarOferta, enviarAlertaCiudad } from '../actions'
 
 export const metadata: Metadata = { title: 'Mis ofertas' }
 
@@ -34,7 +34,7 @@ export default async function MisOfertasPage() {
 
   const { data: todasMisOfertas, error: errorOfertas } = await supabase
     .from('ofertas')
-    .select('id, empresa, sede, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, estado, created_at')
+    .select('id, empresa, sede, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, estado, destacada, created_at')
     .eq('usuario_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -121,9 +121,35 @@ export default async function MisOfertasPage() {
                   id: o.id, empresa: o.empresa, sede: o.sede, operacion: o.operacion,
                   moneda: o.moneda, cantidad: o.cantidad, precioCop: o.precio_cop,
                   condiciones: o.condiciones, notas: o.notas, expiraEn: o.expira_en,
+                  destacada: o.destacada,
                 }}
                 acciones={
                   <div className="grid gap-3">
+                    <div className="flex flex-wrap gap-2">
+                      {!o.destacada && (
+                        <BotonAccionOferta
+                          accion={destacarOferta}
+                          campoNombre="ofertaId"
+                          campoValor={o.id}
+                          etiqueta="Destacar oferta · 1 token"
+                          etiquetaCargando="Destacando…"
+                          variante="outline"
+                          confirmar="¿Destacar esta oferta por 1 token? Se mostrará arriba del tablero, en la sección Destacadas."
+                        />
+                      )}
+                      {o.estado === 'activa' && (
+                        <BotonAccionOferta
+                          accion={enviarAlertaCiudad}
+                          campoNombre="ofertaId"
+                          campoValor={o.id}
+                          etiqueta="Enviar alerta a mi ciudad · 1 token"
+                          etiquetaCargando="Enviando…"
+                          variante="outline"
+                          confirmar="¿Enviar un aviso inmediato por Telegram/correo a los PCD aprobados de su zona? Consume 1 token cada vez."
+                        />
+                      )}
+                    </div>
+
                     {/* Eliminar disponible tanto en 'activa' como en negociación
                         (por si el dueño decide cancelar durante la negociación). */}
                     <BotonAccionOferta

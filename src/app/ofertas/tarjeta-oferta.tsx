@@ -1,9 +1,11 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { Star } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { formatearCuentaRegresiva } from '@/lib/ofertas/tiempo'
+import { cn } from '@/lib/utils'
 import type { Condicion, Moneda, Operacion } from '@/types/database'
 
 const EASE_PRO = [0.22, 1, 0.36, 1] as const
@@ -26,6 +28,7 @@ export interface DatosOferta {
   condiciones: Condicion[]
   notas: string | null
   expiraEn: string
+  destacada?: boolean
 }
 
 export function TarjetaOferta({
@@ -35,25 +38,39 @@ export function TarjetaOferta({
   oferta: DatosOferta
   acciones?: React.ReactNode
 }) {
+  const destacada = Boolean(oferta.destacada)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE_PRO } }}
       whileHover={{ y: -4, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
     >
-      <Card className="transition-shadow duration-300 hover:shadow-lg">
+      <Card
+        className={cn(
+          'transition-shadow duration-300 hover:shadow-lg',
+          destacada && 'border-amber-300 bg-amber-50/50'
+        )}
+      >
         <CardHeader className="flex-row items-center justify-between space-y-0">
           <div>
-            <Badge
-              variant="outline"
-              className={
-                oferta.operacion === 'venta'
-                  ? 'border-primary/20 bg-primary/10 text-primary'
-                  : 'border-slate-200 bg-slate-100 text-slate-700'
-              }
-            >
-              {oferta.operacion === 'venta' ? 'Vende' : 'Compra'} {oferta.moneda}
-            </Badge>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {destacada && (
+                <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
+                  <Star className="size-3 fill-current" /> Destacada
+                </Badge>
+              )}
+              <Badge
+                variant="outline"
+                className={
+                  oferta.operacion === 'venta'
+                    ? 'border-primary/20 bg-primary/10 text-primary'
+                    : 'border-slate-200 bg-slate-100 text-slate-700'
+                }
+              >
+                {oferta.operacion === 'venta' ? 'Vende' : 'Compra'} {oferta.moneda}
+              </Badge>
+            </div>
             <CardDescription className="mt-1.5">
               {oferta.empresa}{oferta.sede ? ` · ${oferta.sede}` : ''}
             </CardDescription>

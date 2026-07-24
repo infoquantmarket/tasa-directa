@@ -43,7 +43,7 @@ Resumen:
 | 2.6 — Onboarding en 3 etapas | ✅ | Cuenta → perfil de empresa → contrato digital (ver README) |
 | 2.7 — 7 documentos legales | ✅ | Registro versionado, páginas públicas `/legal`, click-wrap con snapshot de identidad. **Cerrada 2026-07-23: el abogado del sector cambiario aprobó los 7 documentos sin cambios de texto.** |
 | Verificación de identidad (Didit) | ✅ | Cuarto requisito de aprobación, webhook firmado, ver README |
-| 3+4 — Marketplace y su UI | ✅ | Publicar/ver ofertas, ciclo de negociación (incluye "Aceptar oferta"), panel admin Operaciones, rediseño tipo marketplace moderno, expiración precisa — ver README |
+| 3+4 — Marketplace y su UI | ✅ | Publicar/ver ofertas, ciclo de negociación (incluye "Aceptar oferta"), panel admin Operaciones, rediseño tipo marketplace moderno, expiración a fin de día, destacar oferta + alerta a mi ciudad (tokens) — ver README |
 | 5 — Notificaciones y DevOps | parcial | Telegram al admin ✅ y al PCD ✅ (vinculación propia por QR/deep-link); falta WhatsApp |
 | Admin — suspender/reactivar PCD | ✅ | Preserva la membresía (no es sanción de facturación); ver abajo |
 
@@ -138,21 +138,40 @@ Resumen:
   QR/deep-link desde su dashboard, en vez de usar el celular de contacto.
   Cuando alguien responde a su oferta, además del correo recibe un DM directo
   si vinculó su Telegram.
+- **Expiración a fin de día + destacar oferta + alerta a mi ciudad
+  (2026-07-24, `0013`/`0014`):** decisión de Jaime — en un marketplace de
+  divisas, una oferta viva más de un día genera malos entendidos de tasa. Se
+  reemplazaron las 24h rodantes por vencimiento fijo a las 11:59:59 p.m. hora
+  Colombia del día de publicación (`fin_del_dia_colombia()`), aplicado
+  también a ofertas `en_negociacion` (antes quedaban abiertas sin límite) —
+  el cron pasó de cada hora a cada 15 min para más precisión cerca de
+  medianoche. Se implementaron los dos primeros servicios pagados con tokens
+  que ya estaban anticipados en el catálogo desde la Fase 2.5: **destacar
+  oferta** (1 token, sección "Destacadas" en ámbar siempre arriba del
+  tablero, cuenta contra el mismo tope de 5 — Jaime prevé vender cupos
+  adicionales con tokens más adelante) y **alerta a mi ciudad** (1 token,
+  DM/correo inmediato a los PCD de la misma área metropolitana — Valle de
+  Aburrá, Bogotá+sabana, Cali — sin revelar contacto, igual que el resto del
+  marketplace). Se cargaron 20 tokens de prueba en Nutifinanzas para testear.
 
 ## Pendiente explícito (lo próximo)
 
-1. **Probar el ciclo completo del marketplace con dos cuentas PCD reales**
+1. **Correr las migraciones `0013` y `0014`** en Supabase y probar en vivo
+   destacar oferta + alerta a mi ciudad con las cuentas de prueba.
+2. **Probar el ciclo completo del marketplace con dos cuentas PCD reales**
    (publicar → responder → negociar → aceptar/republicar) de punta a punta en
    producción — los pasos individuales ya se probaron por separado.
-2. **Definir el mes gratis de lanzamiento**: Jaime quiere dar el primer mes
+3. **Definir el mes gratis de lanzamiento**: Jaime quiere dar el primer mes
    sin costo (posiblemente hasta el 31 de agosto de 2026, aún por confirmar),
    manteniendo el límite de 2 ofertas gratis (sin tokens en circulación
    todavía — esta etapa es para probar flujos). No requiere cambio de código,
    solo decidir si el vencimiento es automático (`fecha_fin` en la membresía)
    o manual, y activarlo para los primeros PCD reales.
-3. Reubicar `ciudad-combobox.tsx` de `src/app/(auth)/registro/` a
+4. **Definir el valor en pesos de un token** (el costo interno de 1 token
+   para destacar/alerta ya está fijo en el código; falta el precio de venta).
+5. Reubicar `ciudad-combobox.tsx` de `src/app/(auth)/registro/` a
    `src/components/` (deuda técnica menor, no bloqueante).
-4. **Notificación por WhatsApp al PCD** — evaluar si vale la pena ahora que
+6. **Notificación por WhatsApp al PCD** — evaluar si vale la pena ahora que
    Telegram (más simple y gratis) ya está resuelto.
 
 ## Dónde está cada cosa

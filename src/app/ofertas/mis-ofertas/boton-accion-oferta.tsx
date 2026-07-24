@@ -37,6 +37,11 @@ export function BotonAccionOferta({
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}
+      {!state.error && state.mensaje && (
+        <Alert className="border-primary/30 bg-primary/5">
+          <AlertDescription className="text-primary">{state.mensaje}</AlertDescription>
+        </Alert>
+      )}
       <Button type="submit" variant={variante} size="sm" disabled={pending}>
         {pending ? etiquetaCargando : etiqueta}
       </Button>

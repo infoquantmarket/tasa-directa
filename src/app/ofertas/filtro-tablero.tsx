@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
+import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TarjetaOferta, type DatosOferta } from './tarjeta-oferta'
 import { ModalRealizarOferta } from './modal-realizar-oferta'
@@ -41,6 +42,11 @@ export function FiltroTablero({ ofertas }: { ofertas: DatosOferta[] }) {
     }
     return filtradas
   }, [ofertas, operacion, moneda, orden])
+
+  // Destacadas siempre arriba, más reciente primero entre ellas (el orden de
+  // llegada ya viene de la consulta / del criterio elegido arriba).
+  const destacadas = useMemo(() => ofertasFiltradas.filter((o) => o.destacada), [ofertasFiltradas])
+  const normales = useMemo(() => ofertasFiltradas.filter((o) => !o.destacada), [ofertasFiltradas])
 
   return (
     <div>
@@ -89,15 +95,35 @@ export function FiltroTablero({ ofertas }: { ofertas: DatosOferta[] }) {
       </div>
 
       {ofertasFiltradas.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {ofertasFiltradas.map((oferta) => (
-            <TarjetaOferta
-              key={oferta.id}
-              oferta={oferta}
-              acciones={<ModalRealizarOferta ofertaId={oferta.id} />}
-            />
-          ))}
-        </div>
+        <>
+          {destacadas.length > 0 && (
+            <div className="mb-6">
+              <div className="mb-3 flex items-center gap-2">
+                <Star className="size-4 fill-current text-amber-600" />
+                <span className="text-sm font-medium">Destacadas</span>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {destacadas.map((oferta) => (
+                  <TarjetaOferta
+                    key={oferta.id}
+                    oferta={oferta}
+                    acciones={<ModalRealizarOferta ofertaId={oferta.id} />}
+                  />
+                ))}
+              </div>
+              <div className="my-6 border-t border-border" />
+            </div>
+          )}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {normales.map((oferta) => (
+              <TarjetaOferta
+                key={oferta.id}
+                oferta={oferta}
+                acciones={<ModalRealizarOferta ofertaId={oferta.id} />}
+              />
+            ))}
+          </div>
+        </>
       ) : (
         <motion.p
           initial={{ opacity: 0, y: 12 }}

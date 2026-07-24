@@ -8,20 +8,25 @@ import { intencionSchema } from '@/lib/validation/intencion'
 import { notificarNuevaIntencion } from '@/lib/notificaciones/intencion'
 import { notificarAceptacion } from '@/lib/notificaciones/aceptacion'
 import { notificarTelegram } from '@/lib/telegram/notificar'
+import { enviarCorreo } from '@/lib/resend/cliente'
+import { ciudadesDelGrupo } from '@/lib/data/areas-metropolitanas'
 
-export type AccionState = { error: string | null }
+export type AccionState = { error: string | null; mensaje?: string }
 
 /**
  * Traduce los `raise exception` de Postgres (triggers/funciones) a mensajes
  * que tienen sentido para el PCD. Los triggers ya escriben mensajes en
  * español pensados para mostrarse tal cual; solo se agrega contexto cuando
- * el mensaje de Postgres no alcanza a explicar el porqué.
+ * el mensaje de Postgres no alcanza a explicar el porqué. `contextoSaldo`
+ * ajusta el mensaje de saldo insuficiente al servicio que lo disparó (cada
+ * uno consume tokens por un motivo distinto).
  */
-function mensajeDesdeError(error: { message: string } | null): string {
+function mensajeDesdeError(
+  error: { message: string } | null,
+  contextoSaldo = 'Ya tiene 2 ofertas activas gratis. Publicar una adicional requiere tokens y no tiene saldo suficiente.'
+): string {
   if (!error) return 'Ocurrió un error inesperado. Intente de nuevo.'
-  if (error.message.includes('Saldo insuficiente')) {
-    return 'Ya tiene 2 ofertas activas gratis. Publicar una adicional requiere tokens y no tiene saldo suficiente.'
-  }
+  if (error.message.includes('Saldo insuficiente')) return contextoSaldo
   return error.message
 }
 
@@ -53,8 +58,10 @@ export async function publicarOferta(
     .eq('id', user.id)
     .single()
 
+  const destacar = formData.get('destacar') === 'on'
+
   const d = parsed.data
-  const { error } = await supabase.from('ofertas').insert({
+  const { data: nuevaOferta, error } = await supabase.from('ofertas').insert({
     usuario_id: user.id,
     empresa: perfil?.razon_social ?? '',
     sede: d.sede || null,
@@ -65,9 +72,18 @@ export async function publicarOferta(
     condiciones: d.condiciones,
     estado: 'activa',
     notas: d.notas || null,
-  })
+  }).select('id').single()
 
   if (error) return { error: mensajeDesdeError(error) }
+
+  if (destacar && nuevaOferta) {
+    const { error: errorDestacar } = await supabase.rpc('destacar_oferta', { p_oferta_id: nuevaOferta.id })
+    if (errorDestacar) {
+      return {
+        error: `La oferta se publicó, pero no se pudo destacar: ${mensajeDesdeError(errorDestacar, 'No tiene saldo suficiente de tokens para destacarla. Puede destacarla después desde "Mis ofertas" cuando tenga saldo.')}`,
+      }
+    }
+  }
 
   await notificarTelegram(
     `📢 <b>Nueva oferta publicada</b>\n${perfil?.razon_social ?? 'Empresa'}: ${d.operacion === 'venta' ? 'Vende' : 'Compra'} ${d.moneda} ${Number(d.cantidad).toLocaleString('es-CO')}\nPrecio: $${Number(d.precioCop).toLocaleString('es-CO')} COP`
@@ -99,7 +115,7 @@ export async function eliminarOferta(
     .from('intenciones')
     .update({ estado: 'cerrada' })
     .eq('oferta_id', ofertaId)
-    .in('estado', ['enviada', 'vista'])
+    .in('estado', ['enviada', 'vista', 'aceptada'])
 
   revalidatePath('/ofertas')
   revalidatePath('/ofertas/mis-ofertas')
@@ -282,4 +298,98 @@ export async function aceptarIntencion(
   revalidatePath('/ofertas/mis-ofertas')
   revalidatePath('/ofertas/mis-intenciones')
   return { error: null }
+}
+
+export async function destacarOferta(
+  _prev: AccionState,
+  formData: FormData
+): Promise<AccionState> {
+  const ofertaId = String(formData.get('ofertaId') ?? '')
+  if (!ofertaId) return { error: 'Solicitud inválida.' }
+
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('destacar_oferta', { p_oferta_id: ofertaId })
+
+  if (error) {
+    return { error: mensajeDesdeError(error, 'No tiene saldo suficiente de tokens para destacar esta oferta.') }
+  }
+
+  revalidatePath('/ofertas')
+  revalidatePath('/ofertas/mis-ofertas')
+  return { error: null, mensaje: 'Oferta destacada. Ya aparece arriba en el tablero.' }
+}
+
+export async function enviarAlertaCiudad(
+  _prev: AccionState,
+  formData: FormData
+): Promise<AccionState> {
+  const ofertaId = String(formData.get('ofertaId') ?? '')
+  if (!ofertaId) return { error: 'Solicitud inválida.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión expirada. Vuelva a ingresar.' }
+
+  const [{ data: oferta }, { data: perfil }] = await Promise.all([
+    supabase.from('ofertas')
+      .select('usuario_id, empresa, operacion, moneda, cantidad, precio_cop, estado')
+      .eq('id', ofertaId).single(),
+    supabase.from('perfiles_usuarios').select('ciudad').eq('id', user.id).single(),
+  ])
+
+  if (!oferta || oferta.usuario_id !== user.id) return { error: 'Oferta no encontrada.' }
+  if (oferta.estado !== 'activa') {
+    return { error: 'Solo se puede enviar la alerta mientras la oferta está activa (aún sin negociación en curso).' }
+  }
+  if (!perfil?.ciudad) {
+    return { error: 'Su perfil no tiene ciudad registrada. Actualícela en "Ver y editar" antes de usar este servicio.' }
+  }
+
+  const { error: errorConsumo } = await supabase.rpc('consumir_tokens', {
+    p_cantidad: 1,
+    p_concepto: 'alerta_premium',
+    p_referencia: ofertaId,
+  })
+  if (errorConsumo) {
+    return { error: mensajeDesdeError(errorConsumo, 'No tiene saldo suficiente de tokens para enviar esta alerta.') }
+  }
+
+  const resumenOferta = `${oferta.operacion === 'venta' ? 'Vende' : 'Compra'} ${oferta.moneda} ${oferta.cantidad.toLocaleString('es-CO')} a $${oferta.precio_cop.toLocaleString('es-CO')} COP`
+  const ciudades = ciudadesDelGrupo(perfil.ciudad)
+
+  // Se usa el cliente de servicio: hay que leer telegram_chat_id (privado, no
+  // expuesto en perfiles_publicos) de OTROS usuarios, y cruzar con membresía
+  // activa — ninguna de las dos cosas es visible para un usuario normal vía RLS.
+  const service = createServiceClient()
+  const [{ data: candidatos }, { data: membresiasActivas }] = await Promise.all([
+    service.from('perfiles_usuarios')
+      .select('id, razon_social, correo, telegram_chat_id')
+      .eq('estado', 'aprobado')
+      .in('ciudad', ciudades)
+      .neq('id', user.id),
+    service.from('membresias').select('usuario_id').eq('estado', 'activa'),
+  ])
+
+  const idsConMembresia = new Set((membresiasActivas ?? []).map((m) => m.usuario_id))
+  const destinatarios = (candidatos ?? []).filter((c) => idsConMembresia.has(c.id))
+
+  const mensaje = `📍 <b>Nueva necesidad cerca de usted</b>\n${oferta.empresa}: ${resumenOferta}\nEntre a Tasa Directa para responder.`
+
+  await Promise.all(destinatarios.map((d) =>
+    d.telegram_chat_id
+      ? notificarTelegram(mensaje, d.telegram_chat_id)
+      : enviarCorreo({
+          to: d.correo,
+          subject: 'Nueva necesidad cerca de usted — Tasa Directa',
+          html: `<p><strong>${oferta.empresa}</strong>: ${resumenOferta}</p><p>Entre a Tasa Directa para responder.</p>`,
+        })
+  ))
+
+  revalidatePath('/ofertas/mis-ofertas')
+  return {
+    error: null,
+    mensaje: destinatarios.length > 0
+      ? `Alerta enviada a ${destinatarios.length} profesional${destinatarios.length === 1 ? '' : 'es'} en su zona.`
+      : 'Alerta procesada. No hay otros PCD activos en su zona por ahora.',
+  }
 }

@@ -119,12 +119,13 @@ export interface Database {
           condiciones: Condicion[]
           estado:     EstadoOferta
           notas:      string | null
+          destacada:  boolean
           expira_en:  string
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['ofertas']['Row'], 'id' | 'expira_en' | 'created_at' | 'updated_at'> & { expira_en?: string }
-        Update: Partial<Pick<Database['public']['Tables']['ofertas']['Row'], 'cantidad' | 'precio_cop' | 'estado'>>
+        Insert: Omit<Database['public']['Tables']['ofertas']['Row'], 'id' | 'expira_en' | 'destacada' | 'created_at' | 'updated_at'> & { expira_en?: string; destacada?: boolean }
+        Update: Partial<Pick<Database['public']['Tables']['ofertas']['Row'], 'cantidad' | 'precio_cop' | 'estado' | 'destacada'>>
         Relationships: []
       }
       intenciones: {
@@ -246,6 +247,7 @@ export interface Database {
       completar_oferta: { Args: { p_oferta_id: string }; Returns: void }
       cerrar_negociacion_sin_acuerdo: { Args: { p_oferta_id: string }; Returns: void }
       aceptar_intencion: { Args: { p_intencion_id: string }; Returns: void }
+      destacar_oferta: { Args: { p_oferta_id: string }; Returns: void }
     }
   }
 }

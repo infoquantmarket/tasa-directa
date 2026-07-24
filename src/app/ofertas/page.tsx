@@ -28,7 +28,7 @@ export default async function OfertasPage() {
   const { data: ofertas, error: errorOfertas } = puedeVerMercado
     ? await supabase
         .from('ofertas')
-        .select('id, empresa, sede, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en')
+        .select('id, empresa, sede, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, destacada')
         .eq('estado', 'activa')
         .gt('expira_en', new Date().toISOString())  // no mostrar vencidas aunque el cron aún no las haya marcado
         .neq('usuario_id', user.id)
@@ -82,6 +82,7 @@ export default async function OfertasPage() {
               condiciones: o.condiciones,
               notas: o.notas,
               expiraEn: o.expira_en,
+              destacada: o.destacada,
             }))}
           />
         )}
