@@ -43,7 +43,7 @@ const SECCIONES: Seccion[] = [
       { name: 'sede', label: 'Sede principal', tipo: 'text', req: true, placeholder: 'Oviedo' },
       { name: 'direccion', label: 'Dirección exacta', tipo: 'text', req: true, placeholder: 'Cra 43A #6 Sur-15, Of. 201', full: true },
       { name: 'telefono', label: 'Teléfono fijo', tipo: 'tel', placeholder: '6044442211' },
-      { name: 'sitioWeb', label: 'Sitio web', tipo: 'url', placeholder: 'https://...' },
+      { name: 'sitioWeb', label: 'Sitio web', tipo: 'text', placeholder: 'https://...' },
     ],
   },
   {

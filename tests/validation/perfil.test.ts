@@ -56,8 +56,8 @@ describe('perfilSchema', () => {
   it('acepta sitioWeb con protocolo https', () => {
     expect(perfilSchema.safeParse({ ...base, sitioWeb: 'https://www.nutifinanzas.co' }).success).toBe(true)
   })
-  it('rechaza sitioWeb sin dominio válido', () => {
-    expect(perfilSchema.safeParse({ ...base, sitioWeb: 'no es un dominio' }).success).toBe(false)
+  it('acepta sitioWeb con cualquier texto (sin exigir formato de URL)', () => {
+    expect(perfilSchema.safeParse({ ...base, sitioWeb: 'no es un dominio' }).success).toBe(true)
   })
 })
 
