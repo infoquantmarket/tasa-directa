@@ -18,7 +18,7 @@ export type Operacion    = 'compra' | 'venta'
 export type Condicion    = 'efectivo' | 'transferencia' | 'para_recoger' | 'en_oficina'
 export type EstadoOferta = 'activa' | 'en_negociacion' | 'completada' | 'expirada' | 'eliminada'
 export type TipoIntencion = 'aceptar_precio' | 'solicitar_contacto'
-export type EstadoIntencion = 'enviada' | 'vista' | 'cerrada'
+export type EstadoIntencion = 'enviada' | 'vista' | 'aceptada' | 'cerrada'
 export type TipoAceptacion =
   | 'contrato_servicios'
   | 'tratamiento_datos'
@@ -245,6 +245,7 @@ export interface Database {
       }
       completar_oferta: { Args: { p_oferta_id: string }; Returns: void }
       cerrar_negociacion_sin_acuerdo: { Args: { p_oferta_id: string }; Returns: void }
+      aceptar_intencion: { Args: { p_intencion_id: string }; Returns: void }
     }
   }
 }

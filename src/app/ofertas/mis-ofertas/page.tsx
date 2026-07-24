@@ -10,9 +10,15 @@ import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia
 import { TarjetaOferta } from '../tarjeta-oferta'
 import { ModalPublicarOferta } from './modal-publicar-oferta'
 import { BotonAccionOferta } from './boton-accion-oferta'
-import { completarOferta, cerrarNegociacionSinAcuerdo, eliminarOferta, marcarIntencionVista } from '../actions'
+import { aceptarIntencion, cerrarNegociacionSinAcuerdo, eliminarOferta } from '../actions'
 
 export const metadata: Metadata = { title: 'Mis ofertas' }
+
+const ETIQUETA_ESTADO: Record<string, string> = {
+  expirada: 'Expirada',
+  completada: 'Completada',
+  eliminada: 'Eliminada',
+}
 
 export default async function MisOfertasPage() {
   const supabase = await createClient()
@@ -32,9 +38,20 @@ export default async function MisOfertasPage() {
     .eq('usuario_id', user.id)
     .order('created_at', { ascending: false })
 
-  const activas = (todasMisOfertas ?? []).filter((o) => o.estado === 'activa' || o.estado === 'en_negociacion')
+  // Vigente = 'activa' Y no vencida, o 'en_negociacion'. El cron corre cada
+  // hora, así que filtrar por expira_en > ahora acá evita que una oferta
+  // vencida (pero aún marcada 'activa') cuente contra el límite ni se muestre
+  // como activa (ver también verificar_acceso_oferta en 0011).
+  const ahora = new Date().toISOString()
+  const activas = (todasMisOfertas ?? []).filter(
+    (o) => (o.estado === 'activa' && o.expira_en > ahora) || o.estado === 'en_negociacion'
+  )
   const historial = (todasMisOfertas ?? [])
-    .filter((o) => o.estado === 'expirada' || o.estado === 'eliminada' || o.estado === 'completada')
+    .filter((o) => (
+      o.estado === 'expirada' ||
+      o.estado === 'completada' ||
+      (o.estado === 'activa' && o.expira_en <= ahora)
+    ))
     .slice(0, 5)
 
   const idsActivas = activas.map((o) => o.id)
@@ -107,16 +124,17 @@ export default async function MisOfertasPage() {
                 }}
                 acciones={
                   <div className="grid gap-3">
-                    {o.estado === 'activa' && (
-                      <BotonAccionOferta
-                        accion={eliminarOferta}
-                        campoNombre="ofertaId"
-                        campoValor={o.id}
-                        etiqueta="Eliminar"
-                        etiquetaCargando="Eliminando…"
-                        variante="outline"
-                      />
-                    )}
+                    {/* Eliminar disponible tanto en 'activa' como en negociación
+                        (por si el dueño decide cancelar durante la negociación). */}
+                    <BotonAccionOferta
+                      accion={eliminarOferta}
+                      campoNombre="ofertaId"
+                      campoValor={o.id}
+                      etiqueta="Eliminar oferta"
+                      etiquetaCargando="Eliminando…"
+                      variante="outline"
+                      confirmar="¿Eliminar esta oferta? No podrá recuperarla."
+                    />
 
                     {propias.length > 0 && (
                       <div className="grid gap-2 rounded-md border border-primary/30 bg-primary/5 p-3">
@@ -124,12 +142,12 @@ export default async function MisOfertasPage() {
                           🤝 Alguien respondió a esta oferta{nuevas > 0 && <span> · {nuevas} nueva{nuevas > 1 ? 's' : ''}</span>}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Contacte a la contraparte por fuera de la plataforma para cerrar la operación.
+                          Al aceptar, la oferta queda completada y se envía un correo a quien respondió con sus datos de contacto.
                         </p>
                         {propias.map((i) => {
                           const contacto = contactosPorUsuario.get(i.usuario_id)
                           return (
-                            <div key={i.id} className="grid gap-0.5 border-t border-primary/15 pt-2 text-xs">
+                            <div key={i.id} className="grid gap-1.5 border-t border-primary/15 pt-2 text-xs">
                               <p className="font-medium text-foreground">{contacto?.razon_social}</p>
                               <p className="text-muted-foreground">
                                 {contacto?.contacto_nombre} · {contacto?.contacto_celular} · {contacto?.contacto_correo}
@@ -138,15 +156,18 @@ export default async function MisOfertasPage() {
                                 {i.tipo === 'aceptar_precio' ? 'Aceptó el precio publicado' : 'Solicitó contacto para negociar'}
                               </p>
                               {i.comentarios && <p className="text-muted-foreground">&ldquo;{i.comentarios}&rdquo;</p>}
-                              {i.estado === 'enviada' && (
+                              {(i.estado === 'enviada' || i.estado === 'vista') && (
                                 <BotonAccionOferta
-                                  accion={marcarIntencionVista}
+                                  accion={aceptarIntencion}
                                   campoNombre="intencionId"
                                   campoValor={i.id}
-                                  etiqueta="Marcar como vista"
-                                  etiquetaCargando="Marcando…"
-                                  variante="ghost"
+                                  etiqueta="Aceptar oferta"
+                                  etiquetaCargando="Aceptando…"
+                                  confirmar="¿Aceptar esta oferta? La operación quedará cerrada como completada y se notificará por correo a la contraparte."
                                 />
+                              )}
+                              {i.estado === 'aceptada' && (
+                                <p className="font-medium text-primary">Oferta aceptada</p>
                               )}
                             </div>
                           )
@@ -155,23 +176,14 @@ export default async function MisOfertasPage() {
                     )}
 
                     {o.estado === 'en_negociacion' && (
-                      <div className="flex gap-2">
-                        <BotonAccionOferta
-                          accion={completarOferta}
-                          campoNombre="ofertaId"
-                          campoValor={o.id}
-                          etiqueta="Oferta completada"
-                          etiquetaCargando="Guardando…"
-                        />
-                        <BotonAccionOferta
-                          accion={cerrarNegociacionSinAcuerdo}
-                          campoNombre="ofertaId"
-                          campoValor={o.id}
-                          etiqueta="Republicar"
-                          etiquetaCargando="Republicando…"
-                          variante="outline"
-                        />
-                      </div>
+                      <BotonAccionOferta
+                        accion={cerrarNegociacionSinAcuerdo}
+                        campoNombre="ofertaId"
+                        campoValor={o.id}
+                        etiqueta="Republicar (no se concretó)"
+                        etiquetaCargando="Republicando…"
+                        variante="outline"
+                      />
                     )}
                   </div>
                 }
@@ -184,20 +196,39 @@ export default async function MisOfertasPage() {
         </section>
 
         {historial.length > 0 && (
-          <section className="mt-8 grid gap-3">
-            <h2 className="text-lg font-semibold">Historial reciente</h2>
-            {historial.map((o) => (
-              <Card key={o.id}>
-                <CardHeader className="flex-row items-center justify-between space-y-0">
-                  <CardTitle className="text-sm font-normal text-muted-foreground">
-                    {o.operacion === 'venta' ? 'Vende' : 'Compra'} {o.moneda} · {o.cantidad.toLocaleString('es-CO')}
-                  </CardTitle>
-                  <span className="text-xs text-muted-foreground">{o.estado}</span>
-                </CardHeader>
-                <CardContent />
-              </Card>
-            ))}
-          </section>
+          <details className="mt-8 rounded-lg border border-border bg-white">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
+              Historial reciente ({historial.length})
+            </summary>
+            <div className="grid gap-2 border-t border-border p-4">
+              {historial.map((o) => {
+                const estadoMostrar = o.estado === 'activa' ? 'expirada' : o.estado
+                return (
+                  <Card key={o.id}>
+                    <CardHeader className="flex-row items-center justify-between gap-3 space-y-0">
+                      <CardTitle className="text-sm font-normal text-muted-foreground">
+                        {o.operacion === 'venta' ? 'Vende' : 'Compra'} {o.moneda} · {o.cantidad.toLocaleString('es-CO')}
+                      </CardTitle>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {ETIQUETA_ESTADO[estadoMostrar] ?? estadoMostrar}
+                        </span>
+                        <BotonAccionOferta
+                          accion={eliminarOferta}
+                          campoNombre="ofertaId"
+                          campoValor={o.id}
+                          etiqueta="Quitar"
+                          etiquetaCargando="Quitando…"
+                          variante="ghost"
+                        />
+                      </div>
+                    </CardHeader>
+                    <CardContent />
+                  </Card>
+                )
+              })}
+            </div>
+          </details>
         )}
       </main>
     </>

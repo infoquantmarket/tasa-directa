@@ -30,6 +30,7 @@ export default async function OfertasPage() {
         .from('ofertas')
         .select('id, empresa, sede, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en')
         .eq('estado', 'activa')
+        .gt('expira_en', new Date().toISOString())  // no mostrar vencidas aunque el cron aún no las haya marcado
         .neq('usuario_id', user.id)
         .order('created_at', { ascending: false })
     : { data: [], error: null }

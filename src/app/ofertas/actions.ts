@@ -6,6 +6,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { ofertaSchema } from '@/lib/validation/oferta'
 import { intencionSchema } from '@/lib/validation/intencion'
 import { notificarNuevaIntencion } from '@/lib/notificaciones/intencion'
+import { notificarAceptacion } from '@/lib/notificaciones/aceptacion'
 import { notificarTelegram } from '@/lib/telegram/notificar'
 
 export type AccionState = { error: string | null }
@@ -226,7 +227,7 @@ export async function realizarOferta(
   return { error: null }
 }
 
-export async function marcarIntencionVista(
+export async function aceptarIntencion(
   _prev: AccionState,
   formData: FormData
 ): Promise<AccionState> {
@@ -234,16 +235,51 @@ export async function marcarIntencionVista(
   if (!intencionId) return { error: 'Solicitud inválida.' }
 
   const supabase = await createClient()
-  const { error } = await supabase
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión expirada. Vuelva a ingresar.' }
+
+  // Lee los datos ANTES del RPC para poder notificar por correo (el RPC hace
+  // el commit atómico: intención=aceptada + oferta=completada + resto=cerrada).
+  const { data: intencion } = await supabase
     .from('intenciones')
-    .update({ estado: 'vista' })
+    .select('id, usuario_id, oferta_id')
     .eq('id', intencionId)
-    .eq('estado', 'enviada')
-    .select('id')
     .single()
+  if (!intencion) return { error: 'Intención no encontrada.' }
 
-  if (error) return { error: 'No se pudo actualizar.' }
+  const [{ data: oferta }, { data: quienResponde }, { data: dueno }] = await Promise.all([
+    supabase.from('ofertas')
+      .select('operacion, moneda, cantidad, precio_cop')
+      .eq('id', intencion.oferta_id).single(),
+    supabase.from('perfiles_publicos')
+      .select('correo').eq('id', intencion.usuario_id).single(),
+    supabase.from('perfiles_publicos')
+      .select('razon_social, contacto_nombre, contacto_celular, contacto_correo')
+      .eq('id', user.id).single(),
+  ])
 
+  const { error } = await supabase.rpc('aceptar_intencion', { p_intencion_id: intencionId })
+  if (error) return { error: mensajeDesdeError(error) }
+
+  if (oferta && quienResponde && dueno) {
+    await notificarAceptacion({
+      correoRespondio: quienResponde.correo,
+      empresaDueno: dueno.razon_social,
+      contactoDueno: dueno.contacto_nombre,
+      celularDueno: dueno.contacto_celular,
+      correoDueno: dueno.contacto_correo,
+      operacionOferta: oferta.operacion,
+      monedaOferta: oferta.moneda,
+      cantidadOferta: oferta.cantidad,
+      precioOferta: oferta.precio_cop,
+    })
+    await notificarTelegram(
+      `✅ <b>Oferta aceptada</b>\n${dueno.razon_social} aceptó la intención de ${quienResponde.correo} (${oferta.operacion === 'venta' ? 'Vende' : 'Compra'} ${oferta.moneda} ${oferta.cantidad.toLocaleString('es-CO')} a $${oferta.precio_cop.toLocaleString('es-CO')} COP)`
+    )
+  }
+
+  revalidatePath('/ofertas')
   revalidatePath('/ofertas/mis-ofertas')
+  revalidatePath('/ofertas/mis-intenciones')
   return { error: null }
 }
