@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { AutoRefresh } from '@/components/auto-refresh'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -81,6 +82,7 @@ export default async function MisOfertasPage() {
   return (
     <>
       <SiteHeader />
+      <AutoRefresh />
       <main className="mx-auto w-full max-w-3xl px-6 py-10">
         <div className="mb-6 flex items-center justify-between">
           <div>

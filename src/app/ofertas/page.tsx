@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { AutoRefresh } from '@/components/auto-refresh'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -38,6 +39,7 @@ export default async function OfertasPage() {
   return (
     <>
       <SiteHeader />
+      <AutoRefresh />
       <main className="mx-auto w-full max-w-5xl px-6 py-10">
         <div className="mb-6 flex items-center justify-between">
           <div>
