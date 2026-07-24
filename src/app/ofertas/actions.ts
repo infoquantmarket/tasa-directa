@@ -289,9 +289,26 @@ export async function aceptarIntencion(
       cantidadOferta: oferta.cantidad,
       precioOferta: oferta.precio_cop,
     })
+    const resumenOferta = `${oferta.operacion === 'venta' ? 'Vende' : 'Compra'} ${oferta.moneda} ${oferta.cantidad.toLocaleString('es-CO')} a $${oferta.precio_cop.toLocaleString('es-CO')} COP`
     await notificarTelegram(
-      `✅ <b>Oferta aceptada</b>\n${dueno.razon_social} aceptó la intención de ${quienResponde.correo} (${oferta.operacion === 'venta' ? 'Vende' : 'Compra'} ${oferta.moneda} ${oferta.cantidad.toLocaleString('es-CO')} a $${oferta.precio_cop.toLocaleString('es-CO')} COP)`
+      `✅ <b>Oferta aceptada</b>\n${dueno.razon_social} aceptó la intención de ${quienResponde.correo} (${resumenOferta})`
     )
+
+    // Aviso directo al PCD que respondió, si vinculó su Telegram. El chat_id
+    // no es legible por el dueño de la oferta (RLS), así que se lee con el
+    // cliente de servicio — mismo patrón que la notificación de intención.
+    const service = createServiceClient()
+    const { data: respondioTg } = await service
+      .from('perfiles_usuarios')
+      .select('telegram_chat_id')
+      .eq('id', intencion.usuario_id)
+      .single()
+    if (respondioTg?.telegram_chat_id) {
+      await notificarTelegram(
+        `✅ <b>Su intención fue aceptada</b>\n${dueno.razon_social} aceptó su respuesta a la oferta: ${resumenOferta}\nContacto: ${dueno.contacto_nombre} · ${dueno.contacto_celular} · ${dueno.contacto_correo}\n\nContáctelos directamente para cerrar la operación.`,
+        respondioTg.telegram_chat_id
+      )
+    }
   }
 
   revalidatePath('/ofertas')
