@@ -123,31 +123,67 @@ esta verificación como requisito adicional visible en el expediente.
 ## Marketplace de ofertas
 
 PCD aprobados con membresía activa pueden publicar su necesidad de compra/venta
-de divisas en `/ofertas/mis-ofertas`: hasta **5 ofertas activas simultáneas**
+de divisas en `/ofertas/mis-ofertas`, en cualquiera de **25 monedas** (`MONEDAS`
+en `src/lib/validation/oferta.ts`): hasta **5 ofertas activas simultáneas**
 por empresa — las primeras **2 gratis**, de la 3ra en adelante consume **1
 token** cada una (concepto `oferta_adicional`). Cada oferta expira **24 horas**
-después de publicarse (cron por hora, no a medianoche). Otros PCD la ven en el
-tablero `/ofertas` y responden con "Realizar Oferta" (revela el contacto
-operativo de la empresa para negociar fuera de la plataforma, más notificación
-por correo vía Resend), lo que pasa la oferta a `en_negociacion` y bloquea
-nuevas respuestas mientras dure. Desde ahí:
+después de publicarse (cron por hora, no a medianoche); el conteo de "activas"
+exige además `expira_en > now()` — no basta con `estado='activa'`, porque el
+cron solo corre cada hora y una oferta recién vencida no debe seguir contando
+ni mostrándose como activa. Otros PCD la ven en el tablero `/ofertas` (con
+filtro por operación/moneda y orden por vencimiento) y responden con "Realizar
+Oferta" (revela el contacto operativo de la empresa para negociar fuera de la
+plataforma, más notificación por correo y Telegram), lo que pasa la oferta a
+`en_negociacion` y bloquea nuevas respuestas mientras dure. Desde ahí:
 
-- El dueño ve **"Oferta completada"** (cierra definitivamente) o
-  **"Republicar"** (si no hubo acuerdo).
+- El dueño ve, por cada intención recibida, un botón **"Aceptar oferta"** (con
+  confirmación): en una sola transacción marca la intención `aceptada`,
+  completa la oferta, y envía correo + Telegram a quien ofertó con los datos
+  de contacto del dueño. También puede **"Eliminar"** la oferta (disponible
+  también durante la negociación) o, una vez en negociación, **"Republicar"**
+  si no hubo acuerdo.
 - Quien respondió ve **"No se realizó la negociación"** en `/ofertas/mis-intenciones`.
-- Ambas acciones de liberar la negociación reactivan la **misma fila** (no una
-  nueva) con 24h nuevas — son **siempre gratis**, no cuentan contra el tope ni
-  consumen tokens (cobrar por esto se consideró poco ético: la negociación
-  pudo fallar sin culpa del PCD).
+- Republicar y "no se realizó la negociación" reactivan la **misma fila** (no
+  una nueva) con 24h nuevas — son **siempre gratis**, no cuentan contra el
+  tope ni consumen tokens (cobrar por esto se consideró poco ético: la
+  negociación pudo fallar sin culpa del PCD).
+- El historial reciente (últimas 5: expiradas/completadas) vive en un
+  `<details>` colapsado por defecto, para no llenar la pantalla de ruido.
 
-Al cancelar la membresía de un PCD se eliminan automáticamente (borrado
-lógico) todas sus ofertas activas o en negociación, y se cierran las
-intenciones pendientes que tuvieran. El admin tiene visibilidad total en
-`/admin/operaciones`, con opción de eliminar cualquier oferta. La mayor parte
-del backend (RLS, triggers de acceso, la vista `perfiles_publicos`) ya existía
-desde las Fases 1 y 2.5 — este marketplace solo amplía esas piezas y agrega
-toda la capa de UI. Ver `supabase/migrations/0007_marketplace_ofertas.sql` y
-el spec en `docs/superpowers/specs/2026-07-21-marketplace-ofertas-design.md`.
+Al cancelar la membresía de un PCD, o **al suspenderlo** (ver más abajo), se
+eliminan automáticamente (borrado lógico) todas sus ofertas activas o en
+negociación, y se cierran las intenciones pendientes que tuvieran — misma
+función compartida `eliminar_ofertas_activas_usuario()`, disparada por dos
+triggers independientes (uno en `membresias`, otro en `perfiles_usuarios`).
+El admin tiene visibilidad total en `/admin/operaciones`, con opción de
+eliminar cualquier oferta. La mayor parte del backend (RLS, triggers de
+acceso, la vista `perfiles_publicos`) ya existía desde las Fases 1 y 2.5 —
+este marketplace solo amplía esas piezas y agrega toda la capa de UI. Ver
+`supabase/migrations/0007_marketplace_ofertas.sql` (base),
+`0011_expiracion_y_aceptacion.sql` y el spec en
+`docs/superpowers/specs/2026-07-21-marketplace-ofertas-design.md`.
+
+## Vinculación de Telegram por PCD
+
+Un bot de Telegram no puede escribir por número de teléfono — solo a un
+`chat_id`, y solo después de que la persona le dé `/start`. Por eso cada PCD
+vincula su propio Telegram una vez desde su dashboard (tarjeta con QR +
+deep-link `t.me/<bot>?start=<token>`, `telegram_link_token` único por perfil);
+el webhook `POST /api/webhooks/telegram` resuelve el token y guarda el
+`chat_id`. A partir de ahí, cuando alguien responde a una de sus ofertas,
+recibe además del correo un DM directo. Ver
+`supabase/migrations/0010_telegram_vinculacion.sql`.
+
+## Suspender / reactivar un PCD (admin)
+
+Desde el expediente de un PCD aprobado, el admin puede **suspenderlo** (exige
+motivo, con confirmación) — bloquea su acceso al mercado y elimina sus ofertas
+activas, pero **preserva su membresía**: suspender es una medida de
+cumplimiento, no de facturación, así que un PCD suspendido que esté al día
+con el pago no debe perder el ciclo ya pagado. Al **reactivarlo**, si la
+membresía seguía vigente, recupera el acceso al mercado de inmediato sin
+volver a pagar. Ambas acciones notifican por correo al PCD y por Telegram al
+admin. Ver `supabase/migrations/0012_suspension_preserva_membresia.sql`.
 
 ## Roadmap por fases
 
@@ -155,9 +191,9 @@ el spec en `docs/superpowers/specs/2026-07-21-marketplace-ofertas-design.md`.
 - [x] **Fase 2 — Admin y KYC** · registro *Pendiente*, carga de documentos, panel de cumplimiento, endpoint de validación de identidad.
 - [x] **Fase 2.5 — Modelo comercial** · suscripción única + billetera de tokens, gestión comercial en el panel admin, arquitectura de pagos Bold. ⟶ `supabase/migrations/0003_modelo_comercial.sql`
 - [x] **Fase 2.6 — Onboarding en 3 etapas** · cuenta mínima, perfil de empresa completo (`/vinculacion`), contrato de servicios con aceptación digital (`/contrato`). ⟶ `supabase/migrations/0004_onboarding_perfil_contrato.sql`
-- [x] **Fase 2.7 — 7 documentos legales** · registro central versionado, páginas públicas `/legal`, click-wrap por documento con snapshot de identidad. ⟶ `supabase/migrations/0005_documentos_legales.sql`
-- [x] **Fase 3+4 — Marketplace y su UI** · publicar/ver ofertas, ciclo de negociación, panel admin de Operaciones. ⟶ `supabase/migrations/0007_marketplace_ofertas.sql`
-- [ ] **Fase 5 — Notificaciones y DevOps** · Telegram/WhatsApp para el PCD (hoy solo correo + badge en plataforma) + despliegue en Vercel.
+- [x] **Fase 2.7 — 7 documentos legales** · registro central versionado, páginas públicas `/legal`, click-wrap por documento con snapshot de identidad. Cerrada: el abogado del sector cambiario aprobó los 7 documentos sin cambios de texto. ⟶ `supabase/migrations/0005_documentos_legales.sql`
+- [x] **Fase 3+4 — Marketplace y su UI** · publicar/ver ofertas, ciclo de negociación (con "Aceptar oferta"), panel admin de Operaciones, expiración precisa, 25 monedas. ⟶ `supabase/migrations/0007_marketplace_ofertas.sql`, `0011_expiracion_y_aceptacion.sql`
+- [~] **Fase 5 — Notificaciones y DevOps** · Telegram al admin y al PCD (vinculación propia por QR) ya implementado; falta WhatsApp. Despliegue ya en producción en `www.tasadirecta.com`.
 
 ## Fase 1 — Cómo aplicar el esquema
 

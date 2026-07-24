@@ -41,12 +41,13 @@ Resumen:
 | 2 — Admin y KYC | ✅ | Registro, carga de documentos, panel de cumplimiento |
 | 2.5 — Modelo comercial | ✅ | Suscripción única + tokens, gestión comercial admin, arquitectura Bold |
 | 2.6 — Onboarding en 3 etapas | ✅ | Cuenta → perfil de empresa → contrato digital (ver README) |
-| 2.7 — 7 documentos legales | ✅ | Registro versionado, páginas públicas `/legal`, click-wrap con snapshot de identidad |
+| 2.7 — 7 documentos legales | ✅ | Registro versionado, páginas públicas `/legal`, click-wrap con snapshot de identidad. **Cerrada 2026-07-23: el abogado del sector cambiario aprobó los 7 documentos sin cambios de texto.** |
 | Verificación de identidad (Didit) | ✅ | Cuarto requisito de aprobación, webhook firmado, ver README |
-| 3+4 — Marketplace y su UI | ✅ | Publicar/ver ofertas, ciclo de negociación, panel admin Operaciones, rediseño tipo marketplace moderno — ver README |
-| 5 — Notificaciones y DevOps | ⬜ | Telegram/WhatsApp para el PCD (ya hay Telegram admin para ofertas/intenciones) |
+| 3+4 — Marketplace y su UI | ✅ | Publicar/ver ofertas, ciclo de negociación (incluye "Aceptar oferta"), panel admin Operaciones, rediseño tipo marketplace moderno, expiración precisa — ver README |
+| 5 — Notificaciones y DevOps | parcial | Telegram al admin ✅ y al PCD ✅ (vinculación propia por QR/deep-link); falta WhatsApp |
+| Admin — suspender/reactivar PCD | ✅ | Preserva la membresía (no es sanción de facturación); ver abajo |
 
-**Mergeado a `master` y en producción (2026-07-22)**: decisión explícita de Jaime de migrar ya a `www.tasadirecta.com` en vez de seguir probando en el Preview de Vercel, dado que casi toda la fricción reciente (protección de despliegue, allow-list de redirect de Supabase, confusión de cuentas de Resend) era del entorno Preview y no de la app. El código no tenía ninguna URL de Vercel hardcodeada (todo usa origen dinámico), así que no hubo que tocar rutas — solo había que actualizar dos configuraciones externas: el webhook de Didit (URL de producción, sin el bypass de Vercel) y confirmar el Redirect URL de Supabase, ambos ya hechos. El ciclo completo del marketplace con dos cuentas PCD reales sigue sin probarse de punta a punta — es lo próximo, ya en producción.
+**Mergeado a `master` y en producción desde el 2026-07-22**: decisión explícita de Jaime de migrar ya a `www.tasadirecta.com` en vez de seguir probando en el Preview de Vercel, dado que casi toda la fricción reciente (protección de despliegue, allow-list de redirect de Supabase, confusión de cuentas de Resend) era del entorno Preview y no de la app. El código no tenía ninguna URL de Vercel hardcodeada (todo usa origen dinámico), así que no hubo que tocar rutas. Desde entonces `master` y `fase-2-kyc` se mantienen sincronizados: cada fix se hace en `fase-2-kyc`, se mergea (fast-forward) y se despliega a producción de inmediato. Migraciones corridas hasta la `0012` (verificadas contra la base real).
 
 ## Decisiones estratégicas clave (por qué, no solo qué)
 
@@ -111,27 +112,48 @@ Resumen:
   la visibilidad de su propia negociación. Detalle completo:
   `docs/superpowers/specs/2026-07-21-marketplace-ofertas-design.md` y
   `supabase/migrations/0007_marketplace_ofertas.sql`.
+- **Segunda ronda de fixes del marketplace (2026-07-23, `0011`):** al probar
+  con dos cuentas reales aparecieron 3 problemas reales: (1) las ofertas
+  vencidas seguían contando como activas porque el cron corre cada hora —
+  `verificar_acceso_oferta` ahora exige `expira_en > now()` en vez de confiar
+  solo en `estado='activa'`; (2) "Eliminar" no estaba disponible durante la
+  negociación ni en el historial; (3) "Marcar como vista" no hacía nada real.
+  Se reemplazó por **"Aceptar oferta"**: un solo botón con confirmación que
+  marca la intención `aceptada`, completa la oferta, y envía correo con el
+  contacto del dueño a quien ofertó (nuevo RPC `aceptar_intencion`). El
+  historial y las ofertas expiradas ahora viven en un `<details>` colapsado
+  (sin librerías) para no generar ruido visual.
+- **Suspender un PCD preserva su membresía (2026-07-22/23, `0011`/`0012`):**
+  decisión de Jaime — suspender es cumplimiento, no facturación. Si el PCD
+  está al día con el pago, suspenderlo no debe hacerle perder el ciclo pagado;
+  al reactivarlo, si la membresía seguía vigente, recupera el acceso
+  inmediatamente sin pagar de nuevo. Se separó la lógica de "eliminar ofertas
+  activas de un usuario" en una función compartida, usada tanto por el
+  trigger de cancelación de membresía (sin cambios) como por un trigger nuevo
+  en `perfiles_usuarios` que se dispara solo al suspender. Verificado en vivo
+  extremo a extremo con una cuenta real.
+- **Vinculación de Telegram por PCD (2026-07-23, `0010`):** un bot de
+  Telegram no puede escribir por número de teléfono, solo a un `chat_id` tras
+  un `/start` — por eso cada PCD vincula su propio Telegram una vez vía
+  QR/deep-link desde su dashboard, en vez de usar el celular de contacto.
+  Cuando alguien responde a su oferta, además del correo recibe un DM directo
+  si vinculó su Telegram.
 
 ## Pendiente explícito (lo próximo)
 
-1. **Revisión de abogado del sector cambiario** de los 7 documentos legales
-   (ya redactados y publicados como v1 — ver Fase 2.7 arriba). Cuando el
-   abogado confirme o ajuste texto, subir `VERSION_LEGAL` en
-   `src/lib/legal/documentos.ts` a `v2-...`; el sistema pedirá re-aceptación
-   automáticamente. Puntos que los propios textos ya señalan como pendientes
-   de confirmar: clasificación Usuario profesional vs. consumidor (Ley 1480)
-   en la política de reembolsos, plazos exactos de conservación de datos, y
-   la cláusula de arbitraje con sede en Medellín.
-2. Reubicar `ciudad-combobox.tsx` de `src/app/(auth)/registro/` a
-   `src/components/` (deuda técnica menor, no bloqueante — se usa desde
-   `/vinculacion` importándolo cross-route).
-3. **Probar el ciclo completo del marketplace con dos cuentas PCD reales**
-   (publicar → responder → negociar → completar/republicar) — todas las
-   migraciones (hasta 0009) ya están corridas y verificadas contra la base
-   real de producción; falta el E2E de punta a punta con dos cuentas.
-4. **Notificación por Telegram/WhatsApp al PCD** de nuevas intenciones — se
-   dejó fuera de la Fase 3+4 a propósito (el admin ya recibe Telegram al
-   publicarse ofertas o recibirse intenciones; falta el aviso al propio PCD).
+1. **Probar el ciclo completo del marketplace con dos cuentas PCD reales**
+   (publicar → responder → negociar → aceptar/republicar) de punta a punta en
+   producción — los pasos individuales ya se probaron por separado.
+2. **Definir el mes gratis de lanzamiento**: Jaime quiere dar el primer mes
+   sin costo (posiblemente hasta el 31 de agosto de 2026, aún por confirmar),
+   manteniendo el límite de 2 ofertas gratis (sin tokens en circulación
+   todavía — esta etapa es para probar flujos). No requiere cambio de código,
+   solo decidir si el vencimiento es automático (`fecha_fin` en la membresía)
+   o manual, y activarlo para los primeros PCD reales.
+3. Reubicar `ciudad-combobox.tsx` de `src/app/(auth)/registro/` a
+   `src/components/` (deuda técnica menor, no bloqueante).
+4. **Notificación por WhatsApp al PCD** — evaluar si vale la pena ahora que
+   Telegram (más simple y gratis) ya está resuelto.
 
 ## Dónde está cada cosa
 
