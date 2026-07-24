@@ -54,7 +54,7 @@ export async function publicarOferta(
 
   const { data: perfil } = await supabase
     .from('perfiles_usuarios')
-    .select('razon_social')
+    .select('razon_social, ciudad')
     .eq('id', user.id)
     .single()
 
@@ -64,6 +64,7 @@ export async function publicarOferta(
   const { data: nuevaOferta, error } = await supabase.from('ofertas').insert({
     usuario_id: user.id,
     empresa: perfil?.razon_social ?? '',
+    ciudad: perfil?.ciudad ?? null,
     sede: d.sede || null,
     operacion: d.operacion,
     moneda: d.moneda,

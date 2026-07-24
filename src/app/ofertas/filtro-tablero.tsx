@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { grupoDe, type GrupoMetropolitano } from '@/lib/data/areas-metropolitanas'
 import { TarjetaOferta, type DatosOferta } from './tarjeta-oferta'
 import { ModalRealizarOferta } from './modal-realizar-oferta'
 import type { Moneda, Operacion } from '@/types/database'
@@ -13,26 +14,55 @@ const EASE_PRO = [0.22, 1, 0.36, 1] as const
 type FiltroOperacion = 'todas' | Operacion
 type Orden = 'reciente' | 'vence_pronto'
 
+const ZONA_MI_ZONA = '__mi_zona__'
+const ZONA_TODAS = '__todas__'
+
 const PILLS: { valor: FiltroOperacion; etiqueta: string }[] = [
   { valor: 'todas', etiqueta: 'Todas' },
   { valor: 'compra', etiqueta: 'Compra' },
   { valor: 'venta', etiqueta: 'Venta' },
 ]
 
-export function FiltroTablero({ ofertas }: { ofertas: DatosOferta[] }) {
+export function FiltroTablero({
+  ofertas,
+  miZona,
+}: {
+  ofertas: DatosOferta[]
+  miZona: GrupoMetropolitano | null
+}) {
   const [operacion, setOperacion] = useState<FiltroOperacion>('todas')
   const [moneda, setMoneda] = useState<Moneda | 'todas'>('todas')
   const [orden, setOrden] = useState<Orden>('reciente')
+  const [zona, setZona] = useState<string>(miZona ? ZONA_MI_ZONA : ZONA_TODAS)
 
   const monedasDisponibles = useMemo(
     () => [...new Set(ofertas.map((o) => o.moneda))].sort(),
     [ofertas]
   )
 
+  // Zonas con al menos una oferta activa ahora mismo, además de "Mi zona" y
+  // "Todas" (que siempre están disponibles). Se identifican por nombre de
+  // grupo metropolitano para no repetir "Valle de Aburrá" una vez por ciudad.
+  const zonasDisponibles = useMemo(() => {
+    const mapa = new Map<string, GrupoMetropolitano>()
+    for (const o of ofertas) {
+      if (!o.ciudad) continue
+      const g = grupoDe(o.ciudad)
+      if (g.nombre !== miZona?.nombre) mapa.set(g.nombre, g)
+    }
+    return [...mapa.values()].sort((a, b) => a.nombre.localeCompare(b.nombre))
+  }, [ofertas, miZona])
+
   const ofertasFiltradas = useMemo(() => {
     const filtradas = ofertas.filter((o) => {
       if (operacion !== 'todas' && o.operacion !== operacion) return false
       if (moneda !== 'todas' && o.moneda !== moneda) return false
+      if (zona === ZONA_MI_ZONA) {
+        if (!miZona || !o.ciudad || !miZona.ciudades.includes(o.ciudad)) return false
+      } else if (zona !== ZONA_TODAS) {
+        const zonaElegida = zonasDisponibles.find((z) => z.nombre === zona)
+        if (!zonaElegida || !o.ciudad || !zonaElegida.ciudades.includes(o.ciudad)) return false
+      }
       return true
     })
     if (orden === 'vence_pronto') {
@@ -41,7 +71,7 @@ export function FiltroTablero({ ofertas }: { ofertas: DatosOferta[] }) {
       )
     }
     return filtradas
-  }, [ofertas, operacion, moneda, orden])
+  }, [ofertas, operacion, moneda, orden, zona, miZona, zonasDisponibles])
 
   // Destacadas siempre arriba, más reciente primero entre ellas (el orden de
   // llegada ya viene de la consulta / del criterio elegido arriba).
@@ -51,7 +81,7 @@ export function FiltroTablero({ ofertas }: { ofertas: DatosOferta[] }) {
   return (
     <div>
       <p className="mb-4 text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">{ofertas.length}</span> ofertas activas en el mercado ahora
+        <span className="font-semibold text-foreground">{ofertasFiltradas.length}</span> ofertas activas en el mercado ahora
       </p>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -72,6 +102,18 @@ export function FiltroTablero({ ofertas }: { ofertas: DatosOferta[] }) {
             </button>
           ))}
         </div>
+
+        <select
+          value={zona}
+          onChange={(e) => setZona(e.target.value)}
+          className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm"
+        >
+          {miZona && <option value={ZONA_MI_ZONA}>Mi zona · {miZona.nombre}</option>}
+          {zonasDisponibles.map((z) => (
+            <option key={z.nombre} value={z.nombre}>{z.nombre}</option>
+          ))}
+          <option value={ZONA_TODAS}>Todas las ciudades</option>
+        </select>
 
         <select
           value={moneda}

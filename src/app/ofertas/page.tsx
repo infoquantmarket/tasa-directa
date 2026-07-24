@@ -7,6 +7,7 @@ import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
+import { grupoDe } from '@/lib/data/areas-metropolitanas'
 import { FiltroTablero } from './filtro-tablero'
 
 export const metadata: Metadata = { title: 'Tablero de ofertas' }
@@ -17,7 +18,7 @@ export default async function OfertasPage() {
   if (!user) redirect('/login')
 
   const [{ data: perfil }, { data: membresia }] = await Promise.all([
-    supabase.from('perfiles_usuarios').select('estado').eq('id', user.id).single(),
+    supabase.from('perfiles_usuarios').select('estado, ciudad').eq('id', user.id).single(),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
       .eq('usuario_id', user.id).eq('estado', 'activa').maybeSingle(),
   ])
@@ -25,11 +26,12 @@ export default async function OfertasPage() {
   if (!perfil) redirect('/login')
 
   const puedeVerMercado = perfil?.estado === 'aprobado' && esMembresiaVigente(membresia, fechaColombiaHoy())
+  const miZona = perfil?.ciudad ? grupoDe(perfil.ciudad) : null
 
   const { data: ofertas, error: errorOfertas } = puedeVerMercado
     ? await supabase
         .from('ofertas')
-        .select('id, empresa, sede, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, destacada')
+        .select('id, empresa, sede, ciudad, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, destacada')
         .eq('estado', 'activa')
         .gt('expira_en', new Date().toISOString())  // no mostrar vencidas aunque el cron aún no las haya marcado
         .neq('usuario_id', user.id)
@@ -73,10 +75,12 @@ export default async function OfertasPage() {
           </p>
         ) : (
           <FiltroTablero
+            miZona={miZona}
             ofertas={ofertas.map((o) => ({
               id: o.id,
               empresa: o.empresa,
               sede: o.sede,
+              ciudad: o.ciudad,
               operacion: o.operacion,
               moneda: o.moneda,
               cantidad: o.cantidad,

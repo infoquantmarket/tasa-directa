@@ -35,7 +35,7 @@ export default async function MisOfertasPage() {
 
   const { data: todasMisOfertas, error: errorOfertas } = await supabase
     .from('ofertas')
-    .select('id, empresa, sede, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, estado, destacada, created_at')
+    .select('id, empresa, sede, ciudad, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, estado, destacada, created_at')
     .eq('usuario_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -120,7 +120,7 @@ export default async function MisOfertasPage() {
               <TarjetaOferta
                 key={o.id}
                 oferta={{
-                  id: o.id, empresa: o.empresa, sede: o.sede, operacion: o.operacion,
+                  id: o.id, empresa: o.empresa, sede: o.sede, ciudad: o.ciudad, operacion: o.operacion,
                   moneda: o.moneda, cantidad: o.cantidad, precioCop: o.precio_cop,
                   condiciones: o.condiciones, notas: o.notas, expiraEn: o.expira_en,
                   destacada: o.destacada,

@@ -112,6 +112,7 @@ export interface Database {
           usuario_id: string
           empresa:    string
           sede:       string | null
+          ciudad:     string | null
           operacion:  Operacion | null
           moneda:     Moneda
           cantidad:   number

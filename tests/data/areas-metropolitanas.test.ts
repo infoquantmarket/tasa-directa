@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ciudadesDelGrupo } from '@/lib/data/areas-metropolitanas'
+import { ciudadesDelGrupo, grupoDe, soloCiudad } from '@/lib/data/areas-metropolitanas'
 
 describe('ciudadesDelGrupo', () => {
   it('devuelve el área metropolitana completa del Valle de Aburrá', () => {
@@ -36,5 +36,26 @@ describe('ciudadesDelGrupo', () => {
   })
   it('es insensible a espacios de más pero no a tildes/mayúsculas (coincide exacto con el valor guardado)', () => {
     expect(ciudadesDelGrupo('  Medellín (Antioquia)  ')).toEqual(ciudadesDelGrupo('Medellín (Antioquia)'))
+  })
+})
+
+describe('grupoDe', () => {
+  it('devuelve nombre y ciudades del grupo cuando pertenece a un área metropolitana', () => {
+    expect(grupoDe('Envigado (Antioquia)')).toEqual({
+      nombre: 'Valle de Aburrá',
+      ciudades: grupoDe('Medellín (Antioquia)').ciudades,
+    })
+  })
+  it('para una ciudad sin grupo, el nombre es la ciudad sin el departamento', () => {
+    expect(grupoDe('Cartagena (Bolívar)')).toEqual({ nombre: 'Cartagena', ciudades: ['Cartagena (Bolívar)'] })
+  })
+})
+
+describe('soloCiudad', () => {
+  it('quita el departamento entre paréntesis', () => {
+    expect(soloCiudad('Cartagena (Bolívar)')).toBe('Cartagena')
+  })
+  it('deja igual una ciudad sin paréntesis', () => {
+    expect(soloCiudad('Cartagena')).toBe('Cartagena')
   })
 })

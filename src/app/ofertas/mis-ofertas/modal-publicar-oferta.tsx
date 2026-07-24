@@ -225,6 +225,7 @@ export function ModalPublicarOferta({
                 id: 'preview',
                 empresa,
                 sede: form.sede || null,
+                ciudad: null,
                 operacion: form.operacion,
                 moneda: form.moneda,
                 cantidad: Number(form.cantidad) || 0,

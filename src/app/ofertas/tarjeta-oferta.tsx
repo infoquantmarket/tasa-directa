@@ -5,6 +5,7 @@ import { Star } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { formatearCuentaRegresiva } from '@/lib/ofertas/tiempo'
+import { soloCiudad } from '@/lib/data/areas-metropolitanas'
 import { cn } from '@/lib/utils'
 import type { Condicion, Moneda, Operacion } from '@/types/database'
 
@@ -21,6 +22,7 @@ export interface DatosOferta {
   id: string
   empresa: string
   sede: string | null
+  ciudad: string | null
   operacion: Operacion | null
   moneda: Moneda
   cantidad: number
@@ -72,7 +74,9 @@ export function TarjetaOferta({
               </Badge>
             </div>
             <CardDescription className="mt-1.5">
-              {oferta.empresa}{oferta.sede ? ` · ${oferta.sede}` : ''}
+              {oferta.empresa}
+              {oferta.sede ? ` · ${oferta.sede}` : ''}
+              {oferta.ciudad ? ` · ${soloCiudad(oferta.ciudad)}` : ''}
             </CardDescription>
           </div>
           <span className="text-xs font-medium text-muted-foreground">
