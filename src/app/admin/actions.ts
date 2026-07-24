@@ -196,18 +196,33 @@ export async function reactivarUsuario(
   if (error) return { error: 'No se pudo reactivar el usuario.' }
 
   const [{ data: perfilReactivado }, { data: membresia }] = await Promise.all([
-    supabase.from('perfiles_usuarios').select('razon_social, correo').eq('id', usuarioId).single(),
+    supabase.from('perfiles_usuarios')
+      .select('razon_social, nit, correo, telegram_chat_id')
+      .eq('id', usuarioId).single(),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
       .eq('usuario_id', usuarioId).eq('estado', 'activa').maybeSingle(),
   ])
+
+  const vigente = esMembresiaVigente(membresia, fechaColombiaHoy())
 
   if (perfilReactivado) {
     await notificarReactivacion({
       correo: perfilReactivado.correo,
       razonSocial: perfilReactivado.razon_social ?? 'Su empresa',
-      membresiaVigente: esMembresiaVigente(membresia, fechaColombiaHoy()),
+      membresiaVigente: vigente,
     })
+
+    if (perfilReactivado.telegram_chat_id) {
+      await notificarTelegram(
+        `✅ <b>Su cuenta fue reactivada</b>\n${vigente ? 'Su membresía seguía vigente: ya tiene acceso completo al mercado.' : 'Active su membresía para volver a publicar y responder ofertas.'}`,
+        perfilReactivado.telegram_chat_id
+      )
+    }
   }
+
+  await notificarTelegram(
+    `✅ <b>PCD reactivado</b>\n${perfilReactivado?.razon_social ?? usuarioId}\nNIT: ${perfilReactivado?.nit ?? '—'}\nCorreo: ${perfilReactivado?.correo ?? '—'}\nMembresía: ${vigente ? 'vigente' : 'inactiva'}`
+  )
 
   revalidatePath('/admin', 'layout')
   return { error: null }
