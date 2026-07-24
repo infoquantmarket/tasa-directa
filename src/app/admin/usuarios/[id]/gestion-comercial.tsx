@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { esMembresiaVigente, fechaColombiaHoy, type MembresiaResumen } from '@/lib/validation/membresia'
 import { ETIQUETAS_CONCEPTO } from '@/lib/validation/tokens'
 import { activarMembresia, cancelarMembresia, otorgarTokens } from '../../actions'
+import { BotonAccionAdmin } from './boton-accion-admin'
 import type { TokenConcepto } from '@/types/database'
 
 interface Movimiento {
@@ -28,18 +29,7 @@ export function GestionComercial({
 }) {
   const vigente = esMembresiaVigente(membresia, fechaColombiaHoy())
 
-  const activarBound = activarMembresia.bind(null, { error: null })
-  const cancelarBound = cancelarMembresia.bind(null, { error: null })
   const otorgarBound = otorgarTokens.bind(null, { error: null })
-
-  const activarAction = async (formData: FormData) => {
-    'use server'
-    await activarBound(formData)
-  }
-  const cancelarAction = async (formData: FormData) => {
-    'use server'
-    await cancelarBound(formData)
-  }
   const otorgarAction = async (formData: FormData) => {
     'use server'
     await otorgarBound(formData)
@@ -60,22 +50,27 @@ export function GestionComercial({
                   Activa desde {membresia?.fecha_inicio}
                   {membresia?.fecha_fin ? ` · hasta ${membresia.fecha_fin}` : ' · sin vencimiento'}
                 </p>
-                <form action={cancelarAction}>
-                  <input type="hidden" name="usuarioId" value={usuarioId} />
-                  <Button type="submit" variant="destructive" size="sm">
-                    Cancelar membresía
-                  </Button>
-                </form>
+                <BotonAccionAdmin
+                  accion={cancelarMembresia}
+                  campos={{ usuarioId }}
+                  etiqueta="Cancelar membresía"
+                  etiquetaCargando="Cancelando…"
+                  variante="destructive"
+                  confirmar="¿Cancelar la membresía? El PCD perderá el acceso al mercado y sus ofertas activas serán eliminadas."
+                />
               </>
             ) : (
               <>
                 <p className="text-muted-foreground">
                   Sin membresía activa. Activar tras confirmar el pago (enlace Bold).
                 </p>
-                <form action={activarAction}>
-                  <input type="hidden" name="usuarioId" value={usuarioId} />
-                  <Button type="submit" size="sm">Activar membresía</Button>
-                </form>
+                <BotonAccionAdmin
+                  accion={activarMembresia}
+                  campos={{ usuarioId }}
+                  etiqueta="Activar membresía"
+                  etiquetaCargando="Activando…"
+                  confirmar="¿Activar la membresía del PCD?"
+                />
               </>
             )}
           </CardContent>

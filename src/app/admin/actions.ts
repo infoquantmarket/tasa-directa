@@ -128,6 +128,69 @@ export async function rechazarUsuario(
   return { error: null }
 }
 
+export async function suspenderUsuario(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const { supabase, admin } = await exigirAdmin()
+  if (!admin) return { error: 'No autorizado.' }
+
+  const usuarioId = String(formData.get('usuarioId') ?? '')
+  const motivo = String(formData.get('motivo') ?? '').trim()
+  if (!usuarioId) return { error: 'Solicitud inválida.' }
+  if (motivo.length < 5) {
+    return { error: 'Indique el motivo de la suspensión (mínimo 5 caracteres).' }
+  }
+
+  // Suspender también cancela la membresía activa — el trigger
+  // liberar_ofertas_por_cancelacion elimina las ofertas activas del PCD.
+  const [{ error: errPerfil }] = await Promise.all([
+    supabase.from('perfiles_usuarios')
+      .update({ estado: 'suspendido', motivo_estado: motivo })
+      .eq('id', usuarioId),
+    supabase.from('membresias')
+      .update({ estado: 'cancelada' })
+      .eq('usuario_id', usuarioId).eq('estado', 'activa'),
+  ])
+
+  if (errPerfil) return { error: 'No se pudo suspender el usuario.' }
+
+  const { data: perfilSuspendido } = await supabase
+    .from('perfiles_usuarios')
+    .select('razon_social, nit, correo')
+    .eq('id', usuarioId)
+    .single()
+
+  await notificarTelegram(
+    `⛔ <b>PCD suspendido</b>\n${perfilSuspendido?.razon_social ?? usuarioId}\nNIT: ${perfilSuspendido?.nit ?? '—'}\nCorreo: ${perfilSuspendido?.correo ?? '—'}\nMotivo: ${motivo}`
+  )
+
+  revalidatePath('/admin', 'layout')
+  return { error: null }
+}
+
+export async function reactivarUsuario(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const { supabase, admin } = await exigirAdmin()
+  if (!admin) return { error: 'No autorizado.' }
+
+  const usuarioId = String(formData.get('usuarioId') ?? '')
+  if (!usuarioId) return { error: 'Solicitud inválida.' }
+
+  const { error } = await supabase
+    .from('perfiles_usuarios')
+    .update({ estado: 'aprobado', motivo_estado: null })
+    .eq('id', usuarioId)
+    .eq('estado', 'suspendido')
+
+  if (error) return { error: 'No se pudo reactivar el usuario.' }
+
+  revalidatePath('/admin', 'layout')
+  return { error: null }
+}
+
 export async function activarMembresia(
   _prev: AdminState,
   formData: FormData

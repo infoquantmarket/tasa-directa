@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { EstadoBadge } from '@/components/estado-badge'
 import { ETIQUETAS_DOCUMENTO, TODOS_TIPOS_DOCUMENTO, puedeAprobarUsuario } from '@/lib/validation/kyc'
-import { revisarDocumento, aprobarUsuario, rechazarUsuario } from '../../actions'
+import { revisarDocumento, aprobarUsuario, rechazarUsuario, reactivarUsuario } from '../../actions'
 import { GestionComercial } from './gestion-comercial'
 import { PerfilEmpresa } from './perfil-empresa'
+import { FormularioSuspender } from './formulario-suspender'
+import { BotonAccionAdmin } from './boton-accion-admin'
 import { DOCUMENTOS_LEGALES, VERSION_LEGAL } from '@/lib/legal/documentos'
 
 export const metadata: Metadata = { title: 'Expediente PCD' }
@@ -193,6 +195,35 @@ export default async function ExpedientePage({
           saldo={saldoRow?.saldo ?? 0}
           movimientos={movimientos ?? []}
         />
+      )}
+
+      {perfil.estado === 'aprobado' && (
+        <section className="grid gap-3 rounded-lg border border-border bg-white p-6">
+          <h2 className="text-lg font-semibold">Suspender PCD</h2>
+          <p className="text-sm text-muted-foreground">
+            Suspender bloquea el acceso del PCD al mercado y elimina sus ofertas
+            activas. También cancela su membresía. Podrá reactivarlo después.
+          </p>
+          <FormularioSuspender usuarioId={perfil.id} />
+        </section>
+      )}
+
+      {perfil.estado === 'suspendido' && (
+        <section className="grid gap-3 rounded-lg border border-border bg-white p-6">
+          <h2 className="text-lg font-semibold">PCD suspendido</h2>
+          {perfil.motivo_estado && (
+            <p className="text-sm">
+              <span className="text-muted-foreground">Motivo:</span> {perfil.motivo_estado}
+            </p>
+          )}
+          <BotonAccionAdmin
+            accion={reactivarUsuario}
+            campos={{ usuarioId: perfil.id }}
+            etiqueta="Reactivar PCD"
+            etiquetaCargando="Reactivando…"
+            confirmar="¿Reactivar este PCD? Recuperará el estado 'aprobado' pero la membresía deberá activarse por separado."
+          />
+        </section>
       )}
 
       {perfil.estado === 'pendiente' && (
