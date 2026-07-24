@@ -202,7 +202,8 @@ export default async function ExpedientePage({
           <h2 className="text-lg font-semibold">Suspender PCD</h2>
           <p className="text-sm text-muted-foreground">
             Suspender bloquea el acceso del PCD al mercado y elimina sus ofertas
-            activas. También cancela su membresía. Podrá reactivarlo después.
+            activas. Su membresía se conserva — si reactiva al PCD y la
+            membresía seguía vigente, recupera el acceso sin volver a pagar.
           </p>
           <FormularioSuspender usuarioId={perfil.id} />
         </section>
@@ -221,7 +222,7 @@ export default async function ExpedientePage({
             campos={{ usuarioId: perfil.id }}
             etiqueta="Reactivar PCD"
             etiquetaCargando="Reactivando…"
-            confirmar="¿Reactivar este PCD? Recuperará el estado 'aprobado' pero la membresía deberá activarse por separado."
+            confirmar="¿Reactivar este PCD? Recuperará el estado 'aprobado'. Si su membresía seguía vigente, tendrá acceso inmediato al mercado."
           />
         </section>
       )}

@@ -72,6 +72,15 @@ export default async function DashboardPage() {
           </AlertDescription>
         </Alert>
       )}
+      {perfil.estado === 'suspendido' && (
+        <Alert variant="destructive">
+          <AlertTitle>Cuenta suspendida</AlertTitle>
+          <AlertDescription>
+            {perfil.motivo_estado ?? 'Contacte a soporte para más información.'}
+            {' '}Su membresía se conserva; al reactivarse recuperará el acceso al mercado.
+          </AlertDescription>
+        </Alert>
+      )}
       {perfil.estado === 'aprobado' && (
         <Alert className="border-green-200 bg-green-50">
           <AlertTitle>Empresa verificada</AlertTitle>

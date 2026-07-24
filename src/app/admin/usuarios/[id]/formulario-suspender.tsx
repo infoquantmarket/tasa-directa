@@ -23,7 +23,7 @@ export function FormularioSuspender({ usuarioId }: { usuarioId: string }) {
           window.alert('Indique el motivo de la suspensión (mínimo 5 caracteres).')
           return
         }
-        if (!window.confirm('¿Suspender este PCD? Se cancelará su membresía y sus ofertas activas serán eliminadas. Podrá reactivarlo después.')) {
+        if (!window.confirm('¿Suspender este PCD? Sus ofertas activas serán eliminadas. Su membresía se conserva. Podrá reactivarlo después.')) {
           e.preventDefault()
         }
       }}

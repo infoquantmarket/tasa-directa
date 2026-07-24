@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { puedeAprobarUsuario } from '@/lib/validation/kyc'
 import { notificarTelegram } from '@/lib/telegram/notificar'
+import { notificarSuspension, notificarReactivacion } from '@/lib/notificaciones/estado-cuenta'
+import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 
 export type AdminState = { error: string | null }
 
@@ -142,16 +144,14 @@ export async function suspenderUsuario(
     return { error: 'Indique el motivo de la suspensión (mínimo 5 caracteres).' }
   }
 
-  // Suspender también cancela la membresía activa — el trigger
-  // liberar_ofertas_por_cancelacion elimina las ofertas activas del PCD.
-  const [{ error: errPerfil }] = await Promise.all([
-    supabase.from('perfiles_usuarios')
-      .update({ estado: 'suspendido', motivo_estado: motivo })
-      .eq('id', usuarioId),
-    supabase.from('membresias')
-      .update({ estado: 'cancelada' })
-      .eq('usuario_id', usuarioId).eq('estado', 'activa'),
-  ])
+  // Suspender NO cancela la membresía (decisión de Jaime: es una medida de
+  // cumplimiento, no de facturación — si el PCD está al día, no debe perder
+  // el ciclo pagado). El trigger trg_liberar_ofertas_suspension en
+  // perfiles_usuarios se encarga de eliminar sus ofertas activas.
+  const { error: errPerfil } = await supabase
+    .from('perfiles_usuarios')
+    .update({ estado: 'suspendido', motivo_estado: motivo })
+    .eq('id', usuarioId)
 
   if (errPerfil) return { error: 'No se pudo suspender el usuario.' }
 
@@ -160,6 +160,14 @@ export async function suspenderUsuario(
     .select('razon_social, nit, correo')
     .eq('id', usuarioId)
     .single()
+
+  if (perfilSuspendido) {
+    await notificarSuspension({
+      correo: perfilSuspendido.correo,
+      razonSocial: perfilSuspendido.razon_social ?? 'Su empresa',
+      motivo,
+    })
+  }
 
   await notificarTelegram(
     `⛔ <b>PCD suspendido</b>\n${perfilSuspendido?.razon_social ?? usuarioId}\nNIT: ${perfilSuspendido?.nit ?? '—'}\nCorreo: ${perfilSuspendido?.correo ?? '—'}\nMotivo: ${motivo}`
@@ -186,6 +194,20 @@ export async function reactivarUsuario(
     .eq('estado', 'suspendido')
 
   if (error) return { error: 'No se pudo reactivar el usuario.' }
+
+  const [{ data: perfilReactivado }, { data: membresia }] = await Promise.all([
+    supabase.from('perfiles_usuarios').select('razon_social, correo').eq('id', usuarioId).single(),
+    supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
+      .eq('usuario_id', usuarioId).eq('estado', 'activa').maybeSingle(),
+  ])
+
+  if (perfilReactivado) {
+    await notificarReactivacion({
+      correo: perfilReactivado.correo,
+      razonSocial: perfilReactivado.razon_social ?? 'Su empresa',
+      membresiaVigente: esMembresiaVigente(membresia, fechaColombiaHoy()),
+    })
+  }
 
   revalidatePath('/admin', 'layout')
   return { error: null }
