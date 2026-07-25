@@ -101,18 +101,21 @@ export function LandingHero() {
   return (
     <>
       <section className="relative overflow-hidden">
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <motion.div
-            className="absolute left-[10%] top-0 h-[36rem] w-[36rem] rounded-full bg-primary/10 blur-3xl md:left-1/4"
-            animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0.8, 0.5] }}
-            transition={{ duration: 8, ease: 'easeInOut', repeat: Infinity }}
-          />
-          <motion.div
-            className="absolute right-[5%] top-16 h-80 w-80 rounded-full bg-accent blur-3xl"
-            animate={{ opacity: [0.4, 0.7, 0.4] }}
-            transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity, delay: 1 }}
-          />
-        </div>
+        <video
+          aria-hidden
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover"
+        >
+          <source src="/video_tasa.mp4" type="video/mp4" />
+        </video>
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/50"
+        />
 
         <div className="mx-auto grid w-full max-w-6xl items-center gap-8 px-6 py-24 md:grid-cols-2 md:gap-4 md:py-28">
           <motion.div
@@ -123,14 +126,14 @@ export function LandingHero() {
           >
             <motion.p
               variants={fadeInUp}
-              className="mb-4 rounded-full border border-border bg-accent px-4 py-1 text-sm font-medium text-accent-foreground"
+              className="mb-4 rounded-full border border-white/30 bg-white/10 px-4 py-1 text-sm font-medium text-white backdrop-blur-sm"
             >
               Seguridad y Confianza
             </motion.p>
-            <motion.h1 variants={fadeInUp} className="max-w-xl text-4xl font-bold tracking-tight sm:text-5xl">
+            <motion.h1 variants={fadeInUp} className="max-w-xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
               El marketplace B2B del sector cambiario en Colombia
             </motion.h1>
-            <motion.p variants={fadeInUp} className="mt-6 max-w-lg text-lg text-muted-foreground">
+            <motion.p variants={fadeInUp} className="mt-6 max-w-lg text-lg text-white/85">
               Plataforma exclusiva para Profesionales de Compra y Venta de Divisas (PCD)
               autorizados por la DIAN. Publique sus necesidades, encuentre contraparte
               y negocie de forma directa.
@@ -139,7 +142,7 @@ export function LandingHero() {
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   size="lg"
-                  className="shadow-[0_0_0_0_rgba(8,128,96,0.35)] transition-shadow duration-300 hover:shadow-[0_0_0_6px_rgba(8,128,96,0.15)]"
+                  className="bg-white text-primary shadow-[0_0_0_0_rgba(255,255,255,0.35)] transition-shadow duration-300 hover:bg-white/90 hover:shadow-[0_0_0_6px_rgba(255,255,255,0.2)]"
                   render={<Link href="/registro" />}
                 >
                   Vincular mi empresa
@@ -149,7 +152,7 @@ export function LandingHero() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="transition-colors duration-300 hover:border-primary/50"
+                  className="border-white/40 bg-transparent text-white transition-colors duration-300 hover:border-white hover:bg-white/10 hover:text-white"
                   render={<Link href="/login" />}
                 >
                   Ya tengo cuenta
