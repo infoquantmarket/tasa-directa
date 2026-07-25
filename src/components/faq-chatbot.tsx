@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MessageCircleQuestion, X, ChevronDown, Phone, Mail } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,17 +12,53 @@ const CATEGORIAS = Array.from(new Set(FAQ.map((p) => p.categoria)))
 export function FaqChatbot() {
   const [abierto, setAbierto] = useState(false)
   const [preguntaAbierta, setPreguntaAbierta] = useState<string | null>(null)
+  const [mostrarAviso, setMostrarAviso] = useState(false)
+
+  useEffect(() => {
+    const aparecer = setTimeout(() => setMostrarAviso(true), 2500)
+    return () => clearTimeout(aparecer)
+  }, [])
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
+        <AnimatePresence>
+          {mostrarAviso && !abierto && (
+            <motion.div
+              initial={{ opacity: 0, x: 12, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1, y: [0, -4, 0] }}
+              exit={{ opacity: 0, x: 12, scale: 0.9 }}
+              transition={{
+                opacity: { duration: 0.3 },
+                x: { duration: 0.3 },
+                scale: { duration: 0.3 },
+                y: { duration: 2.2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 },
+              }}
+              className="relative flex items-center gap-2 rounded-full bg-white py-2 pl-4 pr-2 text-sm font-medium text-foreground shadow-lg ring-1 ring-border"
+            >
+              ¿Necesitas ayuda?
+              <button
+                type="button"
+                onClick={() => setMostrarAviso(false)}
+                aria-label="Cerrar aviso"
+                className="flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <X className="size-3.5" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <motion.button
           type="button"
-          onClick={() => setAbierto((v) => !v)}
+          onClick={() => {
+            setAbierto((v) => !v)
+            setMostrarAviso(false)
+          }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label={abierto ? 'Cerrar preguntas frecuentes' : 'Abrir preguntas frecuentes'}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl"
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl"
         >
           {abierto ? <X className="size-6" /> : <MessageCircleQuestion className="size-6" />}
         </motion.button>
