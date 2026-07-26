@@ -6,8 +6,9 @@ import { parseTokenInicio } from '@/lib/telegram/vinculacion'
 /**
  * Webhook de Telegram: recibe los updates del bot. Su único trabajo es
  * atender el `/start <token>` que dispara el deep-link de vinculación:
- * resuelve el token a un perfil y guarda el `chat_id` de quien escribió, para
- * poder enviarle notificaciones después.
+ * resuelve el token a una empresa y guarda el `chat_id` de quien escribió
+ * (hasta 3 personas distintas por empresa — el trigger de la BD rechaza la
+ * 4ª), para poder enviarle notificaciones después.
  *
  * Registrar una vez (reemplazar <TOKEN> y <SECRET>):
  *   curl "https://api.telegram.org/bot<TOKEN>/setWebhook" \
@@ -25,7 +26,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  let update: { message?: { text?: string; chat?: { id?: number } } }
+  let update: {
+    message?: {
+      text?: string
+      chat?: { id?: number }
+      from?: { first_name?: string; last_name?: string; username?: string }
+    }
+  }
   try {
     update = await request.json()
   } catch {
@@ -43,29 +50,48 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createServiceClient()
-  const { data, error } = await supabase
+  const { data: perfil, error: errorBusqueda } = await supabase
     .from('perfiles_usuarios')
-    .update({ telegram_chat_id: String(chatId) })
+    .select('id')
     .eq('telegram_link_token', token)
-    .select('razon_social')
     .maybeSingle()
 
-  if (error) {
-    console.error('[webhook/telegram] error al vincular chat_id:', error)
+  if (errorBusqueda) {
+    console.error('[webhook/telegram] error al buscar el token:', errorBusqueda)
     return NextResponse.json({ ok: true })
   }
 
-  if (data) {
-    await notificarTelegram(
-      `✅ <b>Telegram vinculado</b>\nA partir de ahora recibirá aquí los avisos de nuevas intenciones sobre sus ofertas en Tasa Directa.`,
-      String(chatId)
-    )
-  } else {
+  if (!perfil) {
     await notificarTelegram(
       'No encontramos una cuenta con ese enlace. Abra el enlace de vinculación desde su panel en Tasa Directa.',
       String(chatId)
     )
+    return NextResponse.json({ ok: true })
   }
+
+  const from = update.message?.from
+  const nombreMostrar =
+    [from?.first_name, from?.last_name].filter(Boolean).join(' ') ||
+    (from?.username ? `@${from.username}` : 'Usuario de Telegram')
+
+  const { error: errorVinculo } = await supabase
+    .from('telegram_vinculaciones')
+    .upsert(
+      { usuario_id: perfil.id, chat_id: String(chatId), nombre_mostrar: nombreMostrar },
+      { onConflict: 'usuario_id,chat_id' }
+    )
+
+  if (errorVinculo) {
+    // El mensaje del trigger de tope (u otro error) ya viene listo para
+    // mostrarse tal cual, mismo criterio que el resto del código.
+    await notificarTelegram(errorVinculo.message, String(chatId))
+    return NextResponse.json({ ok: true })
+  }
+
+  await notificarTelegram(
+    '✅ <b>Telegram vinculado</b>\nA partir de ahora recibirá aquí los avisos de nuevas intenciones sobre sus ofertas en Tasa Directa.',
+    String(chatId)
+  )
 
   return NextResponse.json({ ok: true })
 }
