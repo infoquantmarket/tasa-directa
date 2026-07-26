@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { puedeAprobarUsuario } from '@/lib/validation/kyc'
 import { notificarTelegram } from '@/lib/telegram/notificar'
+import { chatIdsDe } from '@/lib/telegram/vinculacion'
 import { notificarSuspension, notificarReactivacion } from '@/lib/notificaciones/estado-cuenta'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 
@@ -197,7 +198,7 @@ export async function reactivarUsuario(
 
   const [{ data: perfilReactivado }, { data: membresia }] = await Promise.all([
     supabase.from('perfiles_usuarios')
-      .select('razon_social, nit, correo, telegram_chat_id')
+      .select('razon_social, nit, correo')
       .eq('id', usuarioId).single(),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
       .eq('usuario_id', usuarioId).eq('estado', 'activa').maybeSingle(),
@@ -212,12 +213,11 @@ export async function reactivarUsuario(
       membresiaVigente: vigente,
     })
 
-    if (perfilReactivado.telegram_chat_id) {
-      await notificarTelegram(
-        `✅ <b>Su cuenta fue reactivada</b>\n${vigente ? 'Su membresía seguía vigente: ya tiene acceso completo al mercado.' : 'Active su membresía para volver a publicar y responder ofertas.'}`,
-        perfilReactivado.telegram_chat_id
-      )
-    }
+    const chatIds = await chatIdsDe(usuarioId)
+    await Promise.all(chatIds.map((chatId) => notificarTelegram(
+      `✅ <b>Su cuenta fue reactivada</b>\n${vigente ? 'Su membresía seguía vigente: ya tiene acceso completo al mercado.' : 'Active su membresía para volver a publicar y responder ofertas.'}`,
+      chatId
+    )))
   }
 
   await notificarTelegram(

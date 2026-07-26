@@ -11,6 +11,7 @@ import { notificarTelegram } from '@/lib/telegram/notificar'
 import { enviarCorreo } from '@/lib/resend/cliente'
 import { ciudadesDelGrupo } from '@/lib/data/areas-metropolitanas'
 import { mensajeDesdeError } from '@/lib/ofertas/mensaje-error'
+import { chatIdsDe, chatIdsPorUsuarios } from '@/lib/telegram/vinculacion'
 
 export type AccionState = { error: string | null; mensaje?: string }
 
@@ -205,20 +206,14 @@ export async function realizarOferta(
       `🤝 <b>Intención registrada</b>\n${quienResponde?.razon_social ?? 'Un usuario'} respondió a la oferta de ${oferta.empresa} (${resumenOferta})`
     )
 
-    // Aviso directo al PCD dueño de la oferta si vinculó su Telegram. El
-    // chat_id no es legible por el usuario que responde (RLS), así que se lee
-    // con el cliente de servicio.
-    const service = createServiceClient()
-    const { data: duenoTg } = await service
-      .from('perfiles_usuarios')
-      .select('telegram_chat_id')
-      .eq('id', oferta.usuario_id)
-      .single()
-    if (duenoTg?.telegram_chat_id && quienResponde) {
-      await notificarTelegram(
+    // Aviso directo a cada Telegram vinculado del dueño de la oferta (puede
+    // haber hasta 3 personas vinculadas por esa empresa).
+    if (quienResponde) {
+      const chatIdsDueno = await chatIdsDe(oferta.usuario_id)
+      await Promise.all(chatIdsDueno.map((chatId) => notificarTelegram(
         `🤝 <b>Nueva intención sobre su oferta</b>\nSu oferta: ${resumenOferta}\n${quienResponde.razon_social} — ${quienResponde.contacto_nombre} · ${quienResponde.contacto_celular} · ${quienResponde.contacto_correo}\n\nEntre a Tasa Directa para ver el detalle.`,
-        duenoTg.telegram_chat_id
-      )
+        chatId
+      )))
     }
   }
 
@@ -279,21 +274,12 @@ export async function aceptarIntencion(
       `✅ <b>Oferta aceptada</b>\n${dueno.razon_social} aceptó la intención de ${quienResponde.correo} (${resumenOferta})`
     )
 
-    // Aviso directo al PCD que respondió, si vinculó su Telegram. El chat_id
-    // no es legible por el dueño de la oferta (RLS), así que se lee con el
-    // cliente de servicio — mismo patrón que la notificación de intención.
-    const service = createServiceClient()
-    const { data: respondioTg } = await service
-      .from('perfiles_usuarios')
-      .select('telegram_chat_id')
-      .eq('id', intencion.usuario_id)
-      .single()
-    if (respondioTg?.telegram_chat_id) {
-      await notificarTelegram(
-        `✅ <b>Su intención fue aceptada</b>\n${dueno.razon_social} aceptó su respuesta a la oferta: ${resumenOferta}\nContacto: ${dueno.contacto_nombre} · ${dueno.contacto_celular} · ${dueno.contacto_correo}\n\nContáctelos directamente para cerrar la operación.`,
-        respondioTg.telegram_chat_id
-      )
-    }
+    // Aviso directo a cada Telegram vinculado de quien respondió.
+    const chatIdsRespondio = await chatIdsDe(intencion.usuario_id)
+    await Promise.all(chatIdsRespondio.map((chatId) => notificarTelegram(
+      `✅ <b>Su intención fue aceptada</b>\n${dueno.razon_social} aceptó su respuesta a la oferta: ${resumenOferta}\nContacto: ${dueno.contacto_nombre} · ${dueno.contacto_celular} · ${dueno.contacto_correo}\n\nContáctelos directamente para cerrar la operación.`,
+      chatId
+    )))
   }
 
   revalidatePath('/ofertas')
@@ -359,13 +345,12 @@ export async function enviarAlertaCiudad(
   const resumenOferta = `${oferta.operacion === 'venta' ? 'Vende' : 'Compra'} ${oferta.moneda} ${oferta.cantidad.toLocaleString('es-CO')} a $${oferta.precio_cop.toLocaleString('es-CO')} COP`
   const ciudades = ciudadesDelGrupo(perfil.ciudad)
 
-  // Se usa el cliente de servicio: hay que leer telegram_chat_id (privado, no
-  // expuesto en perfiles_publicos) de OTROS usuarios, y cruzar con membresía
-  // activa — ninguna de las dos cosas es visible para un usuario normal vía RLS.
+  // Se usa el cliente de servicio: hay que leer membresía activa de OTROS
+  // usuarios, invisible para un usuario normal vía RLS.
   const service = createServiceClient()
   const [{ data: candidatos }, { data: membresiasActivas }] = await Promise.all([
     service.from('perfiles_usuarios')
-      .select('id, razon_social, correo, telegram_chat_id')
+      .select('id, razon_social, correo')
       .eq('estado', 'aprobado')
       .in('ciudad', ciudades)
       .neq('id', user.id),
@@ -377,15 +362,18 @@ export async function enviarAlertaCiudad(
 
   const mensaje = `📍 <b>Nueva necesidad cerca de usted</b>\n${oferta.empresa}: ${resumenOferta}\nEntre a Tasa Directa para responder.`
 
-  await Promise.all(destinatarios.map((d) =>
-    d.telegram_chat_id
-      ? notificarTelegram(mensaje, d.telegram_chat_id)
+  const chatIdsPorDestinatario = await chatIdsPorUsuarios(destinatarios.map((d) => d.id))
+
+  await Promise.all(destinatarios.map((d) => {
+    const chatIds = chatIdsPorDestinatario.get(d.id) ?? []
+    return chatIds.length
+      ? Promise.all(chatIds.map((chatId) => notificarTelegram(mensaje, chatId)))
       : enviarCorreo({
           to: d.correo,
           subject: 'Nueva necesidad cerca de usted — Tasa Directa',
           html: `<p><strong>${oferta.empresa}</strong>: ${resumenOferta}</p><p>Entre a Tasa Directa para responder.</p>`,
         })
-  ))
+  }))
 
   revalidatePath('/ofertas/mis-ofertas')
   return {
