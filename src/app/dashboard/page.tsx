@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: aceptacionesContrato }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: aceptacionesContrato }, { data: vinculacionesTelegram }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', user.id).single(),
     supabase.from('documentos_kyc').select('tipo_documento, estado').eq('usuario_id', user.id),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
@@ -27,6 +27,8 @@ export default async function DashboardPage() {
     supabase.from('token_saldos').select('saldo').eq('usuario_id', user.id).maybeSingle(),
     supabase.from('aceptaciones').select('documento, created_at')
       .eq('usuario_id', user.id).eq('version', VERSION_LEGAL).in('documento', SLUGS_ETAPA_CONTRATO),
+    supabase.from('telegram_vinculaciones').select('id, nombre_mostrar, created_at')
+      .eq('usuario_id', user.id).order('created_at', { ascending: true }),
   ])
 
   if (!perfil) redirect('/login')
@@ -182,7 +184,14 @@ export default async function DashboardPage() {
       )}
 
       {perfil.estado === 'aprobado' && (
-        <TelegramCard chatId={perfil.telegram_chat_id} token={perfil.telegram_link_token} />
+        <TelegramCard
+          vinculaciones={(vinculacionesTelegram ?? []).map((v) => ({
+            id: v.id,
+            nombreMostrar: v.nombre_mostrar,
+            createdAt: v.created_at,
+          }))}
+          token={perfil.telegram_link_token}
+        />
       )}
 
       <Card>
