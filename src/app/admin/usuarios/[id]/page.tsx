@@ -10,6 +10,7 @@ import { ETIQUETAS_DOCUMENTO, TODOS_TIPOS_DOCUMENTO, puedeAprobarUsuario } from 
 import { revisarDocumento, aprobarUsuario, rechazarUsuario, reactivarUsuario } from '../../actions'
 import { GestionComercial } from './gestion-comercial'
 import { PerfilEmpresa } from './perfil-empresa'
+import { Reputacion } from './reputacion'
 import { FormularioSuspender } from './formulario-suspender'
 import { BotonAccionAdmin } from './boton-accion-admin'
 import { DOCUMENTOS_LEGALES, VERSION_LEGAL } from '@/lib/legal/documentos'
@@ -24,7 +25,7 @@ export default async function ExpedientePage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }, { data: aceptaciones }, { data: verificacionIdentidad }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }, { data: aceptaciones }, { data: verificacionIdentidad }, { data: reputacion }, { data: calificacionesRecibidas }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', id).single(),
     supabase.from('documentos_kyc').select('*').eq('usuario_id', id),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
@@ -37,6 +38,11 @@ export default async function ExpedientePage({
       .eq('usuario_id', id),
     supabase.from('validaciones_identidad').select('estado, created_at')
       .eq('usuario_id', id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('reputacion_usuarios').select('promedio, total').eq('usuario_id', id).maybeSingle(),
+    supabase.from('calificaciones')
+      .select('id, estrellas, comentario, created_at, calificador_id')
+      .eq('calificado_id', id)
+      .order('created_at', { ascending: false }),
   ])
 
   if (!perfil) notFound()
@@ -59,6 +65,12 @@ export default async function ExpedientePage({
     (docs ?? []).map((d) => ({ tipo_documento: d.tipo_documento, estado: d.estado })),
     verificacionIdentidad
   )
+
+  const idsCalificadores = [...new Set((calificacionesRecibidas ?? []).map((c) => c.calificador_id))]
+  const { data: calificadores } = idsCalificadores.length
+    ? await supabase.from('perfiles_usuarios').select('id, razon_social').in('id', idsCalificadores)
+    : { data: [] }
+  const nombrePorCalificador = new Map((calificadores ?? []).map((p) => [p.id, p.razon_social ?? 'PCD']))
 
   const revisarBound = revisarDocumento.bind(null, { error: null })
   const aprobarBound = aprobarUsuario.bind(null, { error: null })
@@ -187,6 +199,20 @@ export default async function ExpedientePage({
           )
         })}
       </section>
+
+      {perfil.estado === 'aprobado' && (
+        <Reputacion
+          promedio={reputacion?.promedio ?? null}
+          total={reputacion?.total ?? 0}
+          calificaciones={(calificacionesRecibidas ?? []).map((c) => ({
+            id: c.id,
+            estrellas: c.estrellas,
+            comentario: c.comentario,
+            calificadorNombre: nombrePorCalificador.get(c.calificador_id) ?? 'PCD',
+            createdAt: c.created_at,
+          }))}
+        />
+      )}
 
       {perfil.estado === 'aprobado' && (
         <GestionComercial

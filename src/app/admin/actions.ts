@@ -275,6 +275,23 @@ export async function cancelarMembresia(
   return { error: null }
 }
 
+export async function eliminarCalificacion(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const { supabase, admin } = await exigirAdmin()
+  if (!admin) return { error: 'No autorizado.' }
+
+  const calificacionId = String(formData.get('calificacionId') ?? '')
+  if (!calificacionId) return { error: 'Solicitud inválida.' }
+
+  const { error } = await supabase.from('calificaciones').delete().eq('id', calificacionId)
+  if (error) return { error: 'No se pudo eliminar la calificación.' }
+
+  revalidatePath('/admin', 'layout')
+  return { error: null }
+}
+
 export async function otorgarTokens(
   _prev: AdminState,
   formData: FormData
