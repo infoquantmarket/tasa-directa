@@ -174,7 +174,11 @@ export const calificacionSchema = z.object({
 
 **Modifica:** `src/app/ofertas/mis-ofertas/page.tsx` y `src/app/ofertas/mis-intenciones/page.tsx` — cada uno llama `tratosPorCalificar(user.id)` y renderiza `<BannerPorCalificar />` arriba de la lista si hay pendientes.
 
-**Crea:** `src/app/admin/usuarios/[id]/reputacion.tsx` — sección del expediente admin: promedio + total (reusa la vista), y tabla con cada calificación recibida (`estrellas`, `comentario`, quién calificó — `razon_social` del calificador vía join, fecha, y botón "Eliminar" con confirmación que llama a un server action `eliminarCalificacion(id)` que hace `supabase.from('calificaciones').delete().eq('id', id)` — la política RLS de `delete` ya restringe esto a admins, así que no hace falta lógica extra de autorización en el action.
+**Crea:** `src/app/admin/usuarios/[id]/reputacion.tsx` (client component) — sección del expediente admin, **colapsada por defecto tipo acordeón** (mismo patrón de disclosure ya usado en `faq-chatbot.tsx`: botón con `ChevronDown` que gira al expandir, sin depender de una librería de acordeón nueva). El encabezado, siempre visible aunque esté colapsada, muestra el promedio + total (p.ej. "★ 4.5 (12 calificaciones)") para que el admin lo vea de un vistazo sin tener que desplegar. Al expandir, se ve la lista completa: cada fila con `estrellas`, `comentario`, quién calificó (`razon_social` del calificador vía join), fecha, y un botón "Eliminar" con confirmación (`window.confirm` o el mismo patrón de `BotonAccionAdmin`) que llama a un server action `eliminarCalificacion(id)`.
+
+**No es una pestaña ni página aparte** — vive dentro del expediente de cada usuario (`/admin/usuarios/[id]`), igual que las secciones de KYC, comercial y suspensión ya existentes, para que el admin tenga todo el contexto de ese PCD en un solo lugar.
+
+**Crea:** server action `eliminarCalificacion(id)` en `src/app/admin/actions.ts` (o archivo de acciones admin existente): hace `supabase.from('calificaciones').delete().eq('id', id)` y revalida la ruta del expediente — la política RLS de `delete` ya restringe esto a admins, así que no hace falta lógica extra de autorización en el action. **Solo elimina, no edita** estrellas ni comentario — si una calificación fue injusta se borra completa, no se corrige su contenido (decisión explícita: evita que el admin reescriba lo que dijo el otro PCD).
 
 **Modifica:** `src/app/admin/usuarios/[id]/page.tsx` — agrega `<Reputacion />` al expediente, junto a las secciones existentes (perfil, comercial, KYC).
 
