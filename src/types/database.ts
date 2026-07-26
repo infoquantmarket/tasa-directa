@@ -108,25 +108,40 @@ export interface Database {
       }
       ofertas: {
         Row: {
-          id:         string
-          usuario_id: string
-          empresa:    string
-          sede:       string | null
-          ciudad:     string | null
-          operacion:  Operacion | null
-          moneda:     Moneda
-          cantidad:   number
-          precio_cop: number
-          condiciones: Condicion[]
-          estado:     EstadoOferta
-          notas:      string | null
-          destacada:  boolean
-          expira_en:  string
-          created_at: string
-          updated_at: string
+          id:              string
+          usuario_id:      string
+          empresa:         string
+          sede:            string | null
+          ciudad:          string | null
+          operacion:       Operacion | null
+          moneda:          Moneda
+          cantidad:        number
+          precio_cop:      number
+          condiciones:     Condicion[]
+          estado:          EstadoOferta
+          notas:           string | null
+          interlocutor_id: string | null
+          destacada:       boolean
+          expira_en:       string
+          created_at:      string
+          updated_at:      string
         }
-        Insert: Omit<Database['public']['Tables']['ofertas']['Row'], 'id' | 'expira_en' | 'destacada' | 'created_at' | 'updated_at'> & { expira_en?: string; destacada?: boolean }
+        Insert: Omit<Database['public']['Tables']['ofertas']['Row'], 'id' | 'expira_en' | 'destacada' | 'created_at' | 'updated_at' | 'interlocutor_id'> & { expira_en?: string; destacada?: boolean }
         Update: Partial<Pick<Database['public']['Tables']['ofertas']['Row'], 'cantidad' | 'precio_cop' | 'estado' | 'destacada'>>
+        Relationships: []
+      }
+      calificaciones: {
+        Row: {
+          id:             string
+          oferta_id:      string
+          calificador_id: string
+          calificado_id:  string
+          estrellas:      number
+          comentario:     string | null
+          created_at:     string
+        }
+        Insert: never   // solo escribe calificar_contraparte()
+        Update: never
         Relationships: []
       }
       intenciones: {
@@ -231,6 +246,14 @@ export interface Database {
         }
         Relationships: []
       }
+      reputacion_usuarios: {
+        Row: {
+          usuario_id: string
+          promedio:   number
+          total:      number
+        }
+        Relationships: []
+      }
     }
     Functions: {
       es_admin:      { Args: { uid?: string }; Returns: boolean }
@@ -249,6 +272,10 @@ export interface Database {
       cerrar_negociacion_sin_acuerdo: { Args: { p_oferta_id: string }; Returns: void }
       aceptar_intencion: { Args: { p_intencion_id: string }; Returns: void }
       destacar_oferta: { Args: { p_oferta_id: string }; Returns: void }
+      calificar_contraparte: {
+        Args: { p_oferta_id: string; p_estrellas: number; p_comentario?: string }
+        Returns: void
+      }
     }
   }
 }
