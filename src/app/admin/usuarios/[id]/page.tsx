@@ -11,6 +11,7 @@ import { revisarDocumento, aprobarUsuario, rechazarUsuario, reactivarUsuario } f
 import { GestionComercial } from './gestion-comercial'
 import { PerfilEmpresa } from './perfil-empresa'
 import { Reputacion } from './reputacion'
+import { TelegramVinculado } from './telegram-vinculado'
 import { FormularioSuspender } from './formulario-suspender'
 import { BotonAccionAdmin } from './boton-accion-admin'
 import { DOCUMENTOS_LEGALES, VERSION_LEGAL } from '@/lib/legal/documentos'
@@ -25,7 +26,7 @@ export default async function ExpedientePage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }, { data: aceptaciones }, { data: verificacionIdentidad }, { data: reputacion }, { data: calificacionesRecibidas }] = await Promise.all([
+  const [{ data: perfil }, { data: docs }, { data: membresia }, { data: saldoRow }, { data: movimientos }, { data: aceptaciones }, { data: verificacionIdentidad }, { data: reputacion }, { data: calificacionesRecibidas }, { data: vinculacionesTelegram }] = await Promise.all([
     supabase.from('perfiles_usuarios').select('*').eq('id', id).single(),
     supabase.from('documentos_kyc').select('*').eq('usuario_id', id),
     supabase.from('membresias').select('estado, fecha_inicio, fecha_fin')
@@ -43,6 +44,10 @@ export default async function ExpedientePage({
       .select('id, estrellas, comentario, created_at, calificador_id')
       .eq('calificado_id', id)
       .order('created_at', { ascending: false }),
+    supabase.from('telegram_vinculaciones')
+      .select('id, nombre_mostrar, created_at')
+      .eq('usuario_id', id)
+      .order('created_at', { ascending: true }),
   ])
 
   if (!perfil) notFound()
@@ -210,6 +215,16 @@ export default async function ExpedientePage({
             comentario: c.comentario,
             calificadorNombre: nombrePorCalificador.get(c.calificador_id) ?? 'PCD',
             createdAt: c.created_at,
+          }))}
+        />
+      )}
+
+      {perfil.estado === 'aprobado' && (
+        <TelegramVinculado
+          vinculaciones={(vinculacionesTelegram ?? []).map((v) => ({
+            id: v.id,
+            nombreMostrar: v.nombre_mostrar,
+            createdAt: v.created_at,
           }))}
         />
       )}

@@ -292,6 +292,23 @@ export async function eliminarCalificacion(
   return { error: null }
 }
 
+export async function eliminarVinculacionTelegram(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const { supabase, admin } = await exigirAdmin()
+  if (!admin) return { error: 'No autorizado.' }
+
+  const vinculacionId = String(formData.get('vinculacionId') ?? '')
+  if (!vinculacionId) return { error: 'Solicitud inválida.' }
+
+  const { error } = await supabase.from('telegram_vinculaciones').delete().eq('id', vinculacionId)
+  if (error) return { error: 'No se pudo desvincular.' }
+
+  revalidatePath('/admin', 'layout')
+  return { error: null }
+}
+
 export async function otorgarTokens(
   _prev: AdminState,
   formData: FormData
