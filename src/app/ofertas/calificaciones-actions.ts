@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { calificacionSchema } from '@/lib/validation/calificacion'
-import { mensajeDesdeError, type AccionState } from './actions'
+import { mensajeDesdeError } from '@/lib/ofertas/mensaje-error'
+import type { AccionState } from './actions'
 
 export async function calificarContraparte(
   _prev: AccionState,
