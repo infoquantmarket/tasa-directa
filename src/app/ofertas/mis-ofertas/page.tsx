@@ -11,6 +11,8 @@ import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia
 import { TarjetaOferta } from '../tarjeta-oferta'
 import { ModalPublicarOferta } from './modal-publicar-oferta'
 import { BotonAccionOferta } from './boton-accion-oferta'
+import { BannerPorCalificar } from '../banner-por-calificar'
+import { tratosPorCalificar } from '@/lib/ofertas/tratos-por-calificar'
 import { aceptarIntencion, cerrarNegociacionSinAcuerdo, eliminarOferta, destacarOferta, enviarAlertaCiudad } from '../actions'
 
 export const metadata: Metadata = { title: 'Mis ofertas' }
@@ -26,11 +28,12 @@ export default async function MisOfertasPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: membresia }, { data: perfil }] = await Promise.all([
+  const [{ data: membresia }, { data: perfil }, tratosPendientes] = await Promise.all([
     supabase.from('membresias')
       .select('estado, fecha_inicio, fecha_fin')
       .eq('usuario_id', user.id).eq('estado', 'activa').maybeSingle(),
     supabase.from('perfiles_usuarios').select('razon_social').eq('id', user.id).single(),
+    tratosPorCalificar(user.id),
   ])
 
   const { data: todasMisOfertas, error: errorOfertas } = await supabase
@@ -100,6 +103,8 @@ export default async function MisOfertasPage() {
             />
           </div>
         </div>
+
+        <BannerPorCalificar tratos={tratosPendientes} />
 
         {errorOfertas && (
           <Alert variant="destructive" className="mb-4">

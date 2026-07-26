@@ -7,6 +7,8 @@ import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { BotonAccionOferta } from '../mis-ofertas/boton-accion-oferta'
+import { BannerPorCalificar } from '../banner-por-calificar'
+import { tratosPorCalificar } from '@/lib/ofertas/tratos-por-calificar'
 import { cerrarNegociacionSinAcuerdo } from '../actions'
 
 export const metadata: Metadata = { title: 'Mis intenciones' }
@@ -16,11 +18,13 @@ export default async function MisIntencionesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: intenciones } = await supabase
-    .from('intenciones')
-    .select('id, oferta_id, tipo, comentarios, estado, created_at')
-    .eq('usuario_id', user.id)
-    .order('created_at', { ascending: false })
+  const [{ data: intenciones }, tratosPendientes] = await Promise.all([
+    supabase.from('intenciones')
+      .select('id, oferta_id, tipo, comentarios, estado, created_at')
+      .eq('usuario_id', user.id)
+      .order('created_at', { ascending: false }),
+    tratosPorCalificar(user.id),
+  ])
 
   const idsOfertas = [...new Set((intenciones ?? []).map((i) => i.oferta_id))]
   const { data: ofertas } = idsOfertas.length
@@ -50,6 +54,8 @@ export default async function MisIntencionesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Mis intenciones</h1>
           <Button variant="outline" render={<Link href="/ofertas" />}>Tablero</Button>
         </div>
+
+        <BannerPorCalificar tratos={tratosPendientes} />
 
         <section className="grid gap-4">
           {(intenciones ?? []).map((i) => {
