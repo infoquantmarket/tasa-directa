@@ -63,13 +63,12 @@ export interface Database {
           contacto_celular: string | null
           contacto_correo:  string | null
           perfil_completo:  boolean
-          telegram_chat_id:    string | null
           telegram_link_token: string
           created_at:       string
           updated_at:       string
         }
-        Insert: Omit<Database['public']['Tables']['perfiles_usuarios']['Row'], 'created_at' | 'updated_at' | 'telegram_chat_id' | 'telegram_link_token'>
-          & { telegram_chat_id?: string | null; telegram_link_token?: string }
+        Insert: Omit<Database['public']['Tables']['perfiles_usuarios']['Row'], 'created_at' | 'updated_at' | 'telegram_link_token'>
+          & { telegram_link_token?: string }
         Update: Partial<Database['public']['Tables']['perfiles_usuarios']['Insert']>
         Relationships: []
       }
@@ -141,6 +140,18 @@ export interface Database {
           created_at:     string
         }
         Insert: never   // solo escribe calificar_contraparte()
+        Update: never
+        Relationships: []
+      }
+      telegram_vinculaciones: {
+        Row: {
+          id:             string
+          usuario_id:     string
+          chat_id:        string
+          nombre_mostrar: string
+          created_at:     string
+        }
+        Insert: Omit<Database['public']['Tables']['telegram_vinculaciones']['Row'], 'id' | 'created_at'>
         Update: never
         Relationships: []
       }
