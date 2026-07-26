@@ -31,6 +31,8 @@ export interface DatosOferta {
   notas: string | null
   expiraEn: string
   destacada?: boolean
+  /** Solo se pasa desde el tablero (`/ofertas`); si se omite, no se muestra la línea de estrellas. */
+  reputacion?: { promedio: number; total: number } | null
 }
 
 export function TarjetaOferta({
@@ -78,6 +80,18 @@ export function TarjetaOferta({
               {oferta.sede ? ` · ${oferta.sede}` : ''}
               {oferta.ciudad ? ` · ${soloCiudad(oferta.ciudad)}` : ''}
             </CardDescription>
+            {oferta.reputacion !== undefined && (
+              <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                {oferta.reputacion ? (
+                  <>
+                    <Star className="size-3 fill-amber-400 text-amber-400" />
+                    {oferta.reputacion.promedio.toFixed(1)} ({oferta.reputacion.total})
+                  </>
+                ) : (
+                  'Sin calificaciones aún'
+                )}
+              </p>
+            )}
           </div>
           <span className="text-xs font-medium text-muted-foreground">
             {formatearCuentaRegresiva(oferta.expiraEn)}

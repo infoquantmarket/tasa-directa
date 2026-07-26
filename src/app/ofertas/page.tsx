@@ -31,12 +31,18 @@ export default async function OfertasPage() {
   const { data: ofertas, error: errorOfertas } = puedeVerMercado
     ? await supabase
         .from('ofertas')
-        .select('id, empresa, sede, ciudad, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, destacada')
+        .select('id, usuario_id, empresa, sede, ciudad, operacion, moneda, cantidad, precio_cop, condiciones, notas, expira_en, destacada')
         .eq('estado', 'activa')
         .gt('expira_en', new Date().toISOString())  // no mostrar vencidas aunque el cron aún no las haya marcado
         .neq('usuario_id', user.id)
         .order('created_at', { ascending: false })
     : { data: [], error: null }
+
+  const idsEmpresas = [...new Set((ofertas ?? []).map((o) => o.usuario_id))]
+  const { data: reputaciones } = idsEmpresas.length
+    ? await supabase.from('reputacion_usuarios').select('usuario_id, promedio, total').in('usuario_id', idsEmpresas)
+    : { data: [] }
+  const reputacionPorUsuario = new Map((reputaciones ?? []).map((r) => [r.usuario_id, { promedio: r.promedio, total: r.total }]))
 
   return (
     <>
@@ -89,6 +95,7 @@ export default async function OfertasPage() {
               notas: o.notas,
               expiraEn: o.expira_en,
               destacada: o.destacada,
+              reputacion: reputacionPorUsuario.get(o.usuario_id) ?? null,
             }))}
           />
         )}
