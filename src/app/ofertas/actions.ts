@@ -21,7 +21,7 @@ export type AccionState = { error: string | null; mensaje?: string }
  * ajusta el mensaje de saldo insuficiente al servicio que lo disparó (cada
  * uno consume tokens por un motivo distinto).
  */
-function mensajeDesdeError(
+export function mensajeDesdeError(
   error: { message: string } | null,
   contextoSaldo = 'Ya tiene 2 ofertas activas gratis. Publicar una adicional requiere tokens y no tiene saldo suficiente.'
 ): string {
