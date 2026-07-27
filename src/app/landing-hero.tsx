@@ -131,7 +131,7 @@ export function LandingHero() {
               Seguridad y Confianza
             </motion.p>
             <motion.h1 variants={fadeInUp} className="max-w-xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              El marketplace B2B del sector cambiario en Colombia
+              El marketplace B2B de los Profesionales de Cambio en Colombia
             </motion.h1>
             <motion.p variants={fadeInUp} className="mt-6 max-w-lg text-lg text-white/85">
               Plataforma exclusiva para Profesionales de Compra y Venta de Divisas (PCD)
