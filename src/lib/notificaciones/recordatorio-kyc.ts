@@ -11,11 +11,12 @@ function escapeHtml(valor: string): string {
 
 export interface NotificarRecordatorioKycInput {
   correo: string
-  razonSocial: string
+  /** Null cuando el usuario aún no llenó el perfil de su empresa en /vinculacion. */
+  razonSocial: string | null
 }
 
 export async function notificarRecordatorioKyc(input: NotificarRecordatorioKycInput): Promise<void> {
-  const razonSocial = escapeHtml(input.razonSocial)
+  const razonSocial = escapeHtml(input.razonSocial ?? 'su empresa')
 
   const html = `
     <h2>Complete su vinculación en Tasa Directa</h2>

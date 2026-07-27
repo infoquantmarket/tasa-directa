@@ -36,4 +36,17 @@ describe('notificarRecordatorioKyc', () => {
     expect(html).not.toContain('<script>evil()</script>')
     expect(html).toContain('&lt;script&gt;')
   })
+
+  it('usa un saludo genérico cuando razón social es null (registro mínimo sin perfil aún)', async () => {
+    const spy = vi.spyOn(resendCliente, 'enviarCorreo').mockResolvedValue(undefined)
+
+    await notificarRecordatorioKyc({
+      correo: 'x@y.com',
+      razonSocial: null,
+    })
+
+    expect(spy).toHaveBeenCalled()
+    const html = spy.mock.calls[0][0].html
+    expect(html).toContain('su empresa')
+  })
 })

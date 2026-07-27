@@ -291,7 +291,7 @@ export interface Database {
       }
       usuarios_para_recordatorio_kyc: {
         Args: Record<never, never>
-        Returns: Array<{ usuario_id: string; correo: string; razon_social: string; numero_recordatorio: number }>
+        Returns: Array<{ usuario_id: string; correo: string; razon_social: string | null; numero_recordatorio: number }>
       }
       registrar_recordatorio_kyc: { Args: { p_usuario_id: string }; Returns: void }
     }
