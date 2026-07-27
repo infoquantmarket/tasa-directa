@@ -64,10 +64,12 @@ export interface Database {
           contacto_correo:  string | null
           perfil_completo:  boolean
           telegram_link_token: string
+          recordatorios_kyc_enviados: number
+          recordatorio_kyc_ultimo_envio: string | null
           created_at:       string
           updated_at:       string
         }
-        Insert: Omit<Database['public']['Tables']['perfiles_usuarios']['Row'], 'created_at' | 'updated_at' | 'telegram_link_token'>
+        Insert: Omit<Database['public']['Tables']['perfiles_usuarios']['Row'], 'created_at' | 'updated_at' | 'telegram_link_token' | 'recordatorios_kyc_enviados' | 'recordatorio_kyc_ultimo_envio'>
           & { telegram_link_token?: string }
         Update: Partial<Database['public']['Tables']['perfiles_usuarios']['Insert']>
         Relationships: []
@@ -287,6 +289,11 @@ export interface Database {
         Args: { p_oferta_id: string; p_estrellas: number; p_comentario?: string }
         Returns: void
       }
+      usuarios_para_recordatorio_kyc: {
+        Args: Record<never, never>
+        Returns: Array<{ usuario_id: string; correo: string; razon_social: string; numero_recordatorio: number }>
+      }
+      registrar_recordatorio_kyc: { Args: { p_usuario_id: string }; Returns: void }
     }
   }
 }
