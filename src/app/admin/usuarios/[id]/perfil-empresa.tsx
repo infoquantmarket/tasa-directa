@@ -49,6 +49,17 @@ export function PerfilEmpresa({ perfil }: { perfil: Perfil }) {
             <Campo label="Celular" valor={perfil.contacto_celular} />
           </dl>
         </div>
+        {perfil.recordatorios_kyc_enviados > 0 && (
+          <div className="grid gap-3">
+            <h4 className="text-sm font-semibold">Recordatorio de documentación</h4>
+            <p className="text-sm text-muted-foreground">
+              {perfil.recordatorios_kyc_enviados}/3 enviados
+              {perfil.recordatorio_kyc_ultimo_envio && (
+                <> · último: {new Date(perfil.recordatorio_kyc_ultimo_envio).toLocaleDateString('es-CO')}</>
+              )}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
