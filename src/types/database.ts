@@ -66,10 +66,12 @@ export interface Database {
           telegram_link_token: string
           recordatorios_kyc_enviados: number
           recordatorio_kyc_ultimo_envio: string | null
+          recordatorios_didit_enviados: number
+          recordatorio_didit_ultimo_envio: string | null
           created_at:       string
           updated_at:       string
         }
-        Insert: Omit<Database['public']['Tables']['perfiles_usuarios']['Row'], 'created_at' | 'updated_at' | 'telegram_link_token' | 'recordatorios_kyc_enviados' | 'recordatorio_kyc_ultimo_envio'>
+        Insert: Omit<Database['public']['Tables']['perfiles_usuarios']['Row'], 'created_at' | 'updated_at' | 'telegram_link_token' | 'recordatorios_kyc_enviados' | 'recordatorio_kyc_ultimo_envio' | 'recordatorios_didit_enviados' | 'recordatorio_didit_ultimo_envio'>
           & { telegram_link_token?: string }
         Update: Partial<Database['public']['Tables']['perfiles_usuarios']['Insert']>
         Relationships: []
@@ -294,6 +296,11 @@ export interface Database {
         Returns: Array<{ usuario_id: string; correo: string; razon_social: string | null; numero_recordatorio: number }>
       }
       registrar_recordatorio_kyc: { Args: { p_usuario_id: string }; Returns: void }
+      usuarios_para_recordatorio_didit: {
+        Args: Record<never, never>
+        Returns: Array<{ usuario_id: string; correo: string; razon_social: string | null; numero_recordatorio: number }>
+      }
+      registrar_recordatorio_didit: { Args: { p_usuario_id: string }; Returns: void }
     }
   }
 }
