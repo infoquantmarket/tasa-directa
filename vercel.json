@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/cron/recordatorio-kyc", "schedule": "0 13 * * *" }
+    { "path": "/api/cron/recordatorio-kyc", "schedule": "0 13 * * *" },
+    { "path": "/api/cron/recordatorio-didit", "schedule": "0 13 * * *" }
   ]
 }
