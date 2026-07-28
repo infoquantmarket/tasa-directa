@@ -6,6 +6,7 @@ import { puedeAprobarUsuario } from '@/lib/validation/kyc'
 import { notificarTelegram } from '@/lib/telegram/notificar'
 import { chatIdsDe } from '@/lib/telegram/vinculacion'
 import { notificarSuspension, notificarReactivacion } from '@/lib/notificaciones/estado-cuenta'
+import { notificarRecordatorioDidit } from '@/lib/notificaciones/recordatorio-didit'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 
 export type AdminState = { error: string | null }
@@ -331,6 +332,33 @@ export async function otorgarTokens(
   })
 
   if (error) return { error: 'No se pudieron otorgar los tokens.' }
+  revalidatePath('/admin', 'layout')
+  return { error: null }
+}
+
+export async function enviarRecordatorioDidit(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const { supabase, admin } = await exigirAdmin()
+  if (!admin) return { error: 'No autorizado.' }
+
+  const usuarioId = String(formData.get('usuarioId') ?? '')
+  if (!usuarioId) return { error: 'Solicitud inválida.' }
+
+  const { data: perfil } = await supabase
+    .from('perfiles_usuarios')
+    .select('correo, razon_social')
+    .eq('id', usuarioId)
+    .single()
+
+  if (!perfil) return { error: 'Usuario no encontrado.' }
+
+  await notificarRecordatorioDidit({ correo: perfil.correo, razonSocial: perfil.razon_social })
+
+  const { error: errorRegistro } = await supabase.rpc('registrar_recordatorio_didit', { p_usuario_id: usuarioId })
+  if (errorRegistro) return { error: 'Se envió el correo, pero no se pudo registrar el recordatorio.' }
+
   revalidatePath('/admin', 'layout')
   return { error: null }
 }

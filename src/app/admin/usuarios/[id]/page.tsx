@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { EstadoBadge } from '@/components/estado-badge'
-import { ETIQUETAS_DOCUMENTO, TODOS_TIPOS_DOCUMENTO, puedeAprobarUsuario } from '@/lib/validation/kyc'
-import { revisarDocumento, aprobarUsuario, rechazarUsuario, reactivarUsuario } from '../../actions'
+import { ETIQUETAS_DOCUMENTO, TODOS_TIPOS_DOCUMENTO, todosDocumentosAprobados, puedeAprobarUsuario } from '@/lib/validation/kyc'
+import { revisarDocumento, aprobarUsuario, rechazarUsuario, reactivarUsuario, enviarRecordatorioDidit } from '../../actions'
 import { GestionComercial } from './gestion-comercial'
 import { PerfilEmpresa } from './perfil-empresa'
 import { Reputacion } from './reputacion'
@@ -70,6 +70,12 @@ export default async function ExpedientePage({
     (docs ?? []).map((d) => ({ tipo_documento: d.tipo_documento, estado: d.estado })),
     verificacionIdentidad
   )
+
+  const documentosCompletos = todosDocumentosAprobados(
+    (docs ?? []).map((d) => ({ tipo_documento: d.tipo_documento, estado: d.estado }))
+  )
+  const mostrarBotonRecordatorioDidit =
+    perfil.estado === 'pendiente' && documentosCompletos && verificacionIdentidad?.estado !== 'Approved'
 
   const idsCalificadores = [...new Set((calificacionesRecibidas ?? []).map((c) => c.calificador_id))]
   const { data: calificadores } = idsCalificadores.length
@@ -138,7 +144,7 @@ export default async function ExpedientePage({
         </ul>
       </section>
 
-      <section className="grid gap-1 rounded-lg border border-border bg-white p-6">
+      <section className="grid gap-3 rounded-lg border border-border bg-white p-6">
         <h2 className="mb-2 text-lg font-semibold">Verificación de identidad (Didit)</h2>
         <div className="flex items-center gap-2 text-sm">
           <span>Representante legal:</span>
@@ -153,6 +159,14 @@ export default async function ExpedientePage({
             <span className="text-muted-foreground">Aún no iniciada</span>
           )}
         </div>
+        {mostrarBotonRecordatorioDidit && (
+          <BotonAccionAdmin
+            accion={enviarRecordatorioDidit}
+            campos={{ usuarioId: perfil.id }}
+            etiqueta="Enviar recordatorio de identidad"
+            etiquetaCargando="Enviando…"
+          />
+        )}
       </section>
 
       <section className="grid gap-4">
