@@ -4,6 +4,7 @@ import {
   TODOS_TIPOS_DOCUMENTO,
   ETIQUETAS_DOCUMENTO,
   validarArchivoKyc,
+  todosDocumentosAprobados,
   puedeAprobarUsuario,
 } from '@/lib/validation/kyc'
 
@@ -32,6 +33,36 @@ describe('validarArchivoKyc', () => {
     expect(
       validarArchivoKyc('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 1024)
     ).toMatch(/PDF|JPG|PNG/)
+  })
+})
+
+describe('todosDocumentosAprobados', () => {
+  const docsCompletos = [
+    { tipo_documento: 'rut' as const, estado: 'aprobado' as const },
+    { tipo_documento: 'camara_comercio' as const, estado: 'aprobado' as const },
+    { tipo_documento: 'resolucion_dian' as const, estado: 'aprobado' as const },
+  ]
+
+  it('true cuando los 3 documentos requeridos están aprobados', () => {
+    expect(todosDocumentosAprobados(docsCompletos)).toBe(true)
+  })
+  it('false si falta alguno', () => {
+    expect(todosDocumentosAprobados(docsCompletos.slice(0, 2))).toBe(false)
+  })
+  it('false si alguno está rechazado o pendiente', () => {
+    const conRechazado = [
+      docsCompletos[0],
+      { tipo_documento: 'camara_comercio' as const, estado: 'rechazado' as const },
+      docsCompletos[2],
+    ]
+    expect(todosDocumentosAprobados(conRechazado)).toBe(false)
+  })
+  it('ignora el documento opcional de composición accionaria', () => {
+    const conOpcionalPendiente = [
+      ...docsCompletos,
+      { tipo_documento: 'composicion_accionaria' as const, estado: 'pendiente' as const },
+    ]
+    expect(todosDocumentosAprobados(conOpcionalPendiente)).toBe(true)
   })
 })
 
