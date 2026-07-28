@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verificarFirmaWebhook } from '@/lib/didit/firma'
 import { createServiceClient } from '@/lib/supabase/service'
+import { alertarSiListoParaAprobar } from '@/lib/kyc/listo-para-aprobar'
 
 export async function POST(request: NextRequest) {
   const cuerpoRaw = await request.text()
@@ -42,16 +43,23 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createServiceClient()
-  const { error } = await supabase
+  const { data: actualizado, error } = await supabase
     .from('validaciones_identidad')
     .update({
       estado: estado as never,
       decision: (decision ?? null) as never,
     })
     .eq('session_id', sessionId)
+    .select('usuario_id')
+    .maybeSingle()
 
   if (error) {
     console.error('[webhook/didit] no se pudo actualizar validaciones_identidad:', error)
+    return NextResponse.json({ ok: true })
+  }
+
+  if (estado === 'Approved' && actualizado) {
+    await alertarSiListoParaAprobar(supabase, actualizado.usuario_id)
   }
 
   return NextResponse.json({ ok: true })

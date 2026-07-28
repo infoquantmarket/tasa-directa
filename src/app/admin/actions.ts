@@ -7,6 +7,7 @@ import { notificarTelegram } from '@/lib/telegram/notificar'
 import { chatIdsDe } from '@/lib/telegram/vinculacion'
 import { notificarSuspension, notificarReactivacion } from '@/lib/notificaciones/estado-cuenta'
 import { notificarRecordatorioDidit } from '@/lib/notificaciones/recordatorio-didit'
+import { alertarSiListoParaAprobar } from '@/lib/kyc/listo-para-aprobar'
 import { esMembresiaVigente, fechaColombiaHoy } from '@/lib/validation/membresia'
 
 export type AdminState = { error: string | null }
@@ -41,7 +42,7 @@ export async function revisarDocumento(
     return { error: 'Indique el motivo del rechazo (mínimo 5 caracteres) para que el PCD sepa qué corregir.' }
   }
 
-  const { error } = await supabase
+  const { data: docActualizado, error } = await supabase
     .from('documentos_kyc')
     .update({
       estado: decision as 'aprobado' | 'rechazado',
@@ -50,8 +51,14 @@ export async function revisarDocumento(
       revisado_at: new Date().toISOString(),
     })
     .eq('id', docId)
+    .select('usuario_id')
+    .single()
 
   if (error) return { error: 'No se pudo guardar la revisión.' }
+
+  if (decision === 'aprobado' && docActualizado) {
+    await alertarSiListoParaAprobar(supabase, docActualizado.usuario_id)
+  }
 
   revalidatePath('/admin', 'layout')
   return { error: null }
