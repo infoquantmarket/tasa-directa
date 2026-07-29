@@ -13,14 +13,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const TITULO = "Tasa Directa — Marketplace B2B Cambiario";
+const DESCRIPCION =
+  "Plataforma exclusiva para Profesionales de Compra y Venta de Divisas (PCD) autorizados por la DIAN. Seguridad y Confianza.";
+
 export const metadata: Metadata = {
   title: {
-    default: "Tasa Directa — Marketplace B2B Cambiario",
+    default: TITULO,
     template: "%s | Tasa Directa",
   },
-  description:
-    "Plataforma exclusiva para Profesionales de Compra y Venta de Divisas (PCD) autorizados por la DIAN. Seguridad y Confianza.",
+  description: DESCRIPCION,
   metadataBase: new URL("https://www.tasadirecta.com"),
+  openGraph: {
+    title: TITULO,
+    description: DESCRIPCION,
+    url: "https://www.tasadirecta.com",
+    siteName: "Tasa Directa",
+    locale: "es_CO",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITULO,
+    description: DESCRIPCION,
+  },
 };
 
 export default function RootLayout({
